@@ -44,11 +44,12 @@ export default function LoginPage() {
     const userRef = doc(db, "users", firebaseUser.uid);
     const userSnap = await getDoc(userRef);
     if (!userSnap.exists()) {
+      const { uid, email, displayName, photoURL } = firebaseUser;
       await setDoc(userRef, {
-        uid: firebaseUser.uid,
-        email: firebaseUser.email,
-        displayName: firebaseUser.displayName,
-        photoURL: firebaseUser.photoURL,
+        uid,
+        email,
+        displayName: displayName || email?.split('@')[0] || 'Usuario',
+        photoURL: photoURL || `https://avatar.vercel.sh/${email}.png`,
         createdAt: new Date()
       });
     }
@@ -84,7 +85,7 @@ export default function LoginPage() {
           title: "¡Cuenta creada!",
           description: "Hemos enviado un enlace de verificación a tu correo electrónico. Por favor, revisa tu bandeja de entrada.",
         });
-        setIsSignUp(false); // Switch to login view
+        setIsSignUp(false);
       } else {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         if (!userCredential.user.emailVerified) {
@@ -120,7 +121,6 @@ export default function LoginPage() {
           description = "La contraseña es demasiado débil. Debe tener al menos 6 caracteres.";
           break;
         default:
-          // Fallback for other errors
           break;
       }
       
