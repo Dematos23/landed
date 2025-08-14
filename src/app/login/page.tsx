@@ -85,7 +85,6 @@ export default function LoginPage() {
           description: "Hemos enviado un enlace de verificación a tu correo electrónico. Por favor, revisa tu bandeja de entrada.",
         });
         setIsSignUp(false); // Switch to login view
-        setIsSubmitting(false);
       } else {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         if (!userCredential.user.emailVerified) {
@@ -121,7 +120,7 @@ export default function LoginPage() {
           description = "La contraseña es demasiado débil. Debe tener al menos 6 caracteres.";
           break;
         default:
-          description = error.message; // Fallback for other errors
+          // Fallback for other errors
           break;
       }
       
@@ -131,9 +130,7 @@ export default function LoginPage() {
         description: description,
       });
     } finally {
-      if (!isSignUp) {
         setIsSubmitting(false);
-      }
     }
   };
 
