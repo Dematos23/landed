@@ -22,7 +22,7 @@ import {
 const sites = [
   {
     id: '1',
-    name: "Acme Inc. Launch",
+    name: "Lanzamiento Acme Inc.",
     subdomain: "acme.landed.co",
     image: "https://placehold.co/600x400.png",
     hint: "website screenshot",
@@ -31,7 +31,7 @@ const sites = [
   },
   {
     id: '2',
-    name: "Innovate Corp. Waitlist",
+    name: "Lista de Espera Innovate Corp.",
     subdomain: "innovate.landed.co",
     image: "https://placehold.co/600x400.png",
     hint: "modern design",
@@ -40,8 +40,8 @@ const sites = [
   },
   {
     id: '3',
-    name: "Portfolio Project",
-    subdomain: "my-portfolio.landed.co",
+    name: "Proyecto de Portafolio",
+    subdomain: "mi-portafolio.landed.co",
     image: "https://placehold.co/600x400.png",
     hint: "abstract portfolio",
     views: "876",
@@ -49,7 +49,7 @@ const sites = [
   },
     {
     id: '4',
-    name: "Beta Signups",
+    name: "Registros Beta",
     subdomain: "beta.landed.co",
     image: "https://placehold.co/600x400.png",
     hint: "tech startup",
@@ -63,14 +63,14 @@ export default function DashboardPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Your Sites</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Tus Sitios</h2>
           <p className="text-muted-foreground">
-            Manage your landing pages here.
+            Gestiona tus páginas de aterrizaje aquí.
           </p>
         </div>
         <Link href="/designer/new">
           <Button>
-            <PlusCircle className="mr-2 h-4 w-4" /> Create New Site
+            <PlusCircle className="mr-2 h-4 w-4" /> Crear Nuevo Sitio
           </Button>
         </Link>
       </div>
@@ -91,14 +91,14 @@ export default function DashboardPage() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                  <DropdownMenuLabel>Acciones</DropdownMenuLabel>
                   <DropdownMenuItem>
                     <Link href={`/designer/${site.id}`} className="flex items-center w-full">
-                      <Pencil className="mr-2 h-4 w-4" /> Edit
+                      <Pencil className="mr-2 h-4 w-4" /> Editar
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
-                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                    <Trash2 className="mr-2 h-4 w-4" /> Eliminar
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -117,9 +117,9 @@ export default function DashboardPage() {
             </CardContent>
             <CardFooter className="flex justify-between items-center text-sm text-muted-foreground">
               <div>
-                <span>{site.views} views</span>
+                <span>{site.views} vistas</span>
                 <span className="mx-2">&#183;</span>
-                <span>{site.conversions} conversion</span>
+                <span>{site.conversions} conversión</span>
               </div>
               <Button variant="ghost" size="icon" asChild>
                 <a href={`https://${site.subdomain}`} target="_blank" rel="noopener noreferrer">

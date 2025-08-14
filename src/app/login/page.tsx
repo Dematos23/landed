@@ -93,6 +93,7 @@ export default function LoginPage() {
             description: "Por favor, verifica tu correo electrónico antes de iniciar sesión. ¿Reenviar correo?",
             action: <Button onClick={async () => await sendEmailVerification(userCredential.user)}>Reenviar</Button>
           });
+          setIsSubmitting(false);
           return;
         }
         router.push('/dashboard');
@@ -104,7 +105,9 @@ export default function LoginPage() {
         description: error.message,
       });
     } finally {
-      setIsSubmitting(false);
+      if (!isSignUp) {
+        setIsSubmitting(false);
+      }
     }
   };
 

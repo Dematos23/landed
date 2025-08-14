@@ -55,15 +55,15 @@ export default function DashboardLayout({
           <Separator />
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton href="#" tooltip="Settings">
+              <SidebarMenuButton href="#" tooltip="Configuración">
                 <Settings />
-                Settings
+                Configuración
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="#" tooltip="Help">
+              <SidebarMenuButton href="#" tooltip="Ayuda">
                 <LifeBuoy />
-                Help
+                Ayuda
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -78,7 +78,7 @@ export default function DashboardLayout({
             <h1 className="text-lg font-semibold">Dashboard</h1>
           </div>
           <Button variant="outline" size="sm">
-            Upgrade
+            Actualizar
           </Button>
           <UserNav />
         </header>
