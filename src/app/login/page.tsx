@@ -8,6 +8,7 @@ import {
   signInWithPopup,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  sendEmailVerification,
   User as FirebaseUser
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
@@ -31,7 +32,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
-      if (user) {
+      if (user && user.emailVerified) {
         router.push('/dashboard');
       }
     });
@@ -74,14 +75,28 @@ export default function LoginPage() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      let userCredential;
       if (isSignUp) {
-        userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        await sendEmailVerification(userCredential.user);
+        await handleUserInFirestore(userCredential.user);
+        toast({
+          title: "¡Cuenta creada!",
+          description: "Hemos enviado un enlace de verificación a tu correo electrónico. Por favor, revisa tu bandeja de entrada.",
+        });
+        setIsSignUp(false); // Switch to login view
       } else {
-        userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        if (!userCredential.user.emailVerified) {
+          toast({
+            variant: "destructive",
+            title: "Verificación requerida",
+            description: "Por favor, verifica tu correo electrónico antes de iniciar sesión. ¿Reenviar correo?",
+            action: <Button onClick={async () => await sendEmailVerification(userCredential.user)}>Reenviar</Button>
+          });
+          return;
+        }
+        router.push('/dashboard');
       }
-      await handleUserInFirestore(userCredential.user);
-      router.push('/dashboard');
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -141,14 +156,14 @@ export default function LoginPage() {
             {isSignUp ? (
               <>
                 ¿Ya tienes una cuenta?{" "}
-                <Button variant="link" onClick={() => setIsSignUp(false)} className="p-0 h-auto">
+                <Button variant="link" onClick={() => setIsSignUp(false)} className="p-0 h-auto" disabled={isSubmitting}>
                   Inicia sesión
                 </Button>
               </>
             ) : (
               <>
                 ¿No tienes una cuenta?{" "}
-                <Button variant="link" onClick={() => setIsSignUp(true)} className="p-0 h-auto">
+                <Button variant="link" onClick={() => setIsSignUp(true)} className="p-0 h-auto" disabled={isSubmitting}>
                   Regístrate
                 </Button>
               </>
