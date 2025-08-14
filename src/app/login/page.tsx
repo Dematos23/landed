@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from 'react';
@@ -64,7 +65,7 @@ export default function LoginPage() {
       toast({
         variant: "destructive",
         title: "Error de inicio de sesión",
-        description: error.message,
+        description: "No se pudo iniciar sesión con Google. Por favor, inténtalo de nuevo.",
       });
     } finally {
       setIsSubmitting(false);
@@ -84,6 +85,7 @@ export default function LoginPage() {
           description: "Hemos enviado un enlace de verificación a tu correo electrónico. Por favor, revisa tu bandeja de entrada.",
         });
         setIsSignUp(false); // Switch to login view
+        setIsSubmitting(false);
       } else {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         if (!userCredential.user.emailVerified) {
@@ -99,10 +101,34 @@ export default function LoginPage() {
         router.push('/dashboard');
       }
     } catch (error: any) {
+      let title = isSignUp ? "Error de registro" : "Error de inicio de sesión";
+      let description = "Ocurrió un error inesperado. Por favor, inténtalo de nuevo.";
+
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          description = "Este correo electrónico ya está registrado. Intenta iniciar sesión.";
+          break;
+        case 'auth/wrong-password':
+          description = "La contraseña es incorrecta. Por favor, inténtalo de nuevo.";
+          break;
+        case 'auth/user-not-found':
+          description = "No se encontró ninguna cuenta con este correo electrónico.";
+          break;
+        case 'auth/invalid-email':
+          description = "El formato del correo electrónico no es válido.";
+          break;
+        case 'auth/weak-password':
+          description = "La contraseña es demasiado débil. Debe tener al menos 6 caracteres.";
+          break;
+        default:
+          description = error.message; // Fallback for other errors
+          break;
+      }
+      
       toast({
         variant: "destructive",
-        title: isSignUp ? "Error de registro" : "Error de inicio de sesión",
-        description: error.message,
+        title: title,
+        description: description,
       });
     } finally {
       if (!isSignUp) {
@@ -144,6 +170,7 @@ export default function LoginPage() {
               <Input
                 id="password"
                 type="password"
+                placeholder="********"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
