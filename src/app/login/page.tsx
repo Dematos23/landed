@@ -22,26 +22,26 @@ export default function LoginPage() {
           <div className="flex justify-center mb-4">
             <Logo className="h-8 w-8 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-bold">Welcome to Landed</CardTitle>
-          <CardDescription>Enter your credentials to access your dashboard</CardDescription>
+          <CardTitle className="text-2xl font-bold">Bienvenido a Landed</CardTitle>
+          <CardDescription>Ingresa tus credenciales para acceder a tu panel</CardDescription>
         </CardHeader>
         <form onSubmit={handleLogin}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="name@example.com" required />
+              <Label htmlFor="email">Correo Electrónico</Label>
+              <Input id="email" type="email" placeholder="nombre@ejemplo.com" required />
             </div>
             <div className="space-y-2">
               <div className="flex items-center">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">Contraseña</Label>
               </div>
               <Input id="password" type="password" required />
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
-            <Button type="submit" className="w-full">Sign In</Button>
+            <Button type="submit" className="w-full">Iniciar Sesión</Button>
             <p className="text-xs text-center text-muted-foreground">
-              Don&apos;t have an account? <a href="#" className="underline font-medium hover:text-primary">Sign up</a>
+              ¿No tienes una cuenta? <a href="#" className="underline font-medium hover:text-primary">Regístrate</a>
             </p>
           </CardFooter>
         </form>

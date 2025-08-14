@@ -13,14 +13,11 @@ export default function HomePage() {
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6">
           <Link href="#features" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
-            Features
+            Características
           </Link>
           <Link href="/login" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
-            Login
+            Iniciar Sesión
           </Link>
-          <Button asChild>
-            <Link href="/dashboard">Get Started</Link>
-          </Button>
         </nav>
       </header>
       <main className="flex-1">
@@ -30,17 +27,16 @@ export default function HomePage() {
               <div className="flex flex-col justify-center space-y-4">
                 <div className="space-y-2">
                   <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
-                    Create Beautiful Landing Pages Effortlessly
+                    Crea Hermosas Páginas de Aterrizaje sin Esfuerzo
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                    Our platform empowers you to design, build, and launch stunning landing pages in minutes, not
-                    weeks.
+                    Nuestra plataforma te permite diseñar, construir y lanzar impresionantes páginas de aterrizaje en minutos, no en semanas.
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
                   <Button asChild size="lg">
                     <Link href="/dashboard">
-                      Get Started for Free
+                      Comienza Gratis
                     </Link>
                   </Button>
                 </div>
@@ -60,10 +56,10 @@ export default function HomePage() {
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
-                <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">Key Features</div>
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">Everything You Need to Succeed</h2>
+                <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">Características Clave</div>
+                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">Todo lo que Necesitas para Triunfar</h2>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  From intuitive design tools to powerful analytics, we have you covered.
+                  Desde herramientas de diseño intuitivas hasta potentes analíticas, te tenemos cubierto.
                 </p>
               </div>
             </div>
@@ -71,28 +67,28 @@ export default function HomePage() {
               <div className="grid gap-1">
                 <div className="flex items-center gap-2">
                   <Mountain className="h-6 w-6 text-primary" />
-                  <h3 className="text-xl font-bold">Intuitive Builder</h3>
+                  <h3 className="text-xl font-bold">Constructor Intuitivo</h3>
                 </div>
                 <p className="text-muted-foreground">
-                  Our drag-and-drop builder makes it easy to create custom layouts.
+                  Nuestro constructor de arrastrar y soltar facilita la creación de diseños personalizados.
                 </p>
               </div>
               <div className="grid gap-1">
                 <div className="flex items-center gap-2">
                   <Zap className="h-6 w-6 text-primary" />
-                  <h3 className="text-xl font-bold">Blazing Fast</h3>
+                  <h3 className="text-xl font-bold">Increíblemente Rápido</h3>
                 </div>
                 <p className="text-muted-foreground">
-                  Pages are optimized for speed, ensuring a great user experience.
+                  Las páginas están optimizadas para la velocidad, garantizando una gran experiencia de usuario.
                 </p>
               </div>
               <div className="grid gap-1">
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="h-6 w-6 text-primary" />
-                  <h3 className="text-xl font-bold">Secure & Reliable</h3>
+                  <h3 className="text-xl font-bold">Seguro y Confiable</h3>
                 </div>
                 <p className="text-muted-foreground">
-                  Hosted on a global infrastructure, ensuring 99.9% uptime.
+                  Alojado en una infraestructura global, garantizando un 99.9% de tiempo de actividad.
                 </p>
               </div>
             </div>
@@ -100,13 +96,13 @@ export default function HomePage() {
         </section>
       </main>
       <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
-        <p className="text-xs text-muted-foreground">&copy; 2024 Landed. All rights reserved.</p>
+        <p className="text-xs text-muted-foreground">&copy; 2024 Landed. Todos los derechos reservados.</p>
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
           <Link href="#" className="text-xs hover:underline underline-offset-4" prefetch={false}>
-            Terms of Service
+            Términos de Servicio
           </Link>
           <Link href="#" className="text-xs hover:underline underline-offset-4" prefetch={false}>
-            Privacy
+            Privacidad
           </Link>
         </nav>
       </footer>
