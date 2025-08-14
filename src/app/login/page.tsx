@@ -27,6 +27,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
@@ -69,34 +70,24 @@ export default function LoginPage() {
     }
   };
 
-  const handleEmailSignIn = async (e: React.FormEvent) => {
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      let userCredential;
+      if (isSignUp) {
+        userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      } else {
+        userCredential = await signInWithEmailAndPassword(auth, email, password);
+      }
       await handleUserInFirestore(userCredential.user);
       router.push('/dashboard');
     } catch (error: any) {
-      if (error.code === 'auth/user-not-found') {
-        // If user not found, try to create a new account
-        try {
-          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-          await handleUserInFirestore(userCredential.user);
-          router.push('/dashboard');
-        } catch (signupError: any) {
-          toast({
-            variant: "destructive",
-            title: "Error de registro",
-            description: signupError.message,
-          });
-        }
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Error de inicio de sesión",
-          description: error.message,
-        });
-      }
+      toast({
+        variant: "destructive",
+        title: isSignUp ? "Error de registro" : "Error de inicio de sesión",
+        description: error.message,
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -109,11 +100,15 @@ export default function LoginPage() {
           <div className="flex justify-center mb-4">
             <Logo className="h-8 w-8 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-bold">Bienvenido a Landed</CardTitle>
-          <CardDescription>Ingresa para acceder a tu panel de control</CardDescription>
+          <CardTitle className="text-2xl font-bold">
+            {isSignUp ? 'Crear una cuenta' : 'Bienvenido a Landed'}
+          </CardTitle>
+          <CardDescription>
+            {isSignUp ? 'Completa tus datos para registrarte' : 'Ingresa para acceder a tu panel de control'}
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleEmailSignIn} className="space-y-4">
+          <form onSubmit={handleEmailSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Correo electrónico</Label>
               <Input
@@ -138,15 +133,34 @@ export default function LoginPage() {
               />
             </div>
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? 'Ingresando...' : 'Ingresar / Registrarse'}
+              {isSubmitting ? (isSignUp ? 'Creando cuenta...' : 'Ingresando...') : (isSignUp ? 'Crear cuenta' : 'Ingresar')}
             </Button>
           </form>
+
+          <div className="mt-4 text-center text-sm">
+            {isSignUp ? (
+              <>
+                ¿Ya tienes una cuenta?{" "}
+                <Button variant="link" onClick={() => setIsSignUp(false)} className="p-0 h-auto">
+                  Inicia sesión
+                </Button>
+              </>
+            ) : (
+              <>
+                ¿No tienes una cuenta?{" "}
+                <Button variant="link" onClick={() => setIsSignUp(true)} className="p-0 h-auto">
+                  Regístrate
+                </Button>
+              </>
+            )}
+          </div>
+
           <div className="relative my-4">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
+              <span className="bg-card px-2 text-muted-foreground">
                 O continuar con
               </span>
             </div>
