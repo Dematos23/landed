@@ -1,5 +1,4 @@
 
-
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -79,7 +78,7 @@ const HeroPreview = ({ headline, subheadline, cta1, cta2, cta1Url, cta2Url }: { 
 const FeaturesPreview = ({ title, features }: { title: string, features: { title: string, description: string }[] }) => (
   <div className="w-full bg-card dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none">
      <h2 className="text-3xl font-bold text-center text-card-foreground dark:text-white mb-8">{title}</h2>
-     <div className="grid md:grid-cols-3 gap-8">
+     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {features.map((feature, index) => (
           <div key={index} className="text-center">
               <div className="flex items-center justify-center h-12 w-12 rounded-md bg-primary/10 text-primary mx-auto mb-4">
