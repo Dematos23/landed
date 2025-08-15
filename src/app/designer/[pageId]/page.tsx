@@ -16,6 +16,7 @@ import {
   Trash2,
   Star,
   ChevronDown,
+  Pencil,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -42,17 +43,26 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import { cn } from '@/lib/utils';
+
+type ComponentData = {
+  id: number;
+  name: string;
+  props: { [key: string]: any };
+};
 
 // --- Component Previews ---
 
-const HeroPreview = () => (
+const HeroPreview = ({ headline, subheadline, cta1, cta2 }: { headline: string, subheadline: string, cta1: string, cta2: string }) => (
   <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center pointer-events-none">
-    <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Your Amazing Product</h1>
-    <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">A compelling tagline that captures attention and explains the core benefit.</p>
+    <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">{headline}</h1>
+    <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">{subheadline}</p>
     <div className="flex justify-center gap-4">
-      <Button size="lg" className="bg-primary hover:bg-primary/90">Get Started</Button>
-      <Button size="lg" variant="outline">Learn More</Button>
+      <Button size="lg" className="bg-primary hover:bg-primary/90">{cta1}</Button>
+      <Button size="lg" variant="outline">{cta2}</Button>
     </div>
   </div>
 );
@@ -158,39 +168,74 @@ const FooterPreview = () => (
     </div>
 );
 
+// --- Component Edit Forms ---
 
-// Map component names to their actual components
-const componentMap: { [key: string]: React.ComponentType } = {
-  'Hero Section': HeroPreview,
-  'Features': FeaturesPreview,
-  'CTA': CtaPreview,
-  'Testimonials': TestimonialsPreview,
-  'FAQ': FaqPreview,
-  'Footer': FooterPreview,
+const EditHeroForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData: any) => void, onCancel: () => void }) => {
+    const [formData, setFormData] = useState(data.props);
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSave(formData);
+    };
+    return (
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 space-y-4">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">Edit Hero Section</h3>
+            <div>
+                <Label htmlFor="headline">Headline</Label>
+                <Input id="headline" value={formData.headline} onChange={(e) => setFormData({ ...formData, headline: e.target.value })} />
+            </div>
+            <div>
+                <Label htmlFor="subheadline">Subheadline</Label>
+                <Textarea id="subheadline" value={formData.subheadline} onChange={(e) => setFormData({ ...formData, subheadline: e.target.value })} />
+            </div>
+            <div>
+                <Label htmlFor="cta1">Button 1 Text</Label>
+                <Input id="cta1" value={formData.cta1} onChange={(e) => setFormData({ ...formData, cta1: e.target.value })} />
+            </div>
+            <div>
+                <Label htmlFor="cta2">Button 2 Text</Label>
+                <Input id="cta2" value={formData.cta2} onChange={(e) => setFormData({ ...formData, cta2: e.target.value })} />
+            </div>
+            <div className="flex justify-end gap-2">
+                <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
+                <Button type="submit">Save</Button>
+            </div>
+        </form>
+    );
 };
 
-const initialComponents = [
-    { id: 1, name: 'Hero Section' },
-    { id: 2, name: 'Features' },
-]
 
-type Component = {
-    id: number;
-    name: string;
-}
+const componentMap: { [key: string]: { preview: React.ComponentType<any>, edit: React.ComponentType<any> } } = {
+  'Hero Section': { preview: HeroPreview, edit: EditHeroForm },
+  'Features': { preview: FeaturesPreview, edit: () => <div>Edit Features</div> },
+  'CTA': { preview: CtaPreview, edit: () => <div>Edit CTA</div> },
+  'Testimonials': { preview: TestimonialsPreview, edit: () => <div>Edit Testimonials</div> },
+  'FAQ': { preview: FaqPreview, edit: () => <div>Edit FAQ</div> },
+  'Footer': { preview: FooterPreview, edit: () => <div>Edit Footer</div> },
+};
+
+const initialComponents: ComponentData[] = [
+    { id: 1, name: 'Hero Section', props: { headline: 'Your Amazing Product', subheadline: 'A compelling tagline that captures attention and explains the core benefit.', cta1: 'Get Started', cta2: 'Learn More' } },
+    { id: 2, name: 'Features', props: {} },
+]
 
 export default function DesignerPage({ params }: { params: { pageId: string } }) {
   const isNew = params.pageId === 'new';
-  const [components, setComponents] = useState<Component[]>(initialComponents);
+  const [components, setComponents] = useState<ComponentData[]>(initialComponents);
+  const [editingComponent, setEditingComponent] = useState<ComponentData | null>(null);
 
   // Drag and drop state
   const dragItem = useRef<number | null>(null);
   const dragOverItem = useRef<number | null>(null);
 
   const addComponent = (componentName: string) => {
+    let defaultProps = {};
+    if (componentName === 'Hero Section') {
+        defaultProps = { headline: 'New Headline', subheadline: 'New Subheadline', cta1: 'Button 1', cta2: 'Button 2' };
+    }
     const newComponent = {
       id: Date.now(),
       name: componentName,
+      props: defaultProps
     };
     setComponents(prev => [...prev, newComponent]);
   };
@@ -205,7 +250,6 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
 
   const handleDragEnter = (e: React.DragEvent<HTMLDivElement>, position: number) => {
     dragOverItem.current = position;
-    // Visually indicate the drop zone
     const list = e.currentTarget.parentElement;
     if (list) {
         const children = Array.from(list.children);
@@ -236,6 +280,22 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
     dragItem.current = null;
     dragOverItem.current = null;
   }
+
+  const handleEdit = (component: ComponentData) => {
+    setEditingComponent(component);
+  };
+
+  const handleSave = (newProps: any) => {
+    if (!editingComponent) return;
+    setComponents(prev => prev.map(c => 
+      c.id === editingComponent.id ? { ...c, props: newProps } : c
+    ));
+    setEditingComponent(null);
+  };
+
+  const handleCancel = () => {
+    setEditingComponent(null);
+  };
 
   return (
     <div className="flex h-screen w-full flex-col bg-background">
@@ -283,16 +343,16 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
               <CardTitle>Components</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-2">
-              {["Hero Section", "Features", "CTA", "Testimonials", "FAQ", "Footer"].map(
-                (component) => (
+              {Object.keys(componentMap).map(
+                (componentName) => (
                   <Button
-                    key={component}
+                    key={componentName}
                     variant="ghost"
                     className="justify-start gap-2"
-                    onClick={() => addComponent(component)}
+                    onClick={() => addComponent(componentName)}
                   >
                     <GripVertical className="h-4 w-4 text-muted-foreground" />
-                    {component}
+                    {componentName}
                   </Button>
                 )
               )}
@@ -303,47 +363,59 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
           <div className="mx-auto max-w-5xl my-8 space-y-4 p-4">
            {components.length > 0 ? (
                components.map((component, index) => {
-                 const ComponentPreview = componentMap[component.name];
+                 const { preview: ComponentPreview, edit: EditComponent } = componentMap[component.name];
+                 const isEditing = editingComponent?.id === component.id;
+
+                 if (!ComponentPreview) return null;
+
                  return (
-                   ComponentPreview ? (
                     <div 
                         key={component.id} 
                         className="relative group rounded-lg transition-all"
-                        draggable
+                        draggable={!isEditing}
                         onDragStart={(e) => handleDragStart(e, index)}
                         onDragEnter={(e) => handleDragEnter(e, index)}
                         onDragEnd={handleDragEnd}
                         onDragOver={(e) => e.preventDefault()}
                     >
-                        <ComponentPreview />
-                        <div className="absolute top-2 right-2 hidden group-hover:flex gap-2">
-                            <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/80 hover:bg-white cursor-move">
-                                <GripVertical className="h-4 w-4" />
-                            </Button>
-                            <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <Button variant="destructive" size="icon" className="h-8 w-8 bg-white/80 hover:bg-white">
-                                        <Trash2 className="h-4 w-4 text-red-500" />
-                                    </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                    <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                        Esta acción no se puede deshacer. Esto eliminará permanentemente la sección.
-                                    </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => removeComponent(component.id)}>
-                                        Eliminar
-                                    </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
-                        </div>
+                        {isEditing ? (
+                          <EditComponent data={component} onSave={handleSave} onCancel={handleCancel} />
+                        ) : (
+                          <>
+                            <ComponentPreview {...component.props} />
+                            <div className="absolute top-2 right-2 hidden group-hover:flex gap-2">
+                                <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/80 hover:bg-white cursor-move">
+                                    <GripVertical className="h-4 w-4" />
+                                </Button>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/80 hover:bg-white" onClick={() => handleEdit(component)}>
+                                    <Pencil className="h-4 w-4" />
+                                </Button>
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button variant="destructive" size="icon" className="h-8 w-8 bg-white/80 hover:bg-white">
+                                            <Trash2 className="h-4 w-4 text-red-500" />
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                        <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            Esta acción no se puede deshacer. Esto eliminará permanentemente la sección.
+                                        </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => removeComponent(component.id)}>
+                                            Eliminar
+                                        </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            </div>
+                          </>
+                        )}
                     </div>
-                   ) : null
+                   )
                  );
                })
             ) : (
