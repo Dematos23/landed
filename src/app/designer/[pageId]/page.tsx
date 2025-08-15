@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import React, { useState, useRef } from 'react';
@@ -415,9 +416,9 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
                           </>
                         )}
                     </div>
-                   )
-                 );
-               })
+                   );
+                 }
+               )
             ) : (
                 <div 
                     className="flex flex-col items-center justify-center text-center py-24 px-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700"
