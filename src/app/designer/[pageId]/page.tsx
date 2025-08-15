@@ -2,7 +2,7 @@
 
 "use client"
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from "next/link"
 import {
   ArrowLeft,
@@ -18,6 +18,7 @@ import {
   Star,
   ChevronDown,
   Pencil,
+  Palette,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -49,6 +50,8 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 
 type ComponentData = {
   id: number;
@@ -59,9 +62,9 @@ type ComponentData = {
 // --- Component Previews ---
 
 const HeroPreview = ({ headline, subheadline, cta1, cta2, cta1Url, cta2Url }: { headline: string, subheadline: string, cta1: string, cta2: string, cta1Url: string, cta2Url: string }) => (
-  <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center pointer-events-none">
-    <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">{headline}</h1>
-    <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">{subheadline}</p>
+  <div className="w-full bg-card dark:bg-gray-800 rounded-lg shadow-md p-8 text-center pointer-events-none">
+    <h1 className="text-4xl font-bold text-card-foreground dark:text-white mb-4">{headline}</h1>
+    <p className="text-lg text-muted-foreground dark:text-gray-300 mb-6">{subheadline}</p>
     <div className="flex justify-center gap-4">
       <Button size="lg" className="bg-primary hover:bg-primary/90" asChild>
         <Link href={cta1Url}>{cta1}</Link>
@@ -74,16 +77,16 @@ const HeroPreview = ({ headline, subheadline, cta1, cta2, cta1Url, cta2Url }: { 
 );
 
 const FeaturesPreview = ({ title, features }: { title: string, features: { title: string, description: string }[] }) => (
-  <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none">
-     <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-8">{title}</h2>
+  <div className="w-full bg-card dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none">
+     <h2 className="text-3xl font-bold text-center text-card-foreground dark:text-white mb-8">{title}</h2>
      <div className="grid md:grid-cols-3 gap-8">
         {features.map((feature, index) => (
           <div key={index} className="text-center">
               <div className="flex items-center justify-center h-12 w-12 rounded-md bg-primary/10 text-primary mx-auto mb-4">
                   <Layers className="h-6 w-6"/>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{feature.title}</h3>
-              <p className="text-gray-600 dark:text-gray-300">{feature.description}</p>
+              <h3 className="text-lg font-semibold text-card-foreground dark:text-white">{feature.title}</h3>
+              <p className="text-muted-foreground dark:text-gray-300">{feature.description}</p>
           </div>
         ))}
      </div>
@@ -91,10 +94,10 @@ const FeaturesPreview = ({ title, features }: { title: string, features: { title
 );
 
 const CtaPreview = ({ title, subtitle, buttonText, buttonUrl }: { title: string, subtitle: string, buttonText: string, buttonUrl: string }) => (
-    <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none">
+    <div className="w-full bg-card dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none">
         <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{title}</h2>
-            <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">{subtitle}</p>
+            <h2 className="text-3xl font-bold text-card-foreground dark:text-white">{title}</h2>
+            <p className="mt-2 text-lg text-muted-foreground dark:text-gray-300">{subtitle}</p>
             <Button size="lg" className="mt-6 bg-primary hover:bg-primary/90" asChild>
                 <Link href={buttonUrl}>{buttonText}</Link>
             </Button>
@@ -103,16 +106,16 @@ const CtaPreview = ({ title, subtitle, buttonText, buttonUrl }: { title: string,
 );
 
 const TestimonialsPreview = ({ title, testimonials }: { title: string, testimonials: { quote: string, name: string, company: string }[] }) => (
-    <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none">
-        <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-8">{title}</h2>
+    <div className="w-full bg-card dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none">
+        <h2 className="text-3xl font-bold text-center text-card-foreground dark:text-white mb-8">{title}</h2>
         <div className="grid md:grid-cols-2 gap-8">
             {testimonials.map((testimonial, index) => (
                 <div key={index} className="bg-primary/5 dark:bg-gray-700 p-6 rounded-lg">
-                    <p className="text-gray-600 dark:text-gray-300 italic">"{testimonial.quote}"</p>
+                    <p className="text-muted-foreground dark:text-gray-300 italic">"{testimonial.quote}"</p>
                     <div className="flex items-center mt-4">
                         <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-600 mr-4"></div>
                         <div>
-                            <p className="font-semibold text-gray-900 dark:text-white">{testimonial.name}</p>
+                            <p className="font-semibold text-card-foreground dark:text-white">{testimonial.name}</p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">{testimonial.company}</p>
                         </div>
                     </div>
@@ -123,13 +126,13 @@ const TestimonialsPreview = ({ title, testimonials }: { title: string, testimoni
 );
 
 const FaqPreview = ({ title, faqs }: { title: string, faqs: { question: string, answer: string }[] }) => (
-    <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none">
-        <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-8">{title}</h2>
+    <div className="w-full bg-card dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none">
+        <h2 className="text-3xl font-bold text-center text-card-foreground dark:text-white mb-8">{title}</h2>
         <div className="space-y-4">
             {faqs.map((faq, index) => (
                 <div key={index}>
-                    <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{faq.question}</h3>
-                    <p className="text-gray-600 dark:text-gray-300 mt-1">{faq.answer}</p>
+                    <h3 className="font-semibold text-lg text-card-foreground dark:text-white">{faq.question}</h3>
+                    <p className="text-muted-foreground dark:text-gray-300 mt-1">{faq.answer}</p>
                 </div>
             ))}
         </div>
@@ -474,9 +477,74 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
   const [components, setComponents] = useState<ComponentData[]>(initialComponents);
   const [editingComponent, setEditingComponent] = useState<ComponentData | null>(null);
 
+  // Theme state
+  const [theme, setTheme] = useState({
+    primaryColor: '#6B7280',
+    backgroundColor: '#F3F4F6',
+    fontFamily: 'Inter',
+  });
+
   // Drag and drop state
   const dragItem = useRef<number | null>(null);
   const dragOverItem = useRef<number | null>(null);
+
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.innerHTML = `
+      :root {
+        --primary-hsl: ${hexToHsl(theme.primaryColor, { asString: false }).h} ${hexToHsl(theme.primaryColor, { asString: false }).s}% ${hexToHsl(theme.primaryColor, { asString: false }).l}%;
+        --background-hsl: ${hexToHsl(theme.backgroundColor, { asString: false }).h} ${hexToHsl(theme.backgroundColor, { asString: false }).s}% ${hexToHsl(theme.backgroundColor, { asString: false }).l}%;
+        --font-body: '${theme.fontFamily}', sans-serif;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, [theme]);
+  
+  const handleThemeChange = (key: keyof typeof theme, value: string) => {
+    setTheme(prev => ({ ...prev, [key]: value }));
+  };
+
+  function hexToHsl(H: string, { asString = true } = {}) {
+    let r = 0, g = 0, b = 0;
+    if (H.length == 4) {
+      r = +("0x" + H[1] + H[1]);
+      g = +("0x" + H[2] + H[2]);
+      b = +("0x" + H[3] + H[3]);
+    } else if (H.length == 7) {
+      r = +("0x" + H[1] + H[2]);
+      g = +("0x" + H[3] + H[4]);
+      b = +("0x" + H[5] + H[6]);
+    }
+    r /= 255;
+    g /= 255;
+    b /= 255;
+    let cmin = Math.min(r,g,b),
+        cmax = Math.max(r,g,b),
+        delta = cmax - cmin,
+        h = 0,
+        s = 0,
+        l = 0;
+  
+    if (delta == 0) h = 0;
+    else if (cmax == r) h = ((g - b) / delta) % 6;
+    else if (cmax == g) h = (b - r) / delta + 2;
+    else h = (r - g) / delta + 4;
+  
+    h = Math.round(h * 60);
+    if (h < 0) h += 360;
+  
+    l = (cmax + cmin) / 2;
+    s = delta == 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+    s = +(s * 100).toFixed(1);
+    l = +(l * 100).toFixed(1);
+  
+    if (asString) return "hsl(" + h + "," + s + "%," + l + "%)";
+    return { h, s, l };
+  }
+
 
   const addComponent = (componentName: string) => {
     const newComponent = {
@@ -585,11 +653,46 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
       </header>
       <div className="flex flex-1 overflow-hidden">
         <aside className="w-72 border-r bg-card hidden md:flex flex-col">
+          <Accordion type="single" collapsible defaultValue="item-1" className="w-full">
+            <AccordionItem value="item-1" className="border-b-0">
+              <AccordionTrigger className="p-4 hover:no-underline">
+                <div className="flex items-center gap-2">
+                    <Palette className="h-4 w-4" />
+                    <span className="font-semibold text-base">Tema</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="p-4 pt-0 space-y-4">
+                <div className="space-y-2">
+                    <Label>Color Primario</Label>
+                    <Input type="color" value={theme.primaryColor} onChange={(e) => handleThemeChange('primaryColor', e.target.value)} />
+                </div>
+                 <div className="space-y-2">
+                    <Label>Color de Fondo</Label>
+                    <Input type="color" value={theme.backgroundColor} onChange={(e) => handleThemeChange('backgroundColor', e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Fuente</Label>
+                  <Select value={theme.fontFamily} onValueChange={(value) => handleThemeChange('fontFamily', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar fuente" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Inter">Inter</SelectItem>
+                      <SelectItem value="Roboto">Roboto</SelectItem>
+                      <SelectItem value="Lato">Lato</SelectItem>
+                      <SelectItem value="Montserrat">Montserrat</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+
           <Card className="border-none rounded-none">
-            <CardHeader>
-              <CardTitle>Componentes</CardTitle>
+            <CardHeader className="p-4">
+              <CardTitle className="flex items-center gap-2"><Layers className="h-4 w-4" /> Componentes</CardTitle>
             </CardHeader>
-            <CardContent className="flex flex-col gap-2">
+            <CardContent className="flex flex-col gap-2 px-4 pb-4">
               {Object.keys(componentMap).map(
                 (componentName) => (
                   <Button
@@ -607,7 +710,7 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
           </Card>
         </aside>
         <main className="flex-1 overflow-auto bg-muted/40" onDrop={handleDrop}>
-          <div className="mx-auto max-w-5xl my-8 space-y-4 p-4">
+          <div className="mx-auto max-w-5xl my-8 space-y-4 p-4" style={{ fontFamily: `var(--font-body)` }}>
            {components.length > 0 ? (
                components.map((component, index) => {
                  const { preview: ComponentPreview, edit: EditComponent } = componentMap[component.name];
@@ -639,7 +742,7 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
                                 </Button>
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
-                                        <Button variant="destructive" size="icon" className="h-8 w-8 bg-white/80 hover:bg-white">
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/80 hover:bg-white">
                                             <Trash2 className="h-4 w-4 text-red-500" />
                                         </Button>
                                     </AlertDialogTrigger>
