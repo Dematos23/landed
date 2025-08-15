@@ -484,6 +484,7 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
     secondary: '#93C5FD',
     accent: '#FBBF24',
     foreground: '#1F2937',
+    mutedForeground: '#6B7280',
     background1: '#F9FAFB',
     background2: '#FFFFFF',
     fontFamily: 'Inter',
@@ -502,6 +503,7 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
         --secondary-hsl: ${hexToHsl(theme.secondary, { asString: false }).h} ${hexToHsl(theme.secondary, { asString: false }).s}% ${hexToHsl(theme.secondary, { asString: false }).l}%;
         --accent-hsl: ${hexToHsl(theme.accent, { asString: false }).h} ${hexToHsl(theme.accent, { asString: false }).s}% ${hexToHsl(theme.accent, { asString: false }).l}%;
         --foreground-hsl: ${hexToHsl(theme.foreground, { asString: false }).h} ${hexToHsl(theme.foreground, { asString: false }).s}% ${hexToHsl(theme.foreground, { asString: false }).l}%;
+        --muted-foreground-hsl: ${hexToHsl(theme.mutedForeground, { asString: false }).h} ${hexToHsl(theme.mutedForeground, { asString: false }).s}% ${hexToHsl(theme.mutedForeground, { asString: false }).l}%;
         --background-hsl: ${hexToHsl(theme.background1, { asString: false }).h} ${hexToHsl(theme.background1, { asString: false }).s}% ${hexToHsl(theme.background1, { asString: false }).l}%;
         --card-hsl: ${hexToHsl(theme.background2, { asString: false }).h} ${hexToHsl(theme.background2, { asString: false }).s}% ${hexToHsl(theme.background2, { asString: false }).l}%;
         --font-body: '${theme.fontFamily}', sans-serif;
@@ -664,7 +666,7 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
       <div className="flex flex-1 overflow-hidden">
         <aside className="w-72 border-r bg-card hidden md:flex flex-col">
           <Accordion type="single" collapsible defaultValue="item-1" className="w-full">
-            <AccordionItem value="item-1" className="border-b-0">
+            <AccordionItem value="item-1">
               <AccordionTrigger className="p-4 hover:no-underline">
                 <div className="flex items-center gap-2">
                     <Palette className="h-4 w-4" />
@@ -687,6 +689,10 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
                  <div className="space-y-2">
                     <Label>Color de Texto</Label>
                     <Input type="color" value={theme.foreground} onChange={(e) => handleThemeChange('foreground', e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                    <Label>Color de Texto Secundario</Label>
+                    <Input type="color" value={theme.mutedForeground} onChange={(e) => handleThemeChange('mutedForeground', e.target.value)} />
                 </div>
                 <div className="space-y-2">
                     <Label>Color de Fondo 1</Label>
@@ -712,28 +718,32 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
                 </div>
               </AccordionContent>
             </AccordionItem>
+            <AccordionItem value="item-2">
+               <AccordionTrigger className="p-4 hover:no-underline">
+                <div className="flex items-center gap-2">
+                    <Layers className="h-4 w-4" />
+                    <span className="font-semibold text-base">Componentes</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="p-4 pt-0">
+                 <div className="flex flex-col gap-2">
+                    {Object.keys(componentMap).map(
+                      (componentName) => (
+                        <Button
+                          key={componentName}
+                          variant="ghost"
+                          className="justify-start gap-2"
+                          onClick={() => addComponent(componentName)}
+                        >
+                          <GripVertical className="h-4 w-4 text-muted-foreground" />
+                          {componentName}
+                        </Button>
+                      )
+                    )}
+                  </div>
+              </AccordionContent>
+            </AccordionItem>
           </Accordion>
-
-          <Card className="border-none rounded-none">
-            <CardHeader className="p-4">
-              <CardTitle className="flex items-center gap-2"><Layers className="h-4 w-4" /> Componentes</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-2 px-4 pb-4">
-              {Object.keys(componentMap).map(
-                (componentName) => (
-                  <Button
-                    key={componentName}
-                    variant="ghost"
-                    className="justify-start gap-2"
-                    onClick={() => addComponent(componentName)}
-                  >
-                    <GripVertical className="h-4 w-4 text-muted-foreground" />
-                    {componentName}
-                  </Button>
-                )
-              )}
-            </CardContent>
-          </Card>
         </aside>
         <main className="flex-1 overflow-auto bg-muted/40 transition-all duration-300" onDrop={handleDrop}>
           <div className={cn(
