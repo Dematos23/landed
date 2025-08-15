@@ -1,5 +1,8 @@
+
+"use client"
+
+import React, { useState } from 'react';
 import Link from "next/link"
-import Image from "next/image"
 import {
   ArrowLeft,
   GripVertical,
@@ -10,6 +13,7 @@ import {
   Tablet,
   Smartphone,
   Monitor,
+  Trash2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -25,6 +29,19 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+
+// --- Component Previews ---
 
 const HeroPreview = () => (
   <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
@@ -66,9 +83,38 @@ const FeaturesPreview = () => (
   </div>
 );
 
+// Map component names to their actual components
+const componentMap: { [key: string]: React.ComponentType } = {
+  'Hero Section': HeroPreview,
+  'Features': FeaturesPreview,
+};
+
+const initialComponents = [
+    { id: 1, name: 'Hero Section' },
+    { id: 2, name: 'Features' },
+]
+
+type Component = {
+    id: number;
+    name: string;
+}
 
 export default function DesignerPage({ params }: { params: { pageId: string } }) {
   const isNew = params.pageId === 'new';
+  const [components, setComponents] = useState<Component[]>(initialComponents);
+
+  const addComponent = (componentName: string) => {
+    const newComponent = {
+      id: Date.now(),
+      name: componentName,
+    };
+    setComponents(prev => [...prev, newComponent]);
+  };
+  
+  const removeComponent = (id: number) => {
+    setComponents(prev => prev.filter(c => c.id !== id));
+  };
+
 
   return (
     <div className="flex h-screen w-full flex-col bg-background">
@@ -122,6 +168,7 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
                     key={component}
                     variant="ghost"
                     className="justify-start gap-2"
+                    onClick={() => addComponent(component)}
                   >
                     <GripVertical className="h-4 w-4 text-muted-foreground" />
                     {component}
@@ -133,10 +180,51 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
         </aside>
         <main className="flex-1 overflow-auto bg-muted/40">
           <div className="mx-auto max-w-5xl my-8 space-y-4 p-4">
-            <HeroPreview />
-            <FeaturesPreview />
+           {components.length > 0 ? (
+               components.map((component) => {
+                 const ComponentPreview = componentMap[component.name];
+                 return (
+                   ComponentPreview ? (
+                    <div key={component.id} className="relative group">
+                        <ComponentPreview />
+                        <div className="absolute top-2 right-2 hidden group-hover:flex gap-2">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/80 hover:bg-white">
+                                <GripVertical className="h-4 w-4" />
+                            </Button>
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="destructive" size="icon" className="h-8 w-8 bg-white/80 hover:bg-white">
+                                        <Trash2 className="h-4 w-4 text-red-500" />
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                    <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        Esta acción no se puede deshacer. Esto eliminará permanentemente la sección.
+                                    </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => removeComponent(component.id)}>
+                                        Eliminar
+                                    </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        </div>
+                    </div>
+                   ) : null
+                 );
+               })
+            ) : (
+                <div className="flex flex-col items-center justify-center text-center py-24 px-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Página Vacía</h2>
+                    <p className="text-gray-500 dark:text-gray-400 mt-2">Comienza a construir tu página agregando un componente desde el panel izquierdo.</p>
+                </div>
+            )}
             <div className="flex justify-center">
-              <Button variant="outline" className="rounded-full">
+              <Button variant="outline" className="rounded-full" onClick={() => addComponent('Features')}>
                 <Plus className="mr-2 h-4 w-4" /> Add Section
               </Button>
             </div>
