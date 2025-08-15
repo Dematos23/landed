@@ -58,13 +58,17 @@ type ComponentData = {
 
 // --- Component Previews ---
 
-const HeroPreview = ({ headline, subheadline, cta1, cta2 }: { headline: string, subheadline: string, cta1: string, cta2: string }) => (
+const HeroPreview = ({ headline, subheadline, cta1, cta2, cta1Url, cta2Url }: { headline: string, subheadline: string, cta1: string, cta2: string, cta1Url: string, cta2Url: string }) => (
   <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center pointer-events-none">
     <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">{headline}</h1>
     <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">{subheadline}</p>
     <div className="flex justify-center gap-4">
-      <Button size="lg" className="bg-primary hover:bg-primary/90">{cta1}</Button>
-      <Button size="lg" variant="outline">{cta2}</Button>
+      <Button size="lg" className="bg-primary hover:bg-primary/90" asChild>
+        <Link href={cta1Url}>{cta1}</Link>
+      </Button>
+      <Button size="lg" variant="outline" asChild>
+        <Link href={cta2Url}>{cta2}</Link>
+      </Button>
     </div>
   </div>
 );
@@ -86,13 +90,13 @@ const FeaturesPreview = ({ title, features }: { title: string, features: { title
   </div>
 );
 
-const CtaPreview = ({ title, subtitle, buttonText }: { title: string, subtitle: string, buttonText: string }) => (
+const CtaPreview = ({ title, subtitle, buttonText, buttonUrl }: { title: string, subtitle: string, buttonText: string, buttonUrl: string }) => (
     <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none">
         <div className="text-center">
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{title}</h2>
             <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">{subtitle}</p>
-            <Button size="lg" className="mt-6 bg-primary hover:bg-primary/90">
-                {buttonText}
+            <Button size="lg" className="mt-6 bg-primary hover:bg-primary/90" asChild>
+                <Link href={buttonUrl}>{buttonText}</Link>
             </Button>
         </div>
     </div>
@@ -164,13 +168,25 @@ const EditHeroForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData:
                 <Label htmlFor="subheadline">Subtítulo</Label>
                 <Textarea id="subheadline" value={formData.subheadline} onChange={(e) => setFormData({ ...formData, subheadline: e.target.value })} />
             </div>
-            <div>
-                <Label htmlFor="cta1">Texto del Botón 1</Label>
-                <Input id="cta1" value={formData.cta1} onChange={(e) => setFormData({ ...formData, cta1: e.target.value })} />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                  <Label htmlFor="cta1">Texto del Botón 1</Label>
+                  <Input id="cta1" value={formData.cta1} onChange={(e) => setFormData({ ...formData, cta1: e.target.value })} />
+              </div>
+              <div>
+                  <Label htmlFor="cta1Url">URL del Botón 1</Label>
+                  <Input id="cta1Url" value={formData.cta1Url} onChange={(e) => setFormData({ ...formData, cta1Url: e.target.value })} />
+              </div>
             </div>
-            <div>
-                <Label htmlFor="cta2">Texto del Botón 2</Label>
-                <Input id="cta2" value={formData.cta2} onChange={(e) => setFormData({ ...formData, cta2: e.target.value })} />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                  <Label htmlFor="cta2">Texto del Botón 2</Label>
+                  <Input id="cta2" value={formData.cta2} onChange={(e) => setFormData({ ...formData, cta2: e.target.value })} />
+              </div>
+              <div>
+                  <Label htmlFor="cta2Url">URL del Botón 2</Label>
+                  <Input id="cta2Url" value={formData.cta2Url} onChange={(e) => setFormData({ ...formData, cta2Url: e.target.value })} />
+              </div>
             </div>
             <div className="flex justify-end gap-2">
                 <Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
@@ -243,6 +259,10 @@ const EditCtaForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData: 
             <div>
                 <Label htmlFor="cta-button">Texto del Botón</Label>
                 <Input id="cta-button" value={formData.buttonText} onChange={(e) => setFormData({ ...formData, buttonText: e.target.value })} />
+            </div>
+             <div>
+                <Label htmlFor="cta-button-url">URL del Botón</Label>
+                <Input id="cta-button-url" value={formData.buttonUrl} onChange={(e) => setFormData({ ...formData, buttonUrl: e.target.value })} />
             </div>
             <div className="flex justify-end gap-2">
                 <Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
@@ -390,7 +410,7 @@ const componentMap: { [key: string]: { preview: React.ComponentType<any>, edit: 
   'Sección de Héroe': { 
     preview: HeroPreview, 
     edit: EditHeroForm,
-    defaultProps: { headline: 'Tu Producto Increíble', subheadline: 'Un eslogan convincente que capta la atención.', cta1: 'Comenzar', cta2: 'Saber Más' }
+    defaultProps: { headline: 'Tu Producto Increíble', subheadline: 'Un eslogan convincente que capta la atención.', cta1: 'Comenzar', cta2: 'Saber Más', cta1Url: '#', cta2Url: '#' }
   },
   'Características': { 
     preview: FeaturesPreview, 
@@ -407,7 +427,7 @@ const componentMap: { [key: string]: { preview: React.ComponentType<any>, edit: 
   'CTA': { 
     preview: CtaPreview, 
     edit: EditCtaForm,
-    defaultProps: { title: '¿Listo para Empezar?', subtitle: 'Comienza tu prueba gratuita hoy.', buttonText: 'Regístrate Ahora' }
+    defaultProps: { title: '¿Listo para Empezar?', subtitle: 'Comienza tu prueba gratuita hoy.', buttonText: 'Regístrate Ahora', buttonUrl: '#' }
   },
   'Testimonios': { 
     preview: TestimonialsPreview, 
