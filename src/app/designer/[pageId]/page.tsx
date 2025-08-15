@@ -14,6 +14,8 @@ import {
   Smartphone,
   Monitor,
   Trash2,
+  Star,
+  ChevronDown,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -84,10 +86,87 @@ const FeaturesPreview = () => (
   </div>
 );
 
+const CtaPreview = () => (
+    <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none">
+        <div className="text-center">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Ready to Dive In?</h2>
+            <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">Start your free trial today. No credit card required.</p>
+            <Button size="lg" className="mt-6 bg-primary hover:bg-primary/90">
+                Sign Up Now
+            </Button>
+        </div>
+    </div>
+);
+
+const TestimonialsPreview = () => (
+    <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none">
+        <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-8">What Our Customers Say</h2>
+        <div className="grid md:grid-cols-2 gap-8">
+            <div className="bg-primary/5 dark:bg-gray-700 p-6 rounded-lg">
+                <p className="text-gray-600 dark:text-gray-300 italic">"This product has changed my life. I can't imagine working without it anymore."</p>
+                <div className="flex items-center mt-4">
+                    <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-600 mr-4"></div>
+                    <div>
+                        <p className="font-semibold text-gray-900 dark:text-white">Jane Doe</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">CEO, Acme Inc.</p>
+                    </div>
+                </div>
+            </div>
+            <div className="bg-primary/5 dark:bg-gray-700 p-6 rounded-lg">
+                <p className="text-gray-600 dark:text-gray-300 italic">"A must-have for any serious professional. The support is also top-notch!"</p>
+                 <div className="flex items-center mt-4">
+                    <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-600 mr-4"></div>
+                    <div>
+                        <p className="font-semibold text-gray-900 dark:text-white">John Smith</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Lead Developer, Innovate Corp.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+);
+
+const FaqPreview = () => (
+    <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none">
+        <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-8">Frequently Asked Questions</h2>
+        <div className="space-y-4">
+            <div>
+                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">What is the refund policy?</h3>
+                <p className="text-gray-600 dark:text-gray-300 mt-1">We offer a 30-day money-back guarantee, no questions asked.</p>
+            </div>
+            <div>
+                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">Can I upgrade my plan later?</h3>
+                <p className="text-gray-600 dark:text-gray-300 mt-1">Yes, you can upgrade, downgrade, or cancel your plan at any time from your account dashboard.</p>
+            </div>
+            <div>
+                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">Is there a student discount?</h3>
+                <p className="text-gray-600 dark:text-gray-300 mt-1">We currently do not offer student discounts, but we have affordable plans for everyone.</p>
+            </div>
+        </div>
+    </div>
+);
+
+const FooterPreview = () => (
+    <div className="w-full bg-gray-900 text-white rounded-lg shadow-md p-8 pointer-events-none">
+        <div className="flex justify-between items-center">
+            <p>&copy; 2024 Your Company. All rights reserved.</p>
+            <div className="flex space-x-4">
+                <a href="#" className="hover:underline">Privacy Policy</a>
+                <a href="#" className="hover:underline">Terms of Service</a>
+            </div>
+        </div>
+    </div>
+);
+
+
 // Map component names to their actual components
 const componentMap: { [key: string]: React.ComponentType } = {
   'Hero Section': HeroPreview,
   'Features': FeaturesPreview,
+  'CTA': CtaPreview,
+  'Testimonials': TestimonialsPreview,
+  'FAQ': FaqPreview,
+  'Footer': FooterPreview,
 };
 
 const initialComponents = [
