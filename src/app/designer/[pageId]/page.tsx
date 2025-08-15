@@ -479,10 +479,15 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
 
   // Theme state
   const [theme, setTheme] = useState({
-    primaryColor: '#6B7280',
-    backgroundColor: '#F3F4F6',
+    primary: '#60A5FA',
+    secondary: '#93C5FD',
+    accent: '#FBBF24',
+    foreground: '#1F2937',
+    background1: '#F9FAFB',
+    background2: '#FFFFFF',
     fontFamily: 'Inter',
   });
+
 
   // Drag and drop state
   const dragItem = useRef<number | null>(null);
@@ -492,8 +497,12 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
     const style = document.createElement('style');
     style.innerHTML = `
       :root {
-        --primary-hsl: ${hexToHsl(theme.primaryColor, { asString: false }).h} ${hexToHsl(theme.primaryColor, { asString: false }).s}% ${hexToHsl(theme.primaryColor, { asString: false }).l}%;
-        --background-hsl: ${hexToHsl(theme.backgroundColor, { asString: false }).h} ${hexToHsl(theme.backgroundColor, { asString: false }).s}% ${hexToHsl(theme.backgroundColor, { asString: false }).l}%;
+        --primary-hsl: ${hexToHsl(theme.primary, { asString: false }).h} ${hexToHsl(theme.primary, { asString: false }).s}% ${hexToHsl(theme.primary, { asString: false }).l}%;
+        --secondary-hsl: ${hexToHsl(theme.secondary, { asString: false }).h} ${hexToHsl(theme.secondary, { asString: false }).s}% ${hexToHsl(theme.secondary, { asString: false }).l}%;
+        --accent-hsl: ${hexToHsl(theme.accent, { asString: false }).h} ${hexToHsl(theme.accent, { asString: false }).s}% ${hexToHsl(theme.accent, { asString: false }).l}%;
+        --foreground-hsl: ${hexToHsl(theme.foreground, { asString: false }).h} ${hexToHsl(theme.foreground, { asString: false }).s}% ${hexToHsl(theme.foreground, { asString: false }).l}%;
+        --background-hsl: ${hexToHsl(theme.background1, { asString: false }).h} ${hexToHsl(theme.background1, { asString: false }).s}% ${hexToHsl(theme.background1, { asString: false }).l}%;
+        --card-hsl: ${hexToHsl(theme.background2, { asString: false }).h} ${hexToHsl(theme.background2, { asString: false }).s}% ${hexToHsl(theme.background2, { asString: false }).l}%;
         --font-body: '${theme.fontFamily}', sans-serif;
       }
     `;
@@ -663,12 +672,28 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
               </AccordionTrigger>
               <AccordionContent className="p-4 pt-0 space-y-4">
                 <div className="space-y-2">
-                    <Label>Color Primario</Label>
-                    <Input type="color" value={theme.primaryColor} onChange={(e) => handleThemeChange('primaryColor', e.target.value)} />
+                    <Label>Primario</Label>
+                    <Input type="color" value={theme.primary} onChange={(e) => handleThemeChange('primary', e.target.value)} />
                 </div>
                  <div className="space-y-2">
-                    <Label>Color de Fondo</Label>
-                    <Input type="color" value={theme.backgroundColor} onChange={(e) => handleThemeChange('backgroundColor', e.target.value)} />
+                    <Label>Secundario</Label>
+                    <Input type="color" value={theme.secondary} onChange={(e) => handleThemeChange('secondary', e.target.value)} />
+                </div>
+                 <div className="space-y-2">
+                    <Label>Acentos</Label>
+                    <Input type="color" value={theme.accent} onChange={(e) => handleThemeChange('accent', e.target.value)} />
+                </div>
+                 <div className="space-y-2">
+                    <Label>Color de Texto</Label>
+                    <Input type="color" value={theme.foreground} onChange={(e) => handleThemeChange('foreground', e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                    <Label>Color de Fondo 1</Label>
+                    <Input type="color" value={theme.background1} onChange={(e) => handleThemeChange('background1', e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                    <Label>Color de Fondo 2</Label>
+                    <Input type="color" value={theme.background2} onChange={(e) => handleThemeChange('background2', e.target.value)} />
                 </div>
                 <div className="space-y-2">
                   <Label>Fuente</Label>

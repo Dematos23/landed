@@ -8,22 +8,24 @@ body {
 
 @layer base {
   :root {
-    --background: 231 48% 94%;
-    --foreground: 231 30% 20%;
-    --card: 0 0% 100%;
-    --card-foreground: 231 30% 20%;
+    --background: var(--background-hsl, 231 48% 94%);
+    --foreground: var(--foreground-hsl, 231 30% 20%);
+    --card: var(--card-hsl, 0 0% 100%);
+    --card-foreground: var(--foreground-hsl, 231 30% 20%);
     --popover: 0 0% 100%;
     --popover-foreground: 231 30% 20%;
     --primary: var(--primary-hsl, 231 48% 48%);
     --primary-foreground: 0 0% 100%;
-    --secondary: 231 30% 90%;
+    --secondary: var(--secondary-hsl, 231 30% 90%);
     --secondary-foreground: 231 30% 20%;
     --muted: 231 30% 90%;
     --muted-foreground: 231 30% 50%;
-    --accent: 255 100% 65%;
+    --accent: var(--accent-hsl, 255 100% 65%);
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 84.2% 60.2%;
+    --destructive: var(--destructive-hsl, 0 84.2% 60.2%);
     --destructive-foreground: 0 0% 98%;
+    --success: var(--success-hsl, 142 71% 45%);
+    --success-foreground: 0 0% 98%;
     --border: 231 20% 85%;
     --input: 231 20% 88%;
     --ring: var(--primary-hsl, 231 48% 48%);
@@ -43,22 +45,24 @@ body {
     --sidebar-ring: 231 48% 48%;
   }
   .dark {
-    --background: 231 22% 20%;
-    --foreground: 231 22% 88%;
-    --card: 231 22% 24%;
-    --card-foreground: 231 22% 88%;
+    --background: var(--background-hsl, 231 22% 20%);
+    --foreground: var(--foreground-hsl, 231 22% 88%);
+    --card: var(--card-hsl, 231 22% 24%);
+    --card-foreground: var(--foreground-hsl, 231 22% 88%);
     --popover: 231 22% 20%;
     --popover-foreground: 231 22% 88%;
     --primary: var(--primary-hsl, 231 48% 68%);
     --primary-foreground: 231 22% 10%;
-    --secondary: 231 22% 30%;
+    --secondary: var(--secondary-hsl, 231 22% 30%);
     --secondary-foreground: 231 22% 90%;
     --muted: 231 22% 30%;
     --muted-foreground: 231 22% 60%;
-    --accent: 255 100% 75%;
+    --accent: var(--accent-hsl, 255 100% 75%);
     --accent-foreground: 231 22% 10%;
-    --destructive: 0 62.8% 30.6%;
+    --destructive: var(--destructive-hsl, 0 62.8% 30.6%);
     --destructive-foreground: 0 0% 98%;
+    --success: var(--success-hsl, 142 71% 45%);
+    --success-foreground: 0 0% 98%;
     --border: 231 22% 30%;
     --input: 231 22% 30%;
     --ring: var(--primary-hsl, 231 48% 68%);
