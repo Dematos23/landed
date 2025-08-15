@@ -48,6 +48,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from '@/lib/utils';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 type ComponentData = {
   id: number;
@@ -68,102 +69,77 @@ const HeroPreview = ({ headline, subheadline, cta1, cta2 }: { headline: string, 
   </div>
 );
 
-const FeaturesPreview = () => (
+const FeaturesPreview = ({ title, features }: { title: string, features: { title: string, description: string }[] }) => (
   <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none">
-     <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-8">Características</h2>
+     <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-8">{title}</h2>
      <div className="grid md:grid-cols-3 gap-8">
-        <div className="text-center">
-            <div className="flex items-center justify-center h-12 w-12 rounded-md bg-primary/10 text-primary mx-auto mb-4">
-                <Layers className="h-6 w-6"/>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Característica Uno</h3>
-            <p className="text-gray-600 dark:text-gray-300">Describe brevemente una característica clave y su beneficio.</p>
-        </div>
-         <div className="text-center">
-            <div className="flex items-center justify-center h-12 w-12 rounded-md bg-primary/10 text-primary mx-auto mb-4">
-                <Settings className="h-6 w-6"/>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Característica Dos</h3>
-            <p className="text-gray-600 dark:text-gray-300">Describe brevemente una característica clave y su beneficio.</p>
-        </div>
-         <div className="text-center">
-            <div className="flex items-center justify-center h-12 w-12 rounded-md bg-primary/10 text-primary mx-auto mb-4">
-                <Eye className="h-6 w-6"/>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Característica Tres</h3>
-            <p className="text-gray-600 dark:text-gray-300">Describe brevemente una característica clave y su beneficio.</p>
-        </div>
+        {features.map((feature, index) => (
+          <div key={index} className="text-center">
+              <div className="flex items-center justify-center h-12 w-12 rounded-md bg-primary/10 text-primary mx-auto mb-4">
+                  <Layers className="h-6 w-6"/>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{feature.title}</h3>
+              <p className="text-gray-600 dark:text-gray-300">{feature.description}</p>
+          </div>
+        ))}
      </div>
   </div>
 );
 
-const CtaPreview = () => (
+const CtaPreview = ({ title, subtitle, buttonText }: { title: string, subtitle: string, buttonText: string }) => (
     <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none">
         <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">¿Listo para Empezar?</h2>
-            <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">Comienza tu prueba gratuita hoy. No se requiere tarjeta de crédito.</p>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{title}</h2>
+            <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">{subtitle}</p>
             <Button size="lg" className="mt-6 bg-primary hover:bg-primary/90">
-                Regístrate Ahora
+                {buttonText}
             </Button>
         </div>
     </div>
 );
 
-const TestimonialsPreview = () => (
+const TestimonialsPreview = ({ title, testimonials }: { title: string, testimonials: { quote: string, name: string, company: string }[] }) => (
     <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none">
-        <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-8">Lo que Dicen Nuestros Clientes</h2>
+        <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-8">{title}</h2>
         <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-primary/5 dark:bg-gray-700 p-6 rounded-lg">
-                <p className="text-gray-600 dark:text-gray-300 italic">"Este producto ha cambiado mi vida. Ya no me imagino trabajando sin él."</p>
-                <div className="flex items-center mt-4">
-                    <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-600 mr-4"></div>
-                    <div>
-                        <p className="font-semibold text-gray-900 dark:text-white">Juana Pérez</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">CEO, Acme Inc.</p>
+            {testimonials.map((testimonial, index) => (
+                <div key={index} className="bg-primary/5 dark:bg-gray-700 p-6 rounded-lg">
+                    <p className="text-gray-600 dark:text-gray-300 italic">"{testimonial.quote}"</p>
+                    <div className="flex items-center mt-4">
+                        <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-600 mr-4"></div>
+                        <div>
+                            <p className="font-semibold text-gray-900 dark:text-white">{testimonial.name}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{testimonial.company}</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div className="bg-primary/5 dark:bg-gray-700 p-6 rounded-lg">
-                <p className="text-gray-600 dark:text-gray-300 italic">"Imprescindible para cualquier profesional serio. ¡El soporte también es de primera!"</p>
-                 <div className="flex items-center mt-4">
-                    <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-600 mr-4"></div>
-                    <div>
-                        <p className="font-semibold text-gray-900 dark:text-white">Juan García</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Desarrollador Principal, Innovate Corp.</p>
-                    </div>
-                </div>
-            </div>
+            ))}
         </div>
     </div>
 );
 
-const FaqPreview = () => (
+const FaqPreview = ({ title, faqs }: { title: string, faqs: { question: string, answer: string }[] }) => (
     <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none">
-        <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-8">Preguntas Frecuentes</h2>
+        <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-8">{title}</h2>
         <div className="space-y-4">
-            <div>
-                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">¿Cuál es la política de reembolso?</h3>
-                <p className="text-gray-600 dark:text-gray-300 mt-1">Ofrecemos una garantía de devolución de dinero de 30 días, sin hacer preguntas.</p>
-            </div>
-            <div>
-                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">¿Puedo cambiar mi plan más tarde?</h3>
-                <p className="text-gray-600 dark:text-gray-300 mt-1">Sí, puedes mejorar, degradar o cancelar tu plan en cualquier momento desde tu panel de control.</p>
-            </div>
-            <div>
-                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">¿Hay descuento para estudiantes?</h3>
-                <p className="text-gray-600 dark:text-gray-300 mt-1">Actualmente no ofrecemos descuentos para estudiantes, pero tenemos planes asequibles para todos.</p>
-            </div>
+            {faqs.map((faq, index) => (
+                <div key={index}>
+                    <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{faq.question}</h3>
+                    <p className="text-gray-600 dark:text-gray-300 mt-1">{faq.answer}</p>
+                </div>
+            ))}
         </div>
     </div>
 );
 
-const FooterPreview = () => (
+const FooterPreview = ({ copyright, links }: { copyright: string, links: { text: string, url: string }[] }) => (
     <div className="w-full bg-gray-900 text-white rounded-lg shadow-md p-8 pointer-events-none">
         <div className="flex justify-between items-center">
-            <p>&copy; 2024 Tu Compañía. Todos los derechos reservados.</p>
+            <p>{copyright}</p>
             <div className="flex space-x-4">
-                <a href="#" className="hover:underline">Política de Privacidad</a>
-                <a href="#" className="hover:underline">Términos de Servicio</a>
+                {links.map((link, index) => (
+                  <a key={index} href={link.url} className="hover:underline">{link.text}</a>
+                ))}
             </div>
         </div>
     </div>
@@ -204,19 +180,273 @@ const EditHeroForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData:
     );
 };
 
+const EditFeaturesForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData: any) => void, onCancel: () => void }) => {
+    const [formData, setFormData] = useState(data.props);
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSave(formData);
+    };
+    const handleFeatureChange = (index: number, field: string, value: string) => {
+        const newFeatures = [...formData.features];
+        newFeatures[index] = { ...newFeatures[index], [field]: value };
+        setFormData({ ...formData, features: newFeatures });
+    };
+    return (
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 space-y-4">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">Editar Sección de Características</h3>
+            <div>
+                <Label htmlFor="main-title">Título Principal</Label>
+                <Input id="main-title" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
+            </div>
+            <Accordion type="single" collapsible className="w-full">
+              {formData.features.map((feature: any, index: number) => (
+                  <AccordionItem value={`item-${index}`} key={index}>
+                      <AccordionTrigger>Característica {index + 1}</AccordionTrigger>
+                      <AccordionContent className="space-y-2">
+                          <div>
+                              <Label htmlFor={`feature-title-${index}`}>Título</Label>
+                              <Input id={`feature-title-${index}`} value={feature.title} onChange={(e) => handleFeatureChange(index, 'title', e.target.value)} />
+                          </div>
+                          <div>
+                              <Label htmlFor={`feature-desc-${index}`}>Descripción</Label>
+                              <Textarea id={`feature-desc-${index}`} value={feature.description} onChange={(e) => handleFeatureChange(index, 'description', e.target.value)} />
+                          </div>
+                      </AccordionContent>
+                  </AccordionItem>
+              ))}
+            </Accordion>
+            <div className="flex justify-end gap-2">
+                <Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
+                <Button type="submit">Guardar</Button>
+            </div>
+        </form>
+    );
+};
 
-const componentMap: { [key: string]: { preview: React.ComponentType<any>, edit: React.ComponentType<any> } } = {
-  'Sección de Héroe': { preview: HeroPreview, edit: EditHeroForm },
-  'Características': { preview: FeaturesPreview, edit: () => <div>Editar Características</div> },
-  'CTA': { preview: CtaPreview, edit: () => <div>Editar CTA</div> },
-  'Testimonios': { preview: TestimonialsPreview, edit: () => <div>Editar Testimonios</div> },
-  'Preguntas Frecuentes': { preview: FaqPreview, edit: () => <div>Editar Preguntas Frecuentes</div> },
-  'Pie de página': { preview: FooterPreview, edit: () => <div>Editar Pie de Página</div> },
+const EditCtaForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData: any) => void, onCancel: () => void }) => {
+    const [formData, setFormData] = useState(data.props);
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSave(formData);
+    };
+    return (
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 space-y-4">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">Editar Sección de CTA</h3>
+            <div>
+                <Label htmlFor="cta-title">Título</Label>
+                <Input id="cta-title" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
+            </div>
+            <div>
+                <Label htmlFor="cta-subtitle">Subtítulo</Label>
+                <Input id="cta-subtitle" value={formData.subtitle} onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })} />
+            </div>
+            <div>
+                <Label htmlFor="cta-button">Texto del Botón</Label>
+                <Input id="cta-button" value={formData.buttonText} onChange={(e) => setFormData({ ...formData, buttonText: e.target.value })} />
+            </div>
+            <div className="flex justify-end gap-2">
+                <Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
+                <Button type="submit">Guardar</Button>
+            </div>
+        </form>
+    );
+};
+
+const EditTestimonialsForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData: any) => void, onCancel: () => void }) => {
+    const [formData, setFormData] = useState(data.props);
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSave(formData);
+    };
+    const handleTestimonialChange = (index: number, field: string, value: string) => {
+        const newTestimonials = [...formData.testimonials];
+        newTestimonials[index] = { ...newTestimonials[index], [field]: value };
+        setFormData({ ...formData, testimonials: newTestimonials });
+    };
+    return (
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 space-y-4">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">Editar Sección de Testimonios</h3>
+            <div>
+                <Label htmlFor="main-title">Título Principal</Label>
+                <Input id="main-title" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
+            </div>
+             <Accordion type="single" collapsible className="w-full">
+              {formData.testimonials.map((testimonial: any, index: number) => (
+                  <AccordionItem value={`item-${index}`} key={index}>
+                      <AccordionTrigger>Testimonio {index + 1}</AccordionTrigger>
+                      <AccordionContent className="space-y-2">
+                          <div>
+                              <Label htmlFor={`testimonial-quote-${index}`}>Cita</Label>
+                              <Textarea id={`testimonial-quote-${index}`} value={testimonial.quote} onChange={(e) => handleTestimonialChange(index, 'quote', e.target.value)} />
+                          </div>
+                          <div>
+                              <Label htmlFor={`testimonial-name-${index}`}>Nombre</Label>
+                              <Input id={`testimonial-name-${index}`} value={testimonial.name} onChange={(e) => handleTestimonialChange(index, 'name', e.target.value)} />
+                          </div>
+                          <div>
+                              <Label htmlFor={`testimonial-company-${index}`}>Compañía</Label>
+                              <Input id={`testimonial-company-${index}`} value={testimonial.company} onChange={(e) => handleTestimonialChange(index, 'company', e.target.value)} />
+                          </div>
+                      </AccordionContent>
+                  </AccordionItem>
+              ))}
+            </Accordion>
+            <div className="flex justify-end gap-2">
+                <Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
+                <Button type="submit">Guardar</Button>
+            </div>
+        </form>
+    );
+};
+
+const EditFaqForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData: any) => void, onCancel: () => void }) => {
+    const [formData, setFormData] = useState(data.props);
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSave(formData);
+    };
+    const handleFaqChange = (index: number, field: string, value: string) => {
+        const newFaqs = [...formData.faqs];
+        newFaqs[index] = { ...newFaqs[index], [field]: value };
+        setFormData({ ...formData, faqs: newFaqs });
+    };
+    return (
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 space-y-4">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">Editar Sección de FAQ</h3>
+            <div>
+                <Label htmlFor="main-title">Título Principal</Label>
+                <Input id="main-title" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
+            </div>
+             <Accordion type="single" collapsible className="w-full">
+              {formData.faqs.map((faq: any, index: number) => (
+                  <AccordionItem value={`item-${index}`} key={index}>
+                      <AccordionTrigger>Pregunta {index + 1}</AccordionTrigger>
+                      <AccordionContent className="space-y-2">
+                          <div>
+                              <Label htmlFor={`faq-question-${index}`}>Pregunta</Label>
+                              <Input id={`faq-question-${index}`} value={faq.question} onChange={(e) => handleFaqChange(index, 'question', e.target.value)} />
+                          </div>
+                          <div>
+                              <Label htmlFor={`faq-answer-${index}`}>Respuesta</Label>
+                              <Textarea id={`faq-answer-${index}`} value={faq.answer} onChange={(e) => handleFaqChange(index, 'answer', e.target.value)} />
+                          </div>
+                      </AccordionContent>
+                  </AccordionItem>
+              ))}
+            </Accordion>
+            <div className="flex justify-end gap-2">
+                <Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
+                <Button type="submit">Guardar</Button>
+            </div>
+        </form>
+    );
+};
+
+const EditFooterForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData: any) => void, onCancel: () => void }) => {
+    const [formData, setFormData] = useState(data.props);
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSave(formData);
+    };
+    const handleLinkChange = (index: number, field: string, value: string) => {
+        const newLinks = [...formData.links];
+        newLinks[index] = { ...newLinks[index], [field]: value };
+        setFormData({ ...formData, links: newLinks });
+    };
+    return (
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 space-y-4">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">Editar Pie de Página</h3>
+            <div>
+                <Label htmlFor="copyright">Texto de Copyright</Label>
+                <Input id="copyright" value={formData.copyright} onChange={(e) => setFormData({ ...formData, copyright: e.target.value })} />
+            </div>
+             <Accordion type="single" collapsible className="w-full">
+              {formData.links.map((link: any, index: number) => (
+                  <AccordionItem value={`item-${index}`} key={index}>
+                      <AccordionTrigger>Enlace {index + 1}</AccordionTrigger>
+                      <AccordionContent className="space-y-2">
+                           <div>
+                              <Label htmlFor={`link-text-${index}`}>Texto</Label>
+                              <Input id={`link-text-${index}`} value={link.text} onChange={(e) => handleLinkChange(index, 'text', e.target.value)} />
+                          </div>
+                           <div>
+                              <Label htmlFor={`link-url-${index}`}>URL</Label>
+                              <Input id={`link-url-${index}`} value={link.url} onChange={(e) => handleLinkChange(index, 'url', e.target.value)} />
+                          </div>
+                      </AccordionContent>
+                  </AccordionItem>
+              ))}
+            </Accordion>
+            <div className="flex justify-end gap-2">
+                <Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
+                <Button type="submit">Guardar</Button>
+            </div>
+        </form>
+    );
+};
+
+
+const componentMap: { [key: string]: { preview: React.ComponentType<any>, edit: React.ComponentType<any>, defaultProps: any } } = {
+  'Sección de Héroe': { 
+    preview: HeroPreview, 
+    edit: EditHeroForm,
+    defaultProps: { headline: 'Tu Producto Increíble', subheadline: 'Un eslogan convincente que capta la atención.', cta1: 'Comenzar', cta2: 'Saber Más' }
+  },
+  'Características': { 
+    preview: FeaturesPreview, 
+    edit: EditFeaturesForm,
+    defaultProps: {
+        title: "Características",
+        features: [
+            { title: 'Característica Uno', description: 'Describe brevemente una característica clave.' },
+            { title: 'Característica Dos', description: 'Describe brevemente una característica clave.' },
+            { title: 'Característica Tres', description: 'Describe brevemente una característica clave.' },
+        ]
+    }
+  },
+  'CTA': { 
+    preview: CtaPreview, 
+    edit: EditCtaForm,
+    defaultProps: { title: '¿Listo para Empezar?', subtitle: 'Comienza tu prueba gratuita hoy.', buttonText: 'Regístrate Ahora' }
+  },
+  'Testimonios': { 
+    preview: TestimonialsPreview, 
+    edit: EditTestimonialsForm,
+    defaultProps: {
+        title: "Lo que Dicen Nuestros Clientes",
+        testimonials: [
+            { quote: "Este producto ha cambiado mi vida.", name: "Juana Pérez", company: "CEO, Acme Inc." },
+            { quote: "Imprescindible para cualquier profesional.", name: "Juan García", company: "Desarrollador, Innovate Corp." },
+        ]
+    }
+  },
+  'Preguntas Frecuentes': { 
+    preview: FaqPreview, 
+    edit: EditFaqForm,
+    defaultProps: {
+        title: "Preguntas Frecuentes",
+        faqs: [
+            { question: '¿Cuál es la política de reembolso?', answer: 'Ofrecemos una garantía de 30 días.' },
+            { question: '¿Puedo cambiar mi plan?', answer: 'Sí, puedes cambiar de plan en cualquier momento.' },
+        ]
+    }
+  },
+  'Pie de página': { 
+    preview: FooterPreview, 
+    edit: EditFooterForm,
+    defaultProps: {
+        copyright: `© ${new Date().getFullYear()} Tu Compañía.`,
+        links: [
+            { text: 'Política de Privacidad', url: '#' },
+            { text: 'Términos de Servicio', url: '#' },
+        ]
+    }
+  },
 };
 
 const initialComponents: ComponentData[] = [
-    { id: 1, name: 'Sección de Héroe', props: { headline: 'Tu Producto Increíble', subheadline: 'Un eslogan convincente que capta la atención y explica el beneficio principal.', cta1: 'Comenzar', cta2: 'Saber Más' } },
-    { id: 2, name: 'Características', props: {} },
+    { id: 1, name: 'Sección de Héroe', props: componentMap['Sección de Héroe'].defaultProps },
+    { id: 2, name: 'Características', props: componentMap['Características'].defaultProps },
 ];
 
 export default function DesignerPage({ params }: { params: { pageId: string } }) {
@@ -229,14 +459,10 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
   const dragOverItem = useRef<number | null>(null);
 
   const addComponent = (componentName: string) => {
-    let defaultProps = {};
-    if (componentName === 'Sección de Héroe') {
-        defaultProps = { headline: 'Nuevo Titular', subheadline: 'Nuevo Subtítulo', cta1: 'Botón 1', cta2: 'Botón 2' };
-    }
     const newComponent = {
       id: Date.now(),
       name: componentName,
-      props: defaultProps
+      props: componentMap[componentName].defaultProps
     };
     setComponents(prev => [...prev, newComponent]);
   };
