@@ -70,28 +70,28 @@ const HeroPreview = ({ headline, subheadline, cta1, cta2 }: { headline: string, 
 
 const FeaturesPreview = () => (
   <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none">
-     <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-8">Features</h2>
+     <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-8">Características</h2>
      <div className="grid md:grid-cols-3 gap-8">
         <div className="text-center">
             <div className="flex items-center justify-center h-12 w-12 rounded-md bg-primary/10 text-primary mx-auto mb-4">
                 <Layers className="h-6 w-6"/>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Feature One</h3>
-            <p className="text-gray-600 dark:text-gray-300">Briefly describe a key feature and its benefit.</p>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Característica Uno</h3>
+            <p className="text-gray-600 dark:text-gray-300">Describe brevemente una característica clave y su beneficio.</p>
         </div>
          <div className="text-center">
             <div className="flex items-center justify-center h-12 w-12 rounded-md bg-primary/10 text-primary mx-auto mb-4">
                 <Settings className="h-6 w-6"/>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Feature Two</h3>
-            <p className="text-gray-600 dark:text-gray-300">Briefly describe a key feature and its benefit.</p>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Característica Dos</h3>
+            <p className="text-gray-600 dark:text-gray-300">Describe brevemente una característica clave y su beneficio.</p>
         </div>
          <div className="text-center">
             <div className="flex items-center justify-center h-12 w-12 rounded-md bg-primary/10 text-primary mx-auto mb-4">
                 <Eye className="h-6 w-6"/>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Feature Three</h3>
-            <p className="text-gray-600 dark:text-gray-300">Briefly describe a key feature and its benefit.</p>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Característica Tres</h3>
+            <p className="text-gray-600 dark:text-gray-300">Describe brevemente una característica clave y su beneficio.</p>
         </div>
      </div>
   </div>
@@ -100,10 +100,10 @@ const FeaturesPreview = () => (
 const CtaPreview = () => (
     <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none">
         <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Ready to Dive In?</h2>
-            <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">Start your free trial today. No credit card required.</p>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">¿Listo para Empezar?</h2>
+            <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">Comienza tu prueba gratuita hoy. No se requiere tarjeta de crédito.</p>
             <Button size="lg" className="mt-6 bg-primary hover:bg-primary/90">
-                Sign Up Now
+                Regístrate Ahora
             </Button>
         </div>
     </div>
@@ -111,25 +111,25 @@ const CtaPreview = () => (
 
 const TestimonialsPreview = () => (
     <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none">
-        <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-8">What Our Customers Say</h2>
+        <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-8">Lo que Dicen Nuestros Clientes</h2>
         <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-primary/5 dark:bg-gray-700 p-6 rounded-lg">
-                <p className="text-gray-600 dark:text-gray-300 italic">"This product has changed my life. I can't imagine working without it anymore."</p>
+                <p className="text-gray-600 dark:text-gray-300 italic">"Este producto ha cambiado mi vida. Ya no me imagino trabajando sin él."</p>
                 <div className="flex items-center mt-4">
                     <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-600 mr-4"></div>
                     <div>
-                        <p className="font-semibold text-gray-900 dark:text-white">Jane Doe</p>
+                        <p className="font-semibold text-gray-900 dark:text-white">Juana Pérez</p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">CEO, Acme Inc.</p>
                     </div>
                 </div>
             </div>
             <div className="bg-primary/5 dark:bg-gray-700 p-6 rounded-lg">
-                <p className="text-gray-600 dark:text-gray-300 italic">"A must-have for any serious professional. The support is also top-notch!"</p>
+                <p className="text-gray-600 dark:text-gray-300 italic">"Imprescindible para cualquier profesional serio. ¡El soporte también es de primera!"</p>
                  <div className="flex items-center mt-4">
                     <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-600 mr-4"></div>
                     <div>
-                        <p className="font-semibold text-gray-900 dark:text-white">John Smith</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Lead Developer, Innovate Corp.</p>
+                        <p className="font-semibold text-gray-900 dark:text-white">Juan García</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Desarrollador Principal, Innovate Corp.</p>
                     </div>
                 </div>
             </div>
@@ -139,19 +139,19 @@ const TestimonialsPreview = () => (
 
 const FaqPreview = () => (
     <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none">
-        <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-8">Frequently Asked Questions</h2>
+        <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-8">Preguntas Frecuentes</h2>
         <div className="space-y-4">
             <div>
-                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">What is the refund policy?</h3>
-                <p className="text-gray-600 dark:text-gray-300 mt-1">We offer a 30-day money-back guarantee, no questions asked.</p>
+                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">¿Cuál es la política de reembolso?</h3>
+                <p className="text-gray-600 dark:text-gray-300 mt-1">Ofrecemos una garantía de devolución de dinero de 30 días, sin hacer preguntas.</p>
             </div>
             <div>
-                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">Can I upgrade my plan later?</h3>
-                <p className="text-gray-600 dark:text-gray-300 mt-1">Yes, you can upgrade, downgrade, or cancel your plan at any time from your account dashboard.</p>
+                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">¿Puedo cambiar mi plan más tarde?</h3>
+                <p className="text-gray-600 dark:text-gray-300 mt-1">Sí, puedes mejorar, degradar o cancelar tu plan en cualquier momento desde tu panel de control.</p>
             </div>
             <div>
-                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">Is there a student discount?</h3>
-                <p className="text-gray-600 dark:text-gray-300 mt-1">We currently do not offer student discounts, but we have affordable plans for everyone.</p>
+                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">¿Hay descuento para estudiantes?</h3>
+                <p className="text-gray-600 dark:text-gray-300 mt-1">Actualmente no ofrecemos descuentos para estudiantes, pero tenemos planes asequibles para todos.</p>
             </div>
         </div>
     </div>
@@ -160,10 +160,10 @@ const FaqPreview = () => (
 const FooterPreview = () => (
     <div className="w-full bg-gray-900 text-white rounded-lg shadow-md p-8 pointer-events-none">
         <div className="flex justify-between items-center">
-            <p>&copy; 2024 Your Company. All rights reserved.</p>
+            <p>&copy; 2024 Tu Compañía. Todos los derechos reservados.</p>
             <div className="flex space-x-4">
-                <a href="#" className="hover:underline">Privacy Policy</a>
-                <a href="#" className="hover:underline">Terms of Service</a>
+                <a href="#" className="hover:underline">Política de Privacidad</a>
+                <a href="#" className="hover:underline">Términos de Servicio</a>
             </div>
         </div>
     </div>
@@ -179,26 +179,26 @@ const EditHeroForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData:
     };
     return (
         <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 space-y-4">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white">Edit Hero Section</h3>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">Editar Sección de Héroe</h3>
             <div>
-                <Label htmlFor="headline">Headline</Label>
+                <Label htmlFor="headline">Titular</Label>
                 <Input id="headline" value={formData.headline} onChange={(e) => setFormData({ ...formData, headline: e.target.value })} />
             </div>
             <div>
-                <Label htmlFor="subheadline">Subheadline</Label>
+                <Label htmlFor="subheadline">Subtítulo</Label>
                 <Textarea id="subheadline" value={formData.subheadline} onChange={(e) => setFormData({ ...formData, subheadline: e.target.value })} />
             </div>
             <div>
-                <Label htmlFor="cta1">Button 1 Text</Label>
+                <Label htmlFor="cta1">Texto del Botón 1</Label>
                 <Input id="cta1" value={formData.cta1} onChange={(e) => setFormData({ ...formData, cta1: e.target.value })} />
             </div>
             <div>
-                <Label htmlFor="cta2">Button 2 Text</Label>
+                <Label htmlFor="cta2">Texto del Botón 2</Label>
                 <Input id="cta2" value={formData.cta2} onChange={(e) => setFormData({ ...formData, cta2: e.target.value })} />
             </div>
             <div className="flex justify-end gap-2">
-                <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
-                <Button type="submit">Save</Button>
+                <Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
+                <Button type="submit">Guardar</Button>
             </div>
         </form>
     );
@@ -206,17 +206,17 @@ const EditHeroForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData:
 
 
 const componentMap: { [key: string]: { preview: React.ComponentType<any>, edit: React.ComponentType<any> } } = {
-  'Hero Section': { preview: HeroPreview, edit: EditHeroForm },
-  'Features': { preview: FeaturesPreview, edit: () => <div>Edit Features</div> },
-  'CTA': { preview: CtaPreview, edit: () => <div>Edit CTA</div> },
-  'Testimonials': { preview: TestimonialsPreview, edit: () => <div>Edit Testimonials</div> },
-  'FAQ': { preview: FaqPreview, edit: () => <div>Edit FAQ</div> },
-  'Footer': { preview: FooterPreview, edit: () => <div>Edit Footer</div> },
+  'Sección de Héroe': { preview: HeroPreview, edit: EditHeroForm },
+  'Características': { preview: FeaturesPreview, edit: () => <div>Editar Características</div> },
+  'CTA': { preview: CtaPreview, edit: () => <div>Editar CTA</div> },
+  'Testimonios': { preview: TestimonialsPreview, edit: () => <div>Editar Testimonios</div> },
+  'Preguntas Frecuentes': { preview: FaqPreview, edit: () => <div>Editar Preguntas Frecuentes</div> },
+  'Pie de página': { preview: FooterPreview, edit: () => <div>Editar Pie de Página</div> },
 };
 
 const initialComponents: ComponentData[] = [
-    { id: 1, name: 'Hero Section', props: { headline: 'Your Amazing Product', subheadline: 'A compelling tagline that captures attention and explains the core benefit.', cta1: 'Get Started', cta2: 'Learn More' } },
-    { id: 2, name: 'Features', props: {} },
+    { id: 1, name: 'Sección de Héroe', props: { headline: 'Tu Producto Increíble', subheadline: 'Un eslogan convincente que capta la atención y explica el beneficio principal.', cta1: 'Comenzar', cta2: 'Saber Más' } },
+    { id: 2, name: 'Características', props: {} },
 ];
 
 export default function DesignerPage({ params }: { params: { pageId: string } }) {
@@ -230,8 +230,8 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
 
   const addComponent = (componentName: string) => {
     let defaultProps = {};
-    if (componentName === 'Hero Section') {
-        defaultProps = { headline: 'New Headline', subheadline: 'New Subheadline', cta1: 'Button 1', cta2: 'Button 2' };
+    if (componentName === 'Sección de Héroe') {
+        defaultProps = { headline: 'Nuevo Titular', subheadline: 'Nuevo Subtítulo', cta1: 'Botón 1', cta2: 'Botón 2' };
     }
     const newComponent = {
       id: Date.now(),
@@ -307,7 +307,7 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
           </Link>
         </Button>
         <h1 className="flex-1 text-lg font-semibold truncate">
-          {isNew ? "New Landing Page" : "Editing: Acme Inc. Launch"}
+          {isNew ? "Nueva Página de Aterrizaje" : "Editando: Lanzamiento Acme Inc."}
         </h1>
         <div className="hidden md:flex items-center gap-2">
             <TooltipProvider>
@@ -315,33 +315,33 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
                     <TooltipTrigger asChild>
                         <Button variant="ghost" size="icon"><Monitor className="h-4 w-4" /></Button>
                     </TooltipTrigger>
-                    <TooltipContent><p>Desktop</p></TooltipContent>
+                    <TooltipContent><p>Escritorio</p></TooltipContent>
                 </Tooltip>
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <Button variant="ghost" size="icon"><Tablet className="h-4 w-4" /></Button>
                     </TooltipTrigger>
-                    <TooltipContent><p>Tablet</p></TooltipContent>
+                    <TooltipContent><p>Tableta</p></TooltipContent>
                 </Tooltip>
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <Button variant="ghost" size="icon"><Smartphone className="h-4 w-4" /></Button>
                     </TooltipTrigger>
-                    <TooltipContent><p>Mobile</p></TooltipContent>
+                    <TooltipContent><p>Móvil</p></TooltipContent>
                 </Tooltip>
             </TooltipProvider>
         </div>
         <Separator orientation="vertical" className="h-8 hidden md:block" />
         <div className="flex items-center gap-2">
-          <Button variant="outline">Save Draft</Button>
-          <Button>Publish</Button>
+          <Button variant="outline">Guardar Borrador</Button>
+          <Button>Publicar</Button>
         </div>
       </header>
       <div className="flex flex-1 overflow-hidden">
         <aside className="w-72 border-r bg-card hidden md:flex flex-col">
           <Card className="border-none rounded-none">
             <CardHeader>
-              <CardTitle>Components</CardTitle>
+              <CardTitle>Componentes</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-2">
               {Object.keys(componentMap).map(
@@ -428,8 +428,8 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
                 </div>
             )}
             <div className="flex justify-center">
-              <Button variant="outline" className="rounded-full" onClick={() => addComponent('Features')}>
-                <Plus className="mr-2 h-4 w-4" /> Add Section
+              <Button variant="outline" className="rounded-full" onClick={() => addComponent('Características')}>
+                <Plus className="mr-2 h-4 w-4" /> Agregar Sección
               </Button>
             </div>
           </div>
