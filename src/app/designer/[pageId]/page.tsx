@@ -497,15 +497,25 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
 
   useEffect(() => {
     const style = document.createElement('style');
+    const hsl = {
+        primary: hexToHsl(theme.primary),
+        secondary: hexToHsl(theme.secondary),
+        accent: hexToHsl(theme.accent),
+        foreground: hexToHsl(theme.foreground),
+        mutedForeground: hexToHsl(theme.mutedForeground),
+        background: hexToHsl(theme.background1),
+        card: hexToHsl(theme.background2),
+    };
+
     style.innerHTML = `
       :root {
-        --primary-hsl: ${hexToHsl(theme.primary, { asString: false }).h} ${hexToHsl(theme.primary, { asString: false }).s}% ${hexToHsl(theme.primary, { asString: false }).l}%;
-        --secondary-hsl: ${hexToHsl(theme.secondary, { asString: false }).h} ${hexToHsl(theme.secondary, { asString: false }).s}% ${hexToHsl(theme.secondary, { asString: false }).l}%;
-        --accent-hsl: ${hexToHsl(theme.accent, { asString: false }).h} ${hexToHsl(theme.accent, { asString: false }).s}% ${hexToHsl(theme.accent, { asString: false }).l}%;
-        --foreground-hsl: ${hexToHsl(theme.foreground, { asString: false }).h} ${hexToHsl(theme.foreground, { asString: false }).s}% ${hexToHsl(theme.foreground, { asString: false }).l}%;
-        --muted-foreground-hsl: ${hexToHsl(theme.mutedForeground, { asString: false }).h} ${hexToHsl(theme.mutedForeground, { asString: false }).s}% ${hexToHsl(theme.mutedForeground, { asString: false }).l}%;
-        --background-hsl: ${hexToHsl(theme.background1, { asString: false }).h} ${hexToHsl(theme.background1, { asString: false }).s}% ${hexToHsl(theme.background1, { asString: false }).l}%;
-        --card-hsl: ${hexToHsl(theme.background2, { asString: false }).h} ${hexToHsl(theme.background2, { asString: false }).s}% ${hexToHsl(theme.background2, { asString: false }).l}%;
+        --primary-hsl: ${hsl.primary.h} ${hsl.primary.s}% ${hsl.primary.l}%;
+        --secondary-hsl: ${hsl.secondary.h} ${hsl.secondary.s}% ${hsl.secondary.l}%;
+        --accent-hsl: ${hsl.accent.h} ${hsl.accent.s}% ${hsl.accent.l}%;
+        --foreground-hsl: ${hsl.foreground.h} ${hsl.foreground.s}% ${hsl.foreground.l}%;
+        --muted-foreground-hsl: ${hsl.mutedForeground.h} ${hsl.mutedForeground.s}% ${hsl.mutedForeground.l}%;
+        --background-hsl: ${hsl.background.h} ${hsl.background.s}% ${hsl.background.l}%;
+        --card-hsl: ${hsl.card.h} ${hsl.card.s}% ${hsl.card.l}%;
         --font-body: '${theme.fontFamily}', sans-serif;
       }
     `;
@@ -519,16 +529,16 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
     setTheme(prev => ({ ...prev, [key]: value }));
   };
 
-  function hexToHsl(H: string, { asString = true } = {}) {
+  function hexToHsl(H: string) {
     let r = 0, g = 0, b = 0;
     if (H.length == 4) {
-      r = +("0x" + H[1] + H[1]);
-      g = +("0x" + H[2] + H[2]);
-      b = +("0x" + H[3] + H[3]);
+      r = parseInt("0x" + H[1] + H[1]);
+      g = parseInt("0x" + H[2] + H[2]);
+      b = parseInt("0x" + H[3] + H[3]);
     } else if (H.length == 7) {
-      r = +("0x" + H[1] + H[2]);
-      g = +("0x" + H[3] + H[4]);
-      b = +("0x" + H[5] + H[6]);
+      r = parseInt("0x" + H[1] + H[2]);
+      g = parseInt("0x" + H[3] + H[4]);
+      b = parseInt("0x" + H[5] + H[6]);
     }
     r /= 255;
     g /= 255;
@@ -553,7 +563,6 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
     s = +(s * 100).toFixed(1);
     l = +(l * 100).toFixed(1);
   
-    if (asString) return "hsl(" + h + "," + s + "%," + l + "%)";
     return { h, s, l };
   }
 
@@ -687,11 +696,11 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
                     <Input type="color" value={theme.accent} onChange={(e) => handleThemeChange('accent', e.target.value)} />
                 </div>
                  <div className="space-y-2">
-                    <Label>Color de Texto</Label>
+                    <Label>Color de Títulos</Label>
                     <Input type="color" value={theme.foreground} onChange={(e) => handleThemeChange('foreground', e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                    <Label>Color de Texto Secundario</Label>
+                    <Label>Color de Texto</Label>
                     <Input type="color" value={theme.mutedForeground} onChange={(e) => handleThemeChange('mutedForeground', e.target.value)} />
                 </div>
                 <div className="space-y-2">
