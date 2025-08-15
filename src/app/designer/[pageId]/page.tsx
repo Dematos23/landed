@@ -50,6 +50,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { cn } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SidebarProvider, Sidebar, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
 
 
 type ComponentData = {
@@ -66,10 +67,10 @@ const HeroPreview = ({ headline, subheadline, cta1, cta2, cta1Url, cta2Url }: { 
     <p className="text-lg text-muted-foreground dark:text-gray-300 mb-6">{subheadline}</p>
     <div className="flex justify-center gap-4">
       <Button size="lg" className="bg-primary hover:bg-primary/90" asChild>
-        <Link href={cta1Url}>{cta1}</Link>
+        <a href={cta1Url}>{cta1}</a>
       </Button>
       <Button size="lg" variant="outline" asChild>
-        <Link href={cta2Url}>{cta2}</Link>
+        <a href={cta2Url}>{cta2}</a>
       </Button>
     </div>
   </div>
@@ -98,7 +99,7 @@ const CtaPreview = ({ title, subtitle, buttonText, buttonUrl }: { title: string,
             <h2 className="text-3xl font-bold text-card-foreground dark:text-white">{title}</h2>
             <p className="mt-2 text-lg text-muted-foreground dark:text-gray-300">{subtitle}</p>
             <Button size="lg" className="mt-6 bg-primary hover:bg-primary/90" asChild>
-                <Link href={buttonUrl}>{buttonText}</Link>
+                <a href={buttonUrl}>{buttonText}</a>
             </Button>
         </div>
     </div>
@@ -479,13 +480,13 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
 
   // Theme state
   const [theme, setTheme] = useState({
-    primary: '#60A5FA',
-    secondary: '#93C5FD',
-    accent: '#FBBF24',
-    foreground: '#1F2937',
-    mutedForeground: '#6B7280',
-    background1: '#F9FAFB',
-    background2: '#FFFFFF',
+    primary: '#3F51B5', // Deep Indigo
+    secondary: '#7986CB', // Lighter Indigo for secondary elements
+    accent: '#7C4DFF', // Vivid Violet
+    foreground: '#1A237E', // Darker Indigo for titles
+    mutedForeground: '#5C6BC0', // Softer Indigo for text
+    background1: '#E8EAF6', // Light Indigo
+    background2: '#FFFFFF', // White
     fontFamily: 'Inter',
   });
 
@@ -633,206 +634,213 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
   };
 
   return (
-    <div className="flex h-screen w-full flex-col bg-background">
-      <header className="flex h-14 items-center gap-4 border-b bg-card px-4 sticky top-0 z-40">
-        <Button variant="outline" size="icon" asChild>
-          <Link href="/dashboard">
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
-        </Button>
-        <h1 className="flex-1 text-lg font-semibold truncate">
-          {isNew ? "Nueva Página de Aterrizaje" : "Editando: Lanzamiento Acme Inc."}
-        </h1>
-        <div className="hidden md:flex items-center gap-2">
-            <TooltipProvider>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button variant={viewport === 'desktop' ? "secondary" : "ghost"} size="icon" onClick={() => setViewport('desktop')}><Monitor className="h-4 w-4" /></Button>
-                    </TooltipTrigger>
-                    <TooltipContent><p>Escritorio</p></TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button variant={viewport === 'tablet' ? "secondary" : "ghost"} size="icon" onClick={() => setViewport('tablet')}><Tablet className="h-4 w-4" /></Button>
-                    </TooltipTrigger>
-                    <TooltipContent><p>Tableta</p></TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button variant={viewport === 'mobile' ? "secondary" : "ghost"} size="icon" onClick={() => setViewport('mobile')}><Smartphone className="h-4 w-4" /></Button>
-                    </TooltipTrigger>
-                    <TooltipContent><p>Móvil</p></TooltipContent>
-                </Tooltip>
-            </TooltipProvider>
-        </div>
-        <Separator orientation="vertical" className="h-8 hidden md:block" />
-        <div className="flex items-center gap-2">
-          <Button variant="outline">Guardar Borrador</Button>
-          <Button>Publicar</Button>
-        </div>
-      </header>
-      <div className="flex flex-1 overflow-hidden">
-        <aside className="w-72 border-r bg-card hidden md:flex flex-col">
-          <Accordion type="single" collapsible defaultValue="item-1" className="w-full">
-            <AccordionItem value="item-1">
-              <AccordionTrigger className="p-4 hover:no-underline">
-                <div className="flex items-center gap-2">
-                    <Palette className="h-4 w-4" />
-                    <span className="font-semibold text-base">Tema</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="p-4 pt-0 space-y-4">
-                <div className="space-y-2">
-                    <Label>Primario</Label>
-                    <Input type="color" value={theme.primary} onChange={(e) => handleThemeChange('primary', e.target.value)} />
-                </div>
-                 <div className="space-y-2">
-                    <Label>Secundario</Label>
-                    <Input type="color" value={theme.secondary} onChange={(e) => handleThemeChange('secondary', e.target.value)} />
-                </div>
-                 <div className="space-y-2">
-                    <Label>Acentos</Label>
-                    <Input type="color" value={theme.accent} onChange={(e) => handleThemeChange('accent', e.target.value)} />
-                </div>
-                 <div className="space-y-2">
-                    <Label>Color de Títulos</Label>
-                    <Input type="color" value={theme.foreground} onChange={(e) => handleThemeChange('foreground', e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                    <Label>Color de Texto</Label>
-                    <Input type="color" value={theme.mutedForeground} onChange={(e) => handleThemeChange('mutedForeground', e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                    <Label>Color de Fondo 1</Label>
-                    <Input type="color" value={theme.background1} onChange={(e) => handleThemeChange('background1', e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                    <Label>Color de Fondo 2</Label>
-                    <Input type="color" value={theme.background2} onChange={(e) => handleThemeChange('background2', e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Fuente</Label>
-                  <Select value={theme.fontFamily} onValueChange={(value) => handleThemeChange('fontFamily', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar fuente" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Inter">Inter</SelectItem>
-                      <SelectItem value="Roboto">Roboto</SelectItem>
-                      <SelectItem value="Lato">Lato</SelectItem>
-                      <SelectItem value="Montserrat">Montserrat</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="item-2">
-               <AccordionTrigger className="p-4 hover:no-underline">
-                <div className="flex items-center gap-2">
-                    <Layers className="h-4 w-4" />
-                    <span className="font-semibold text-base">Componentes</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="p-4 pt-0">
-                 <div className="flex flex-col gap-2">
-                    {Object.keys(componentMap).map(
-                      (componentName) => (
-                        <Button
-                          key={componentName}
-                          variant="ghost"
-                          className="justify-start gap-2"
-                          onClick={() => addComponent(componentName)}
-                        >
-                          <GripVertical className="h-4 w-4 text-muted-foreground" />
-                          {componentName}
-                        </Button>
-                      )
-                    )}
+    <SidebarProvider>
+      <div className="flex h-screen w-full flex-col bg-background">
+        <header className="flex h-14 items-center gap-4 border-b bg-card px-4 sticky top-0 z-40">
+          <SidebarTrigger className="md:hidden" />
+          <Button variant="outline" size="icon" asChild>
+            <Link href="/dashboard">
+              <ArrowLeft className="h-4 w-4" />
+            </Link>
+          </Button>
+          <h1 className="flex-1 text-lg font-semibold truncate">
+            {isNew ? "Nueva Página de Aterrizaje" : "Editando: Lanzamiento Acme Inc."}
+          </h1>
+          <div className="hidden md:flex items-center gap-2">
+              <TooltipProvider>
+                  <Tooltip>
+                      <TooltipTrigger asChild>
+                          <Button variant={viewport === 'desktop' ? "secondary" : "ghost"} size="icon" onClick={() => setViewport('desktop')}><Monitor className="h-4 w-4" /></Button>
+                      </TooltipTrigger>
+                      <TooltipContent><p>Escritorio</p></TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                      <TooltipTrigger asChild>
+                          <Button variant={viewport === 'tablet' ? "secondary" : "ghost"} size="icon" onClick={() => setViewport('tablet')}><Tablet className="h-4 w-4" /></Button>
+                      </TooltipTrigger>
+                      <TooltipContent><p>Tableta</p></TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                      <TooltipTrigger asChild>
+                          <Button variant={viewport === 'mobile' ? "secondary" : "ghost"} size="icon" onClick={() => setViewport('mobile')}><Smartphone className="h-4 w-4" /></Button>
+                      </TooltipTrigger>
+                      <TooltipContent><p>Móvil</p></TooltipContent>
+                  </Tooltip>
+              </TooltipProvider>
+          </div>
+          <Separator orientation="vertical" className="h-8 hidden md:block" />
+          <div className="flex items-center gap-2">
+            <Button variant="outline">Guardar Borrador</Button>
+            <Button>Publicar</Button>
+          </div>
+        </header>
+        <div className="flex flex-1 overflow-hidden">
+          <Sidebar>
+            <Accordion type="single" collapsible defaultValue="item-1" className="w-full">
+              <AccordionItem value="item-1">
+                <AccordionTrigger className="p-4 hover:no-underline">
+                  <div className="flex items-center gap-2">
+                      <Palette className="h-4 w-4" />
+                      <span className="font-semibold text-base">Tema</span>
                   </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </aside>
-        <main className="flex-1 overflow-auto bg-muted/40 transition-all duration-300" onDrop={handleDrop}>
-          <div className={cn(
-            "mx-auto my-8 space-y-4 p-4 transition-all duration-300",
-            viewport === 'desktop' && 'max-w-5xl',
-            viewport === 'tablet' && 'max-w-3xl',
-            viewport === 'mobile' && 'max-w-sm',
-          )} style={{ fontFamily: `var(--font-body)` }}>
-           {components.length > 0 ? (
-               components.map((component, index) => {
-                 const { preview: ComponentPreview, edit: EditComponent } = componentMap[component.name];
-                 const isEditing = editingComponent?.id === component.id;
+                </AccordionTrigger>
+                <AccordionContent className="p-4 pt-0 space-y-4">
+                  <div className="space-y-2">
+                      <Label>Primario</Label>
+                      <Input type="color" value={theme.primary} onChange={(e) => handleThemeChange('primary', e.target.value)} />
+                  </div>
+                   <div className="space-y-2">
+                      <Label>Secundario</Label>
+                      <Input type="color" value={theme.secondary} onChange={(e) => handleThemeChange('secondary', e.target.value)} />
+                  </div>
+                   <div className="space-y-2">
+                      <Label>Acentos</Label>
+                      <Input type="color" value={theme.accent} onChange={(e) => handleThemeChange('accent', e.target.value)} />
+                  </div>
+                   <div className="space-y-2">
+                      <Label>Color de Títulos</Label>
+                      <Input type="color" value={theme.foreground} onChange={(e) => handleThemeChange('foreground', e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                      <Label>Color de Texto</Label>
+                      <Input type="color" value={theme.mutedForeground} onChange={(e) => handleThemeChange('mutedForeground', e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                      <Label>Color de Fondo 1</Label>
+                      <Input type="color" value={theme.background1} onChange={(e) => handleThemeChange('background1', e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                      <Label>Color de Fondo 2</Label>
+                      <Input type="color" value={theme.background2} onChange={(e) => handleThemeChange('background2', e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Fuente</Label>
+                    <Select value={theme.fontFamily} onValueChange={(value) => handleThemeChange('fontFamily', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar fuente" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Inter">Inter</SelectItem>
+                        <SelectItem value="Roboto">Roboto</SelectItem>
+                        <SelectItem value="Lato">Lato</SelectItem>
+                        <SelectItem value="Montserrat">Montserrat</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-2">
+                 <AccordionTrigger className="p-4 hover:no-underline">
+                  <div className="flex items-center gap-2">
+                      <Layers className="h-4 w-4" />
+                      <span className="font-semibold text-base">Componentes</span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="p-4 pt-0">
+                   <div className="flex flex-col gap-2">
+                      {Object.keys(componentMap).map(
+                        (componentName) => (
+                          <Button
+                            key={componentName}
+                            variant="ghost"
+                            className="justify-start gap-2"
+                            onClick={() => addComponent(componentName)}
+                          >
+                            <GripVertical className="h-4 w-4 text-muted-foreground" />
+                            {componentName}
+                          </Button>
+                        )
+                      )}
+                    </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </Sidebar>
+          <SidebarInset>
+            <main className="flex-1 overflow-auto bg-muted/40 transition-all duration-300" onDrop={handleDrop}>
+              <div className={cn(
+                "mx-auto my-8 space-y-4 p-4 transition-all duration-300",
+                viewport === 'desktop' && 'max-w-5xl',
+                viewport === 'tablet' && 'max-w-3xl',
+                viewport === 'mobile' && 'max-w-sm',
+              )} style={{ fontFamily: `var(--font-body)` }}>
+               {components.length > 0 ? (
+                   components.map((component, index) => {
+                     const { preview: ComponentPreview, edit: EditComponent } = componentMap[component.name];
+                     const isEditing = editingComponent?.id === component.id;
 
-                 if (!ComponentPreview) return null;
+                     if (!ComponentPreview) return null;
 
-                 return (
+                     return (
+                        <div 
+                            key={component.id} 
+                            className="relative group rounded-lg transition-all"
+                            draggable={!isEditing}
+                            onDragStart={(e) => handleDragStart(e, index)}
+                            onDragEnter={(e) => handleDragEnter(e, index)}
+                            onDragEnd={handleDragEnd}
+                            onDragOver={(e) => e.preventDefault()}
+                        >
+                            {isEditing ? (
+                              <EditComponent data={component} onSave={handleSave} onCancel={handleCancel} />
+                            ) : (
+                              <>
+                                <ComponentPreview {...component.props} />
+                                <div className="absolute top-2 right-2 hidden group-hover:flex gap-2">
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/80 hover:bg-white cursor-move">
+                                        <GripVertical className="h-4 w-4" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/80 hover:bg-white" onClick={() => handleEdit(component)}>
+                                        <Pencil className="h-4 w-4" />
+                                    </Button>
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/80 hover:bg-white">
+                                                <Trash2 className="h-4 w-4 text-red-500" />
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                Esta acción no se puede deshacer. Esto eliminará permanentemente la sección.
+                                            </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => removeComponent(component.id)}>
+                                                Eliminar
+                                            </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                                </div>
+                              </>
+                            )}
+                        </div>
+                       );
+                    })
+                ) : (
                     <div 
-                        key={component.id} 
-                        className="relative group rounded-lg transition-all"
-                        draggable={!isEditing}
-                        onDragStart={(e) => handleDragStart(e, index)}
-                        onDragEnter={(e) => handleDragEnter(e, index)}
-                        onDragEnd={handleDragEnd}
+                        className="flex flex-col items-center justify-center text-center py-24 px-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700"
                         onDragOver={(e) => e.preventDefault()}
                     >
-                        {isEditing ? (
-                          <EditComponent data={component} onSave={handleSave} onCancel={handleCancel} />
-                        ) : (
-                          <>
-                            <ComponentPreview {...component.props} />
-                            <div className="absolute top-2 right-2 hidden group-hover:flex gap-2">
-                                <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/80 hover:bg-white cursor-move">
-                                    <GripVertical className="h-4 w-4" />
-                                </Button>
-                                <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/80 hover:bg-white" onClick={() => handleEdit(component)}>
-                                    <Pencil className="h-4 w-4" />
-                                </Button>
-                                <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/80 hover:bg-white">
-                                            <Trash2 className="h-4 w-4 text-red-500" />
-                                        </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                        <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            Esta acción no se puede deshacer. Esto eliminará permanentemente la sección.
-                                        </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => removeComponent(component.id)}>
-                                            Eliminar
-                                        </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-                            </div>
-                          </>
-                        )}
+                        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Página Vacía</h2>
+                        <p className="text-gray-500 dark:text-gray-400 mt-2">Comienza a construir tu página agregando un componente desde el panel izquierdo.</p>
                     </div>
-                   );
-                })
-            ) : (
-                <div 
-                    className="flex flex-col items-center justify-center text-center py-24 px-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700"
-                    onDragOver={(e) => e.preventDefault()}
-                >
-                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Página Vacía</h2>
-                    <p className="text-gray-500 dark:text-gray-400 mt-2">Comienza a construir tu página agregando un componente desde el panel izquierdo.</p>
+                )}
+                <div className="flex justify-center">
+                  <Button variant="outline" className="rounded-full" onClick={() => addComponent('Características')}>
+                    <Plus className="mr-2 h-4 w-4" /> Agregar Sección
+                  </Button>
                 </div>
-            )}
-            <div className="flex justify-center">
-              <Button variant="outline" className="rounded-full" onClick={() => addComponent('Características')}>
-                <Plus className="mr-2 h-4 w-4" /> Agregar Sección
-              </Button>
-            </div>
-          </div>
-        </main>
+              </div>
+            </main>
+          </SidebarInset>
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   )
 }
+
+    
