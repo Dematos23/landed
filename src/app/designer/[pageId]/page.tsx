@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Link from "next/link"
 import {
   ArrowLeft,
@@ -40,11 +40,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { cn } from '@/lib/utils';
 
 // --- Component Previews ---
 
 const HeroPreview = () => (
-  <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
+  <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center pointer-events-none">
     <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Your Amazing Product</h1>
     <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">A compelling tagline that captures attention and explains the core benefit.</p>
     <div className="flex justify-center gap-4">
@@ -55,7 +56,7 @@ const HeroPreview = () => (
 );
 
 const FeaturesPreview = () => (
-  <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-8">
+  <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none">
      <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-8">Features</h2>
      <div className="grid md:grid-cols-3 gap-8">
         <div className="text-center">
@@ -103,6 +104,10 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
   const isNew = params.pageId === 'new';
   const [components, setComponents] = useState<Component[]>(initialComponents);
 
+  // Drag and drop state
+  const dragItem = useRef<number | null>(null);
+  const dragOverItem = useRef<number | null>(null);
+
   const addComponent = (componentName: string) => {
     const newComponent = {
       id: Date.now(),
@@ -115,6 +120,43 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
     setComponents(prev => prev.filter(c => c.id !== id));
   };
 
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, position: number) => {
+    dragItem.current = position;
+  };
+
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>, position: number) => {
+    dragOverItem.current = position;
+    // Visually indicate the drop zone
+    const list = e.currentTarget.parentElement;
+    if (list) {
+        const children = Array.from(list.children);
+        children.forEach(child => child.classList.remove('border-primary', 'border-2'));
+        e.currentTarget.classList.add('border-primary', 'border-2');
+    }
+  };
+  
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    const list = e.currentTarget.parentElement;
+    if (list) {
+        Array.from(list.children).forEach(child => child.classList.remove('border-primary', 'border-2'));
+    }
+
+    if (dragItem.current === null || dragOverItem.current === null) return;
+    
+    const newComponents = [...components];
+    const dragItemContent = newComponents.splice(dragItem.current, 1)[0];
+    newComponents.splice(dragOverItem.current, 0, dragItemContent);
+    
+    dragItem.current = null;
+    dragOverItem.current = null;
+    
+    setComponents(newComponents);
+  };
+
+  const handleDragEnd = () => {
+    dragItem.current = null;
+    dragOverItem.current = null;
+  }
 
   return (
     <div className="flex h-screen w-full flex-col bg-background">
@@ -178,17 +220,25 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
             </CardContent>
           </Card>
         </aside>
-        <main className="flex-1 overflow-auto bg-muted/40">
+        <main className="flex-1 overflow-auto bg-muted/40" onDrop={handleDrop}>
           <div className="mx-auto max-w-5xl my-8 space-y-4 p-4">
            {components.length > 0 ? (
-               components.map((component) => {
+               components.map((component, index) => {
                  const ComponentPreview = componentMap[component.name];
                  return (
                    ComponentPreview ? (
-                    <div key={component.id} className="relative group">
+                    <div 
+                        key={component.id} 
+                        className="relative group rounded-lg transition-all"
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, index)}
+                        onDragEnter={(e) => handleDragEnter(e, index)}
+                        onDragEnd={handleDragEnd}
+                        onDragOver={(e) => e.preventDefault()}
+                    >
                         <ComponentPreview />
                         <div className="absolute top-2 right-2 hidden group-hover:flex gap-2">
-                            <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/80 hover:bg-white">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/80 hover:bg-white cursor-move">
                                 <GripVertical className="h-4 w-4" />
                             </Button>
                             <AlertDialog>
@@ -218,7 +268,10 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
                  );
                })
             ) : (
-                <div className="flex flex-col items-center justify-center text-center py-24 px-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
+                <div 
+                    className="flex flex-col items-center justify-center text-center py-24 px-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700"
+                    onDragOver={(e) => e.preventDefault()}
+                >
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Página Vacía</h2>
                     <p className="text-gray-500 dark:text-gray-400 mt-2">Comienza a construir tu página agregando un componente desde el panel izquierdo.</p>
                 </div>
