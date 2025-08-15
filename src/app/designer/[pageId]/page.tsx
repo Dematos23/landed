@@ -217,7 +217,7 @@ const componentMap: { [key: string]: { preview: React.ComponentType<any>, edit: 
 const initialComponents: ComponentData[] = [
     { id: 1, name: 'Hero Section', props: { headline: 'Your Amazing Product', subheadline: 'A compelling tagline that captures attention and explains the core benefit.', cta1: 'Get Started', cta2: 'Learn More' } },
     { id: 2, name: 'Features', props: {} },
-]
+];
 
 export default function DesignerPage({ params }: { params: { pageId: string } }) {
   const isNew = params.pageId === 'new';
@@ -417,8 +417,7 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
                         )}
                     </div>
                    );
-                 }
-               )
+                })
             ) : (
                 <div 
                     className="flex flex-col items-center justify-center text-center py-24 px-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700"
