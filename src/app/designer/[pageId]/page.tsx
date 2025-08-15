@@ -476,6 +476,7 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
   const isNew = params.pageId === 'new';
   const [components, setComponents] = useState<ComponentData[]>(initialComponents);
   const [editingComponent, setEditingComponent] = useState<ComponentData | null>(null);
+  const [viewport, setViewport] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
 
   // Theme state
   const [theme, setTheme] = useState({
@@ -636,19 +637,19 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
             <TooltipProvider>
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon"><Monitor className="h-4 w-4" /></Button>
+                        <Button variant={viewport === 'desktop' ? "secondary" : "ghost"} size="icon" onClick={() => setViewport('desktop')}><Monitor className="h-4 w-4" /></Button>
                     </TooltipTrigger>
                     <TooltipContent><p>Escritorio</p></TooltipContent>
                 </Tooltip>
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon"><Tablet className="h-4 w-4" /></Button>
+                        <Button variant={viewport === 'tablet' ? "secondary" : "ghost"} size="icon" onClick={() => setViewport('tablet')}><Tablet className="h-4 w-4" /></Button>
                     </TooltipTrigger>
                     <TooltipContent><p>Tableta</p></TooltipContent>
                 </Tooltip>
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon"><Smartphone className="h-4 w-4" /></Button>
+                        <Button variant={viewport === 'mobile' ? "secondary" : "ghost"} size="icon" onClick={() => setViewport('mobile')}><Smartphone className="h-4 w-4" /></Button>
                     </TooltipTrigger>
                     <TooltipContent><p>Móvil</p></TooltipContent>
                 </Tooltip>
@@ -734,8 +735,13 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
             </CardContent>
           </Card>
         </aside>
-        <main className="flex-1 overflow-auto bg-muted/40" onDrop={handleDrop}>
-          <div className="mx-auto max-w-5xl my-8 space-y-4 p-4" style={{ fontFamily: `var(--font-body)` }}>
+        <main className="flex-1 overflow-auto bg-muted/40 transition-all duration-300" onDrop={handleDrop}>
+          <div className={cn(
+            "mx-auto my-8 space-y-4 p-4 transition-all duration-300",
+            viewport === 'desktop' && 'max-w-5xl',
+            viewport === 'tablet' && 'max-w-3xl',
+            viewport === 'mobile' && 'max-w-sm',
+          )} style={{ fontFamily: `var(--font-body)` }}>
            {components.length > 0 ? (
                components.map((component, index) => {
                  const { preview: ComponentPreview, edit: EditComponent } = componentMap[component.name];
