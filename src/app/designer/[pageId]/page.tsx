@@ -1,8 +1,10 @@
 
+
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from "next/link"
+import { useParams } from 'next/navigation';
 import {
   ArrowLeft,
   GripVertical,
@@ -66,10 +68,10 @@ const HeroPreview = ({ headline, subheadline, cta1, cta2, cta1Url, cta2Url }: { 
     <h1 className="text-4xl font-bold text-card-foreground dark:text-white mb-4">{headline}</h1>
     <p className="text-lg text-muted-foreground dark:text-gray-300 mb-6">{subheadline}</p>
     <div className="flex justify-center gap-4">
-       <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+      <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
         <a href={cta1Url}>{cta1}</a>
       </Button>
-      <Button size="lg" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground">
+      <Button asChild size="lg" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground">
         <a href={cta2Url}>{cta2}</a>
       </Button>
     </div>
@@ -472,8 +474,10 @@ const initialComponents: ComponentData[] = [
     { id: 2, name: 'Características', props: componentMap['Características'].defaultProps },
 ];
 
-export default function DesignerPage({ params }: { params: { pageId: string } }) {
-  const isNew = params.pageId === 'new';
+export default function DesignerPage() {
+  const params = useParams();
+  const pageId = params.pageId as string;
+  const isNew = pageId === 'new';
   const [components, setComponents] = useState<ComponentData[]>(initialComponents);
   const [editingComponent, setEditingComponent] = useState<ComponentData | null>(null);
   const [viewport, setViewport] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
@@ -850,5 +854,3 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
     </>
   )
 }
-
-    
