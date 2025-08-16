@@ -494,36 +494,6 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
   // Drag and drop state
   const dragItem = useRef<number | null>(null);
   const dragOverItem = useRef<number | null>(null);
-
-  useEffect(() => {
-    const style = document.createElement('style');
-    const hsl = {
-        primary: hexToHsl(theme.primary),
-        secondary: hexToHsl(theme.secondary),
-        accent: hexToHsl(theme.accent),
-        foreground: hexToHsl(theme.foreground),
-        mutedForeground: hexToHsl(theme.mutedForeground),
-        background: hexToHsl(theme.background1),
-        card: hexToHsl(theme.background2),
-    };
-
-    style.innerHTML = `
-      :root {
-        --primary-hsl: ${hsl.primary.h} ${hsl.primary.s}% ${hsl.primary.l}%;
-        --secondary-hsl: ${hsl.secondary.h} ${hsl.secondary.s}% ${hsl.secondary.l}%;
-        --accent-hsl: ${hsl.accent.h} ${hsl.accent.s}% ${hsl.accent.l}%;
-        --foreground-hsl: ${hsl.foreground.h} ${hsl.foreground.s}% ${hsl.foreground.l}%;
-        --muted-foreground-hsl: ${hsl.mutedForeground.h} ${hsl.mutedForeground.s}% ${hsl.mutedForeground.l}%;
-        --background-hsl: ${hsl.background.h} ${hsl.background.s}% ${hsl.background.l}%;
-        --card-hsl: ${hsl.card.h} ${hsl.card.s}% ${hsl.card.l}%;
-        --font-body: '${theme.fontFamily}', sans-serif;
-      }
-    `;
-    document.head.appendChild(style);
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, [theme]);
   
   const handleThemeChange = (key: keyof typeof theme, value: string) => {
     setTheme(prev => ({ ...prev, [key]: value }));
@@ -566,6 +536,7 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
     return { h, s, l };
   }
 
+  const landingPreviewId = "landing-preview-canvas";
 
   const addComponent = (componentName: string) => {
     const newComponent = {
@@ -634,6 +605,31 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
   };
 
   return (
+    <>
+     <style>
+        {`
+          #${landingPreviewId} {
+            --primary-hsl: ${hexToHsl(theme.primary).h} ${hexToHsl(theme.primary).s}% ${hexToHsl(theme.primary).l}%;
+            --secondary-hsl: ${hexToHsl(theme.secondary).h} ${hexToHsl(theme.secondary).s}% ${hexToHsl(theme.secondary).l}%;
+            --accent-hsl: ${hexToHsl(theme.accent).h} ${hexToHsl(theme.accent).s}% ${hexToHsl(theme.accent).l}%;
+            --foreground-hsl: ${hexToHsl(theme.foreground).h} ${hexToHsl(theme.foreground).s}% ${hexToHsl(theme.foreground).l}%;
+            --muted-foreground-hsl: ${hexToHsl(theme.mutedForeground).h} ${hexToHsl(theme.mutedForeground).s}% ${hexToHsl(theme.mutedForeground).l}%;
+            --background-hsl: ${hexToHsl(theme.background1).h} ${hexToHsl(theme.background1).s}% ${hexToHsl(theme.background1).l}%;
+            --card-hsl: ${hexToHsl(theme.background2).h} ${hexToHsl(theme.background2).s}% ${hexToHsl(theme.background2).l}%;
+            --font-body: '${theme.fontFamily}', sans-serif;
+            background-color: hsl(var(--background-hsl));
+            font-family: var(--font-body);
+          }
+          #${landingPreviewId} .bg-card { background-color: hsl(var(--card-hsl)); }
+          #${landingPreviewId} .bg-primary { background-color: hsl(var(--primary-hsl)); }
+          #${landingPreviewId} .text-primary { color: hsl(var(--primary-hsl)); }
+          #${landingPreviewId} .text-card-foreground { color: hsl(var(--foreground-hsl)); }
+          #${landingPreviewId} .text-muted-foreground { color: hsl(var(--muted-foreground-hsl)); }
+          #${landingPreviewId} .bg-primary\\/10 { background-color: hsla(${hexToHsl(theme.primary).h}, ${hexToHsl(theme.primary).s}%, ${hexToHsl(theme.primary).l}%, 0.1); }
+          #${landingPreviewId} .bg-primary\\/5 { background-color: hsla(${hexToHsl(theme.primary).h}, ${hexToHsl(theme.primary).s}%, ${hexToHsl(theme.primary).l}%, 0.05); }
+
+        `}
+      </style>
     <SidebarProvider>
       <div className="flex h-screen w-full flex-col bg-background">
         <header className="flex h-14 items-center gap-4 border-b bg-card px-4 sticky top-0 z-40">
@@ -758,12 +754,15 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
           </Sidebar>
           <SidebarInset>
             <main className="flex-1 overflow-auto bg-muted/40 transition-all duration-300" onDrop={handleDrop}>
-              <div className={cn(
-                "mx-auto my-8 space-y-4 p-4 transition-all duration-300",
-                viewport === 'desktop' && 'max-w-5xl',
-                viewport === 'tablet' && 'max-w-3xl',
-                viewport === 'mobile' && 'max-w-sm',
-              )} style={{ fontFamily: `var(--font-body)` }}>
+              <div 
+                id={landingPreviewId}
+                className={cn(
+                  "mx-auto my-8 space-y-4 p-4 transition-all duration-300",
+                  viewport === 'desktop' && 'max-w-5xl',
+                  viewport === 'tablet' && 'max-w-3xl',
+                  viewport === 'mobile' && 'max-w-sm',
+                )}
+              >
                {components.length > 0 ? (
                    components.map((component, index) => {
                      const { preview: ComponentPreview, edit: EditComponent } = componentMap[component.name];
@@ -840,7 +839,6 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
         </div>
       </div>
     </SidebarProvider>
+    </>
   )
 }
-
-    
