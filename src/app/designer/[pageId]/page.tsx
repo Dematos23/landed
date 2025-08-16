@@ -66,10 +66,10 @@ const HeroPreview = ({ headline, subheadline, cta1, cta2, cta1Url, cta2Url }: { 
     <h1 className="text-4xl font-bold text-card-foreground dark:text-white mb-4">{headline}</h1>
     <p className="text-lg text-muted-foreground dark:text-gray-300 mb-6">{subheadline}</p>
     <div className="flex justify-center gap-4">
-      <Button size="lg" className="bg-primary hover:bg-primary/90" asChild>
+       <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
         <a href={cta1Url}>{cta1}</a>
       </Button>
-      <Button size="lg" variant="outline" asChild>
+      <Button size="lg" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground">
         <a href={cta2Url}>{cta2}</a>
       </Button>
     </div>
@@ -98,7 +98,7 @@ const CtaPreview = ({ title, subtitle, buttonText, buttonUrl }: { title: string,
         <div className="text-center">
             <h2 className="text-3xl font-bold text-card-foreground dark:text-white">{title}</h2>
             <p className="mt-2 text-lg text-muted-foreground dark:text-gray-300">{subtitle}</p>
-            <Button size="lg" className="mt-6 bg-primary hover:bg-primary/90" asChild>
+            <Button size="lg" asChild className="mt-6 bg-primary hover:bg-primary/90 text-primary-foreground">
                 <a href={buttonUrl}>{buttonText}</a>
             </Button>
         </div>
@@ -533,7 +533,7 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
     s = +(s * 100).toFixed(1);
     l = +(l * 100).toFixed(1);
   
-    return { h, s, l };
+    return `${h} ${s}% ${l}%`;
   }
 
   const landingPreviewId = "landing-preview-canvas";
@@ -609,24 +609,32 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
      <style>
         {`
           #${landingPreviewId} {
-            --primary-hsl: ${hexToHsl(theme.primary).h} ${hexToHsl(theme.primary).s}% ${hexToHsl(theme.primary).l}%;
-            --secondary-hsl: ${hexToHsl(theme.secondary).h} ${hexToHsl(theme.secondary).s}% ${hexToHsl(theme.secondary).l}%;
-            --accent-hsl: ${hexToHsl(theme.accent).h} ${hexToHsl(theme.accent).s}% ${hexToHsl(theme.accent).l}%;
-            --foreground-hsl: ${hexToHsl(theme.foreground).h} ${hexToHsl(theme.foreground).s}% ${hexToHsl(theme.foreground).l}%;
-            --muted-foreground-hsl: ${hexToHsl(theme.mutedForeground).h} ${hexToHsl(theme.mutedForeground).s}% ${hexToHsl(theme.mutedForeground).l}%;
-            --background-hsl: ${hexToHsl(theme.background1).h} ${hexToHsl(theme.background1).s}% ${hexToHsl(theme.background1).l}%;
-            --card-hsl: ${hexToHsl(theme.background2).h} ${hexToHsl(theme.background2).s}% ${hexToHsl(theme.background2).l}%;
+            --primary-hsl: ${hexToHsl(theme.primary)};
+            --secondary-hsl: ${hexToHsl(theme.secondary)};
+            --accent-hsl: ${hexToHsl(theme.accent)};
+            --foreground-hsl: ${hexToHsl(theme.foreground)};
+            --muted-foreground-hsl: ${hexToHsl(theme.mutedForeground)};
+            --background-hsl: ${hexToHsl(theme.background1)};
+            --card-hsl: ${hexToHsl(theme.background2)};
             --font-body: '${theme.fontFamily}', sans-serif;
+            
             background-color: hsl(var(--background-hsl));
             font-family: var(--font-body);
           }
           #${landingPreviewId} .bg-card { background-color: hsl(var(--card-hsl)); }
-          #${landingPreviewId} .bg-primary { background-color: hsl(var(--primary-hsl)); }
-          #${landingPreviewId} .text-primary { color: hsl(var(--primary-hsl)); }
           #${landingPreviewId} .text-card-foreground { color: hsl(var(--foreground-hsl)); }
           #${landingPreviewId} .text-muted-foreground { color: hsl(var(--muted-foreground-hsl)); }
-          #${landingPreviewId} .bg-primary\\/10 { background-color: hsla(${hexToHsl(theme.primary).h}, ${hexToHsl(theme.primary).s}%, ${hexToHsl(theme.primary).l}%, 0.1); }
-          #${landingPreviewId} .bg-primary\\/5 { background-color: hsla(${hexToHsl(theme.primary).h}, ${hexToHsl(theme.primary).s}%, ${hexToHsl(theme.primary).l}%, 0.05); }
+          
+          #${landingPreviewId} .bg-primary { background-color: hsl(var(--primary-hsl)); }
+          #${landingPreviewId} .text-primary-foreground { color: white; } /* Assuming white foreground for primary for now */
+          #${landingPreviewId} .hover\\:bg-primary\\/90:hover { background-color: hsla(${hexToHsl(theme.primary)}, 0.9); }
+          #${landingPreviewId} .bg-primary\\/10 { background-color: hsla(${hexToHsl(theme.primary).split(' ').join(', ')}, 0.1); }
+          #${landingPreviewId} .bg-primary\\/5 { background-color: hsla(${hexToHsl(theme.primary).split(' ').join(', ')}, 0.05); }
+          #${landingPreviewId} .text-primary { color: hsl(var(--primary-hsl)); }
+
+          #${landingPreviewId} .bg-secondary { background-color: hsl(var(--secondary-hsl)); }
+          #${landingPreviewId} .text-secondary-foreground { color: white; } /* Assuming white foreground for secondary for now */
+          #${landingPreviewId} .hover\\:bg-secondary\\/90:hover { background-color: hsla(${hexToHsl(theme.secondary)}, 0.9); }
 
         `}
       </style>
@@ -842,3 +850,5 @@ export default function DesignerPage({ params }: { params: { pageId: string } })
     </>
   )
 }
+
+    
