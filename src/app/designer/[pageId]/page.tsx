@@ -478,6 +478,9 @@ export default function DesignerPage() {
   const params = useParams();
   const pageId = params.pageId as string;
   const isNew = pageId === 'new';
+
+  const [pageName, setPageName] = useState(isNew ? "Nueva Página de Aterrizaje" : "Lanzamiento Acme Inc.");
+  const [isEditingName, setIsEditingName] = useState(false);
   const [components, setComponents] = useState<ComponentData[]>(initialComponents);
   const [editingComponent, setEditingComponent] = useState<ComponentData | null>(null);
   const [viewport, setViewport] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
@@ -608,6 +611,12 @@ export default function DesignerPage() {
     setEditingComponent(null);
   };
 
+  const handleNameKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      setIsEditingName(false);
+    }
+  };
+
   return (
     <>
      <style>
@@ -631,15 +640,14 @@ export default function DesignerPage() {
           
           #${landingPreviewId} .bg-primary { background-color: hsl(var(--primary-hsl)); }
           #${landingPreviewId} .text-primary-foreground { color: white; } /* Assuming white foreground for primary for now */
-          #${landingPreviewId} .hover\\:bg-primary\\/90:hover { background-color: hsla(${hexToHsl(theme.primary)}, 0.9); }
+          #${landingPreviewId} .hover\\:bg-primary\\/90:hover { background-color: hsla(${hexToHsl(theme.primary).replace(/ /g, ', ')}, 0.9); }
           #${landingPreviewId} .bg-primary\\/10 { background-color: hsla(${hexToHsl(theme.primary).split(' ').join(', ')}, 0.1); }
           #${landingPreviewId} .bg-primary\\/5 { background-color: hsla(${hexToHsl(theme.primary).split(' ').join(', ')}, 0.05); }
           #${landingPreviewId} .text-primary { color: hsl(var(--primary-hsl)); }
 
           #${landingPreviewId} .bg-secondary { background-color: hsl(var(--secondary-hsl)); }
           #${landingPreviewId} .text-secondary-foreground { color: white; } /* Assuming white foreground for secondary for now */
-          #${landingPreviewId} .hover\\:bg-secondary\\/90:hover { background-color: hsla(${hexToHsl(theme.secondary)}, 0.9); }
-
+          #${landingPreviewId} .hover\\:bg-secondary\\/90:hover { background-color: hsla(${hexToHsl(theme.secondary).replace(/ /g, ', ')}, 0.9); }
         `}
       </style>
     <SidebarProvider>
@@ -651,9 +659,28 @@ export default function DesignerPage() {
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
-          <h1 className="flex-1 text-lg font-semibold truncate">
-            {isNew ? "Nueva Página de Aterrizaje" : "Editando: Lanzamiento Acme Inc."}
-          </h1>
+          <div className="flex-1 flex items-center gap-2">
+            {isEditingName ? (
+              <Input
+                type="text"
+                value={pageName}
+                onChange={(e) => setPageName(e.target.value)}
+                onBlur={() => setIsEditingName(false)}
+                onKeyDown={handleNameKeyDown}
+                className="text-lg font-semibold h-9"
+                autoFocus
+              />
+            ) : (
+              <>
+                <h1 className="text-lg font-semibold truncate">
+                  {pageName}
+                </h1>
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setIsEditingName(true)}>
+                  <Pencil className="h-4 w-4" />
+                </Button>
+              </>
+            )}
+          </div>
           <div className="hidden md:flex items-center gap-2">
               <TooltipProvider>
                   <Tooltip>
