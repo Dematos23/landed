@@ -180,22 +180,48 @@ const componentMap: { [key: string]: React.ComponentType<any> } = {
 
 type PreviewData = Omit<LandingPageData, 'id' | 'userId' | 'subdomain' | 'isPublished' | 'createdAt' | 'updatedAt'>;
 
+const PREVIEW_DATA_KEY = 'landing-page-preview-data';
+
+function getInitialData(): PreviewData | null {
+  // This function runs only on the client
+  try {
+    const storedData = localStorage.getItem(PREVIEW_DATA_KEY);
+    return storedData ? JSON.parse(storedData) : null;
+  } catch (error) {
+    console.error("Error parsing preview data from localStorage", error);
+    return null;
+  }
+}
+
 export default function PreviewPage() {
-  const [data, setData] = useState<PreviewData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<PreviewData | null>(getInitialData);
 
   useEffect(() => {
-    try {
-      const storedData = localStorage.getItem('landing-page-preview-data');
-      if (storedData) {
-        setData(JSON.parse(storedData));
+    // This effect handles updates if the data is set after the initial render
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === PREVIEW_DATA_KEY && event.newValue) {
+        try {
+          setData(JSON.parse(event.newValue));
+        } catch (error) {
+          console.error("Error parsing updated preview data", error);
+        }
       }
-    } catch (error) {
-      console.error("Error parsing preview data from localStorage", error);
-    } finally {
-      setLoading(false);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    // If data is still null, try fetching it again in case of a race condition
+    if (!data) {
+      const currentData = getInitialData();
+      if (currentData) {
+        setData(currentData);
+      }
     }
-  }, []);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [data]);
 
   const theme = data?.theme;
 
@@ -237,12 +263,8 @@ export default function PreviewPage() {
     return `${h} ${s}% ${l}%`;
   }
 
-  if (loading) {
-    return <div className="flex h-screen items-center justify-center">Cargando previsualización...</div>;
-  }
-
   if (!data || !theme) {
-    return <div className="flex h-screen items-center justify-center">No se encontraron datos para la previsualización.</div>;
+    return <div className="flex h-screen items-center justify-center">Cargando previsualización...</div>;
   }
 
   return (
