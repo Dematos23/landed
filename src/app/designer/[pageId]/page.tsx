@@ -752,6 +752,16 @@ function DesignerPageContent() {
   };
 
 
+  const handlePreview = () => {
+    const previewData = {
+      name: pageName,
+      components,
+      theme,
+    };
+    localStorage.setItem('landing-page-preview-data', JSON.stringify(previewData));
+    window.open('/preview', '_blank');
+  };
+
   // Drag and drop state
   const dragItem = useRef<number | null>(null);
   const dragOverItem = useRef<number | null>(null);
@@ -960,6 +970,10 @@ function DesignerPageContent() {
           </div>
           <Separator orientation="vertical" className="h-8 hidden md:block" />
           <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" onClick={handlePreview}>
+              <Eye className="h-4 w-4" />
+              <span className="sr-only">Previsualizar</span>
+            </Button>
             <Button variant="outline" onClick={handleSaveDraft} disabled={isSaving}>
               {isSaving ? "Guardando..." : "Guardar Borrador"}
             </Button>
