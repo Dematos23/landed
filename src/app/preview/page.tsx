@@ -249,7 +249,7 @@ export default function PreviewPage() {
     <>
       <style>
         {`
-          :root {
+          body {
             --primary-hsl: ${hexToHsl(theme.primary)};
             --primary-foreground-hsl: ${hexToHsl(theme.primaryForeground)};
             --secondary-hsl: ${hexToHsl(theme.secondary)};
@@ -259,7 +259,24 @@ export default function PreviewPage() {
             --background-hsl: ${hexToHsl(theme.background1)};
             --card-hsl: ${hexToHsl(theme.background2)};
             --font-body: '${theme.fontFamily}', sans-serif;
+            
+            background-color: hsl(var(--background-hsl));
+            font-family: var(--font-body);
           }
+          .bg-card { background-color: hsl(var(--card-hsl)); }
+          .text-card-foreground { color: hsl(var(--foreground-hsl)); }
+          .text-muted-foreground { color: hsl(var(--muted-foreground-hsl)); }
+          
+          .bg-primary { background-color: hsl(var(--primary-hsl)); }
+          .text-primary-foreground { color: hsl(var(--primary-foreground-hsl)); }
+          .hover\\:bg-primary\\/90:hover { background-color: hsla(${hexToHsl(theme.primary).replace(/ /g, ', ')}, 0.9); }
+          .bg-primary\\/10 { background-color: hsla(${hexToHsl(theme.primary).split(' ').join(', ')}, 0.1); }
+          .bg-primary\\/5 { background-color: hsla(${hexToHsl(theme.primary).split(' ').join(', ')}, 0.05); }
+          .text-primary { color: hsl(var(--primary-hsl)); }
+
+          .bg-secondary { background-color: hsl(var(--secondary-hsl)); }
+          .text-secondary-foreground { color: white; } /* Assuming white foreground for secondary for now */
+          .hover\\:bg-secondary\\/90:hover { background-color: hsla(${hexToHsl(theme.secondary).replace(/ /g, ', ')}, 0.9); }
         `}
       </style>
       <main>
