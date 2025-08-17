@@ -2,10 +2,21 @@
 
 import { db, auth } from "@/lib/firebase";
 import { collection, doc, getDoc, setDoc, updateDoc, deleteDoc, serverTimestamp, query, where, getDocs } from "firebase/firestore";
+import { onAuthStateChanged, User } from "firebase/auth";
 import { v4 as uuidv4 } from 'uuid';
 import type { LandingPageData, LandingPageTheme, LandingPageComponent } from "@/lib/types";
 
 const landingsCollection = collection(db, "landings");
+
+const getCurrentUser = (): Promise<User | null> => {
+  return new Promise((resolve) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      unsubscribe();
+      resolve(user);
+    });
+  });
+};
+
 
 /**
  * Creates a new landing page document in Firestore.
@@ -14,7 +25,7 @@ const landingsCollection = collection(db, "landings");
  */
 export async function createLandingPage(data: Partial<LandingPageData>): Promise<string | null> {
   try {
-    const currentUser = auth.currentUser;
+    const currentUser = await getCurrentUser();
     if (!currentUser) {
       throw new Error("Authentication required to create a landing page.");
     }
@@ -58,7 +69,7 @@ export async function createLandingPage(data: Partial<LandingPageData>): Promise
  */
 export async function getLandingPage(pageId: string): Promise<LandingPageData | null> {
   try {
-    const currentUser = auth.currentUser;
+    const currentUser = await getCurrentUser();
     if (!currentUser) {
       throw new Error("Authentication required.");
     }
@@ -89,9 +100,10 @@ export async function getLandingPage(pageId: string): Promise<LandingPageData | 
  */
 export async function getUserLandings(): Promise<LandingPageData[]> {
     try {
-        const currentUser = auth.currentUser;
+        const currentUser = await getCurrentUser();
         if (!currentUser) {
-            throw new Error("Authentication required to get landing pages.");
+            console.log("No authenticated user found.");
+            return [];
         }
 
         const q = query(landingsCollection, where("userId", "==", currentUser.uid));

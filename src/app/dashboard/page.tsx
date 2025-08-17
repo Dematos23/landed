@@ -1,3 +1,6 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { PlusCircle, MoreHorizontal, Pencil, ExternalLink, Trash2 } from "lucide-react"
@@ -18,47 +21,42 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Skeleton } from "@/components/ui/skeleton"
+import { getUserLandings } from "@/services/landings"
+import type { LandingPageData } from "@/lib/types"
 
-const sites = [
-  {
-    id: '1',
-    name: "Lanzamiento Acme Inc.",
-    subdomain: "acme.landed.co",
-    image: "https://placehold.co/600x400.png",
-    hint: "website screenshot",
-    views: "1.2k",
-    conversions: "8.5%",
-  },
-  {
-    id: '2',
-    name: "Lista de Espera Innovate Corp.",
-    subdomain: "innovate.landed.co",
-    image: "https://placehold.co/600x400.png",
-    hint: "modern design",
-    views: "3.4k",
-    conversions: "12.1%",
-  },
-  {
-    id: '3',
-    name: "Proyecto de Portafolio",
-    subdomain: "mi-portafolio.landed.co",
-    image: "https://placehold.co/600x400.png",
-    hint: "abstract portfolio",
-    views: "876",
-    conversions: "5.2%",
-  },
-    {
-    id: '4',
-    name: "Registros Beta",
-    subdomain: "beta.landed.co",
-    image: "https://placehold.co/600x400.png",
-    hint: "tech startup",
-    views: "5.6k",
-    conversions: "15.7%",
-  },
-]
+function SiteSkeleton() {
+  return (
+    <Card className="flex flex-col">
+      <CardHeader className="relative">
+        <Skeleton className="aspect-video w-full rounded-md" />
+      </CardHeader>
+      <CardContent className="flex-1">
+        <Skeleton className="h-5 w-3/4 mb-2" />
+        <Skeleton className="h-4 w-1/2" />
+      </CardContent>
+      <CardFooter className="flex justify-between items-center">
+        <Skeleton className="h-4 w-1/3" />
+        <Skeleton className="h-8 w-8 rounded-full" />
+      </CardFooter>
+    </Card>
+  )
+}
 
 export default function DashboardPage() {
+  const [sites, setSites] = useState<LandingPageData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchSites() {
+      const userSites = await getUserLandings();
+      setSites(userSites);
+      setLoading(false);
+    }
+    fetchSites();
+  }, []);
+
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
@@ -75,60 +73,69 @@ export default function DashboardPage() {
         </Link>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {sites.map((site) => (
-          <Card key={site.id} className="flex flex-col">
-            <CardHeader className="relative">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    aria-haspopup="true"
-                    size="icon"
-                    variant="ghost"
-                    className="absolute right-2 top-2 h-8 w-8"
-                  >
-                    <MoreHorizontal className="h-4 w-4" />
-                    <span className="sr-only">Toggle menu</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                  <DropdownMenuItem>
-                    <Link href={`/designer/${site.id}`} className="flex items-center w-full">
-                      <Pencil className="mr-2 h-4 w-4" /> Editar
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Trash2 className="mr-2 h-4 w-4" /> Eliminar
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <Image
-                alt="Site preview"
-                className="aspect-video w-full rounded-md object-cover"
-                data-ai-hint={site.hint}
-                height="310"
-                src={site.image}
-                width="550"
-              />
-            </CardHeader>
-            <CardContent className="flex-1">
-              <CardTitle className="text-lg">{site.name}</CardTitle>
-              <CardDescription>{site.subdomain}</CardDescription>
-            </CardContent>
-            <CardFooter className="flex justify-between items-center text-sm text-muted-foreground">
-              <div>
-                <span>{site.views} vistas</span>
-                <span className="mx-2">&#183;</span>
-                <span>{site.conversions} conversión</span>
-              </div>
-              <Button variant="ghost" size="icon" asChild>
-                <a href={`https://${site.subdomain}`} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="h-4 w-4" />
-                </a>
-              </Button>
-            </CardFooter>
-          </Card>
-        ))}
+        {loading ? (
+          <>
+            <SiteSkeleton />
+            <SiteSkeleton />
+            <SiteSkeleton />
+            <SiteSkeleton />
+          </>
+        ) : (
+          sites.map((site) => (
+            <Card key={site.id} className="flex flex-col">
+              <CardHeader className="relative">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      aria-haspopup="true"
+                      size="icon"
+                      variant="ghost"
+                      className="absolute right-2 top-2 h-8 w-8"
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                      <span className="sr-only">Toggle menu</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                    <DropdownMenuItem>
+                      <Link href={`/designer/${site.id}`} className="flex items-center w-full">
+                        <Pencil className="mr-2 h-4 w-4" /> Editar
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Trash2 className="mr-2 h-4 w-4" /> Eliminar
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <Image
+                  alt="Site preview"
+                  className="aspect-video w-full rounded-md object-cover"
+                  data-ai-hint="website screenshot"
+                  height="310"
+                  src={"https://placehold.co/600x400.png"}
+                  width="550"
+                />
+              </CardHeader>
+              <CardContent className="flex-1">
+                <CardTitle className="text-lg">{site.name}</CardTitle>
+                <CardDescription>{site.subdomain}.landed.co</CardDescription>
+              </CardContent>
+              <CardFooter className="flex justify-between items-center text-sm text-muted-foreground">
+                <div>
+                  <span>0 vistas</span>
+                  <span className="mx-2">&#183;</span>
+                  <span>0% conversión</span>
+                </div>
+                <Button variant="ghost" size="icon" asChild>
+                  <a href={`https://${site.subdomain}.landed.co`} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="h-4 w-4" />
+                  </a>
+                </Button>
+              </CardFooter>
+            </Card>
+          ))
+        )}
       </div>
     </div>
   )
