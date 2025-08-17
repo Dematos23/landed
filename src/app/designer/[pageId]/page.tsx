@@ -73,10 +73,14 @@ type ComponentData = LandingPageComponent;
 // --- Component Previews ---
 
 const HeroPreview = ({ 
-  headline, subheadline, cta1, cta2, cta1Url, cta2Url,
+  headline, subheadline, 
+  cta1, cta2, cta1Url, cta2Url,
+  numberOfButtons, cta1Style, cta2Style,
   backgroundType, backgroundImage, backgroundImages
 }: { 
-  headline: string, subheadline: string, cta1: string, cta2: string, cta1Url: string, cta2Url: string,
+  headline: string, subheadline: string, 
+  cta1: string, cta2: string, cta1Url: string, cta2Url: string,
+  numberOfButtons: number, cta1Style: string, cta2Style: string,
   backgroundType: 'color' | 'image' | 'carousel',
   backgroundImage: string,
   backgroundImages: string[]
@@ -118,6 +122,17 @@ const HeroPreview = ({
     }
   }
 
+  const getButtonStyle = (style: string) => {
+    switch(style) {
+      case 'primary':
+        return "bg-primary hover:bg-primary/90 text-primary-foreground";
+      case 'secondary':
+        return "bg-secondary hover:bg-secondary/90 text-secondary-foreground";
+      default:
+        return "bg-primary hover:bg-primary/90 text-primary-foreground";
+    }
+  };
+
   return (
     <div className="relative w-full bg-card dark:bg-gray-800 rounded-lg shadow-md text-center pointer-events-none overflow-hidden">
       {backgroundContent()}
@@ -134,12 +149,16 @@ const HeroPreview = ({
            (backgroundType === 'image' || backgroundType === 'carousel') ? "text-gray-200" : "text-muted-foreground dark:text-gray-300"
         )}>{subheadline}</p>
         <div className="flex justify-center gap-4">
-          <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-            <a href={cta1Url}>{cta1}</a>
-          </Button>
-          <Button asChild size="lg" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground">
-            <a href={cta2Url}>{cta2}</a>
-          </Button>
+          {numberOfButtons > 0 && (
+            <Button asChild size="lg" className={getButtonStyle(cta1Style)}>
+              <a href={cta1Url}>{cta1}</a>
+            </Button>
+          )}
+          {numberOfButtons > 1 && (
+            <Button asChild size="lg" className={getButtonStyle(cta2Style)}>
+              <a href={cta2Url}>{cta2}</a>
+            </Button>
+          )}
         </div>
       </div>
     </div>
@@ -278,26 +297,78 @@ const EditHeroForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData:
                       <Label htmlFor="subheadline">Subtítulo</Label>
                       <Textarea id="subheadline" value={formData.subheadline} onChange={(e) => setFormData({ ...formData, subheadline: e.target.value })} />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <Label htmlFor="cta1">Texto del Botón 1</Label>
-                        <Input id="cta1" value={formData.cta1} onChange={(e) => setFormData({ ...formData, cta1: e.target.value })} />
-                    </div>
-                    <div>
-                        <Label htmlFor="cta1Url">URL del Botón 1</Label>
-                        <Input id="cta1Url" value={formData.cta1Url} onChange={(e) => setFormData({ ...formData, cta1Url: e.target.value })} />
-                    </div>
+
+                  <Separator />
+
+                  <div>
+                    <Label htmlFor="numberOfButtons">Número de botones</Label>
+                    <Select onValueChange={(value) => setFormData({ ...formData, numberOfButtons: parseInt(value) })} defaultValue={String(formData.numberOfButtons)}>
+                      <SelectTrigger id="numberOfButtons">
+                        <SelectValue placeholder="Seleccionar número de botones" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">1</SelectItem>
+                        <SelectItem value="2">2</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <Label htmlFor="cta2">Texto del Botón 2</Label>
-                        <Input id="cta2" value={formData.cta2} onChange={(e) => setFormData({ ...formData, cta2: e.target.value })} />
+                  
+                  {formData.numberOfButtons > 0 && (
+                    <div className="space-y-4 border p-4 rounded-md">
+                      <h4 className="font-medium">Botón 1</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <Label htmlFor="cta1">Texto del Botón 1</Label>
+                            <Input id="cta1" value={formData.cta1} onChange={(e) => setFormData({ ...formData, cta1: e.target.value })} />
+                        </div>
+                        <div>
+                            <Label htmlFor="cta1Url">URL del Botón 1</Label>
+                            <Input id="cta1Url" value={formData.cta1Url} onChange={(e) => setFormData({ ...formData, cta1Url: e.target.value })} />
+                        </div>
+                      </div>
+                       <div>
+                        <Label htmlFor="cta1Style">Estilo del Botón 1</Label>
+                        <Select onValueChange={(value) => setFormData({ ...formData, cta1Style: value })} defaultValue={formData.cta1Style}>
+                          <SelectTrigger id="cta1Style">
+                            <SelectValue placeholder="Seleccionar estilo" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="primary">Primario</SelectItem>
+                            <SelectItem value="secondary">Secundario</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
-                    <div>
-                        <Label htmlFor="cta2Url">URL del Botón 2</Label>
-                        <Input id="cta2Url" value={formData.cta2Url} onChange={(e) => setFormData({ ...formData, cta2Url: e.target.value })} />
-                    </div>
-                  </div>
+                  )}
+
+                  {formData.numberOfButtons > 1 && (
+                     <div className="space-y-4 border p-4 rounded-md">
+                        <h4 className="font-medium">Botón 2</h4>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                              <Label htmlFor="cta2">Texto del Botón 2</Label>
+                              <Input id="cta2" value={formData.cta2} onChange={(e) => setFormData({ ...formData, cta2: e.target.value })} />
+                          </div>
+                          <div>
+                              <Label htmlFor="cta2Url">URL del Botón 2</Label>
+                              <Input id="cta2Url" value={formData.cta2Url} onChange={(e) => setFormData({ ...formData, cta2Url: e.target.value })} />
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="cta2Style">Estilo del Botón 2</Label>
+                          <Select onValueChange={(value) => setFormData({ ...formData, cta2Style: value })} defaultValue={formData.cta2Style}>
+                            <SelectTrigger id="cta2Style">
+                              <SelectValue placeholder="Seleccionar estilo" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="primary">Primario</SelectItem>
+                              <SelectItem value="secondary">Secundario</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                  )}
+                  
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="background">
@@ -596,6 +667,9 @@ const componentMap: { [key: string]: { preview: React.ComponentType<any>, edit: 
       cta2: 'Saber Más', 
       cta1Url: '#', 
       cta2Url: '#',
+      numberOfButtons: 2,
+      cta1Style: 'primary',
+      cta2Style: 'secondary',
       backgroundType: 'color',
       backgroundImage: 'https://placehold.co/1200x600.png',
       backgroundImages: [],
