@@ -1,3 +1,4 @@
+
 "use server";
 
 import { db, auth } from "@/lib/firebase";
@@ -9,11 +10,11 @@ import type { LandingPageData, LandingPageTheme, LandingPageComponent } from "@/
 const landingsCollection = collection(db, "landings");
 
 const getCurrentUser = (): Promise<User | null> => {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       unsubscribe();
       resolve(user);
-    });
+    }, reject);
   });
 };
 
@@ -110,7 +111,17 @@ export async function getUserLandings(): Promise<LandingPageData[]> {
         const q = query(landingsCollection, where("userId", "==", currentUser.uid));
         const querySnapshot = await getDocs(q);
         
-        return querySnapshot.docs.map(doc => doc.data() as LandingPageData);
+        const landings = querySnapshot.docs.map(doc => {
+            const data = doc.data() as Omit<LandingPageData, 'createdAt' | 'updatedAt'> & { createdAt: any, updatedAt: any };
+            return {
+                ...data,
+                // Firestore Timestamps need to be handled carefully in Server Components
+                // For now, we'll pass them as-is, but they might need conversion for the client
+                createdAt: data.createdAt,
+                updatedAt: data.updatedAt,
+            } as LandingPageData;
+        });
+        return landings;
 
     } catch (error) {
         console.error("Error fetching user landings: ", error);

@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -22,8 +23,20 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Skeleton } from "@/components/ui/skeleton"
-import { getUserLandings } from "@/services/landings"
+import { getUserLandings, deleteLandingPage } from "@/services/landings"
 import type { LandingPageData } from "@/lib/types"
+import { useToast } from "@/hooks/use-toast"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 function SiteSkeleton() {
   return (
@@ -31,7 +44,7 @@ function SiteSkeleton() {
       <CardHeader className="relative">
         <Skeleton className="aspect-video w-full rounded-md" />
       </CardHeader>
-      <CardContent className="flex-1">
+      <CardContent className="flex-1 pt-6">
         <Skeleton className="h-5 w-3/4 mb-2" />
         <Skeleton className="h-4 w-1/2" />
       </CardContent>
@@ -46,15 +59,34 @@ function SiteSkeleton() {
 export default function DashboardPage() {
   const [sites, setSites] = useState<LandingPageData[]>([]);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  const fetchSites = async () => {
+    const userSites = await getUserLandings();
+    setSites(userSites);
+    setLoading(false);
+  };
 
   useEffect(() => {
-    async function fetchSites() {
-      const userSites = await getUserLandings();
-      setSites(userSites);
-      setLoading(false);
-    }
     fetchSites();
   }, []);
+
+  const handleDelete = async (siteId: string) => {
+    const success = await deleteLandingPage(siteId);
+    if (success) {
+      toast({
+        title: "¡Sitio eliminado!",
+        description: "Tu página de aterrizaje ha sido eliminada.",
+      });
+      fetchSites(); // Refresh the list
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Error al eliminar",
+        description: "No se pudo eliminar el sitio. Inténtalo de nuevo.",
+      });
+    }
+  }
 
 
   return (
@@ -83,41 +115,61 @@ export default function DashboardPage() {
         ) : (
           sites.map((site) => (
             <Card key={site.id} className="flex flex-col">
-              <CardHeader className="relative">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      aria-haspopup="true"
-                      size="icon"
-                      variant="ghost"
-                      className="absolute right-2 top-2 h-8 w-8"
-                    >
-                      <MoreHorizontal className="h-4 w-4" />
-                      <span className="sr-only">Toggle menu</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                    <DropdownMenuItem>
-                      <Link href={`/designer/${site.id}`} className="flex items-center w-full">
-                        <Pencil className="mr-2 h-4 w-4" /> Editar
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Trash2 className="mr-2 h-4 w-4" /> Eliminar
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+              <CardHeader className="relative p-0">
+                 <div className="absolute right-2 top-2 z-10">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          aria-haspopup="true"
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 bg-white/80 hover:bg-white"
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                          <span className="sr-only">Toggle menu</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                        <DropdownMenuItem asChild>
+                          <Link href={`/designer/${site.id}`} className="flex items-center w-full cursor-pointer">
+                            <Pencil className="mr-2 h-4 w-4" /> Editar
+                          </Link>
+                        </DropdownMenuItem>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer">
+                              <Trash2 className="mr-2 h-4 w-4" /> Eliminar
+                            </DropdownMenuItem>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Esta acción no se puede deshacer. Esto eliminará permanentemente el sitio <strong>{site.name}</strong>.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDelete(site.id)} className="bg-red-600 hover:bg-red-700">
+                                Sí, eliminar
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                 </div>
                 <Image
                   alt="Site preview"
-                  className="aspect-video w-full rounded-md object-cover"
+                  className="aspect-video w-full rounded-t-lg object-cover"
                   data-ai-hint="website screenshot"
                   height="310"
                   src={"https://placehold.co/600x400.png"}
                   width="550"
                 />
               </CardHeader>
-              <CardContent className="flex-1">
+              <CardContent className="flex-1 pt-6">
                 <CardTitle className="text-lg">{site.name}</CardTitle>
                 <CardDescription>{site.subdomain}.landed.co</CardDescription>
               </CardContent>
