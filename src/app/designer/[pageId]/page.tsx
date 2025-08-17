@@ -5,6 +5,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from "next/link"
 import { useParams } from 'next/navigation';
+import { v4 as uuidv4 } from 'uuid';
 import {
   ArrowLeft,
   GripVertical,
@@ -53,13 +54,11 @@ import { cn } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SidebarProvider, Sidebar, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
+import { getLandingPage } from '@/services/landings';
+import type { LandingPageData, LandingPageComponent, LandingPageTheme } from '@/lib/types';
 
 
-type ComponentData = {
-  id: number;
-  name: string;
-  props: { [key: string]: any };
-};
+type ComponentData = LandingPageComponent;
 
 // --- Component Previews ---
 
@@ -470,23 +469,11 @@ const componentMap: { [key: string]: { preview: React.ComponentType<any>, edit: 
 };
 
 const initialComponents: ComponentData[] = [
-    { id: 1, name: 'Sección de Héroe', props: componentMap['Sección de Héroe'].defaultProps },
-    { id: 2, name: 'Características', props: componentMap['Características'].defaultProps },
+    { id: uuidv4(), name: 'Sección de Héroe', props: componentMap['Sección de Héroe'].defaultProps },
+    { id: uuidv4(), name: 'Características', props: componentMap['Características'].defaultProps },
 ];
 
-export default function DesignerPage() {
-  const params = useParams();
-  const pageId = params.pageId as string;
-  const isNew = pageId === 'new';
-
-  const [pageName, setPageName] = useState(isNew ? "Nueva Página de Aterrizaje" : "Lanzamiento Acme Inc.");
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [components, setComponents] = useState<ComponentData[]>(initialComponents);
-  const [editingComponent, setEditingComponent] = useState<ComponentData | null>(null);
-  const [viewport, setViewport] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
-
-  // Theme state
-  const [theme, setTheme] = useState({
+const defaultTheme: LandingPageTheme = {
     primary: '#3F51B5', // Deep Indigo
     secondary: '#7986CB', // Lighter Indigo for secondary elements
     accent: '#7C4DFF', // Vivid Violet
@@ -495,7 +482,46 @@ export default function DesignerPage() {
     background1: '#E8EAF6', // Light Indigo
     background2: '#FFFFFF', // White
     fontFamily: 'Inter',
-  });
+};
+
+export default function DesignerPage() {
+  const params = useParams();
+  const pageId = params.pageId as string;
+  const isNew = pageId === 'new';
+
+  const [landingData, setLandingData] = useState<LandingPageData | null>(null);
+  const [loading, setLoading] = useState(!isNew);
+  const [pageName, setPageName] = useState("Cargando...");
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [components, setComponents] = useState<ComponentData[]>([]);
+  const [editingComponent, setEditingComponent] = useState<ComponentData | null>(null);
+  const [viewport, setViewport] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
+  const [theme, setTheme] = useState<LandingPageTheme>(defaultTheme);
+
+
+  useEffect(() => {
+    if (isNew) {
+      setPageName("Nueva Página de Aterrizaje");
+      setComponents(initialComponents);
+      setTheme(defaultTheme);
+    } else {
+      const fetchPageData = async () => {
+        setLoading(true);
+        const data = await getLandingPage(pageId);
+        if (data) {
+          setLandingData(data);
+          setPageName(data.name);
+          setComponents(data.components);
+          setTheme(data.theme);
+        } else {
+          // Handle page not found, maybe redirect or show an error
+          setPageName("Página no encontrada");
+        }
+        setLoading(false);
+      };
+      fetchPageData();
+    }
+  }, [pageId, isNew]);
 
 
   // Drag and drop state
@@ -507,6 +533,7 @@ export default function DesignerPage() {
   };
 
   function hexToHsl(H: string) {
+    if (!H) return '0 0% 0%';
     let r = 0, g = 0, b = 0;
     if (H.length == 4) {
       r = parseInt("0x" + H[1] + H[1]);
@@ -546,15 +573,15 @@ export default function DesignerPage() {
   const landingPreviewId = "landing-preview-canvas";
 
   const addComponent = (componentName: string) => {
-    const newComponent = {
-      id: Date.now(),
+    const newComponent: LandingPageComponent = {
+      id: uuidv4(),
       name: componentName,
       props: componentMap[componentName].defaultProps
     };
     setComponents(prev => [...prev, newComponent]);
   };
   
-  const removeComponent = (id: number) => {
+  const removeComponent = (id: string) => {
     setComponents(prev => prev.filter(c => c.id !== id));
   };
 
@@ -750,7 +777,7 @@ export default function DesignerPage() {
                   </div>
                   <div className="space-y-2">
                     <Label>Fuente</Label>
-                    <Select value={theme.fontFamily} onValueChange={(value) => handleThemeChange('fontFamily', value)}>
+                    <Select value={theme.fontFamily} onValueChange={(value) => handleThemeChange('fontFamily', value as LandingPageTheme['fontFamily'])}>
                       <SelectTrigger>
                         <SelectValue placeholder="Seleccionar fuente" />
                       </SelectTrigger>
