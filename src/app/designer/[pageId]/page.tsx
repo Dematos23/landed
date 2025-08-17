@@ -21,6 +21,7 @@ import {
   ChevronDown,
   Pencil,
   Palette,
+  Upload,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -29,6 +30,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Separator } from "@/components/ui/separator"
 import {
   Tooltip,
@@ -63,20 +72,80 @@ type ComponentData = LandingPageComponent;
 
 // --- Component Previews ---
 
-const HeroPreview = ({ headline, subheadline, cta1, cta2, cta1Url, cta2Url }: { headline: string, subheadline: string, cta1: string, cta2: string, cta1Url: string, cta2Url: string }) => (
-  <div className="w-full bg-card dark:bg-gray-800 rounded-lg shadow-md p-8 text-center pointer-events-none">
-    <h1 className="text-4xl font-bold text-card-foreground dark:text-white mb-4">{headline}</h1>
-    <p className="text-lg text-muted-foreground dark:text-gray-300 mb-6">{subheadline}</p>
-    <div className="flex justify-center gap-4">
-      <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-        <a href={cta1Url}>{cta1}</a>
-      </Button>
-      <Button asChild size="lg" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground">
-        <a href={cta2Url}>{cta2}</a>
-      </Button>
+const HeroPreview = ({ 
+  headline, subheadline, cta1, cta2, cta1Url, cta2Url,
+  backgroundType, backgroundImage, backgroundImages
+}: { 
+  headline: string, subheadline: string, cta1: string, cta2: string, cta1Url: string, cta2Url: string,
+  backgroundType: 'color' | 'image' | 'carousel',
+  backgroundImage: string,
+  backgroundImages: string[]
+}) => {
+
+  const backgroundContent = () => {
+    switch (backgroundType) {
+      case 'image':
+        return (
+          <div 
+            className="absolute inset-0 bg-cover bg-center rounded-lg" 
+            style={{ backgroundImage: `url(${backgroundImage})` }}
+          />
+        );
+      case 'carousel':
+        return (
+          <Carousel className="absolute inset-0 w-full h-full rounded-lg" opts={{ loop: true }}>
+            <CarouselContent>
+              {backgroundImages.map((img, index) => (
+                <CarouselItem key={index}>
+                  <div 
+                    className="h-full bg-cover bg-center"
+                    style={{ backgroundImage: `url(${img})` }}
+                  />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            {backgroundImages.length > 1 && (
+              <>
+                <CarouselPrevious className="left-4" />
+                <CarouselNext className="right-4" />
+              </>
+            )}
+          </Carousel>
+        );
+      case 'color':
+      default:
+        return null; // The background color will be handled by the parent div class
+    }
+  }
+
+  return (
+    <div className="relative w-full bg-card dark:bg-gray-800 rounded-lg shadow-md text-center pointer-events-none overflow-hidden">
+      {backgroundContent()}
+      <div className={cn(
+        "relative p-8",
+        (backgroundType === 'image' || backgroundType === 'carousel') && "bg-black/50 rounded-lg text-white"
+      )}>
+        <h1 className={cn(
+          "text-4xl font-bold mb-4",
+          (backgroundType === 'image' || backgroundType === 'carousel') ? "text-white" : "text-card-foreground dark:text-white"
+        )}>{headline}</h1>
+        <p className={cn(
+          "text-lg mb-6",
+           (backgroundType === 'image' || backgroundType === 'carousel') ? "text-gray-200" : "text-muted-foreground dark:text-gray-300"
+        )}>{subheadline}</p>
+        <div className="flex justify-center gap-4">
+          <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+            <a href={cta1Url}>{cta1}</a>
+          </Button>
+          <Button asChild size="lg" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground">
+            <a href={cta2Url}>{cta2}</a>
+          </Button>
+        </div>
+      </div>
     </div>
-  </div>
-);
+  )
+};
+
 
 const FeaturesPreview = ({ title, features }: { title: string, features: { title: string, description: string }[] }) => (
   <div className="w-full bg-card dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none">
@@ -158,48 +227,153 @@ const FooterPreview = ({ copyright, links }: { copyright: string, links: { text:
 
 const EditHeroForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData: any) => void, onCancel: () => void }) => {
     const [formData, setFormData] = useState(data.props);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         onSave(formData);
     };
+
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const newImage = reader.result as string;
+                const updatedImages = [...(formData.backgroundImages || []), newImage];
+                setFormData({ 
+                    ...formData, 
+                    backgroundImages: updatedImages,
+                    // If it's single image mode, also set it as the main one
+                    ...(formData.backgroundType === 'image' && { backgroundImage: newImage })
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleImageSelect = (imgUrl: string) => {
+      if (formData.backgroundType === 'image') {
+        setFormData({ ...formData, backgroundImage: imgUrl });
+      } else if (formData.backgroundType === 'carousel') {
+        // For carousel, you might want a multi-select logic, but for now we'll keep it simple
+        // This function will primarily work for single image selection
+      }
+    };
+
+
     return (
         <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 space-y-4">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white">Editar Sección de Héroe</h3>
-            <div>
-                <Label htmlFor="headline">Titular</Label>
-                <Input id="headline" value={formData.headline} onChange={(e) => setFormData({ ...formData, headline: e.target.value })} />
-            </div>
-            <div>
-                <Label htmlFor="subheadline">Subtítulo</Label>
-                <Textarea id="subheadline" value={formData.subheadline} onChange={(e) => setFormData({ ...formData, subheadline: e.target.value })} />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                  <Label htmlFor="cta1">Texto del Botón 1</Label>
-                  <Input id="cta1" value={formData.cta1} onChange={(e) => setFormData({ ...formData, cta1: e.target.value })} />
-              </div>
-              <div>
-                  <Label htmlFor="cta1Url">URL del Botón 1</Label>
-                  <Input id="cta1Url" value={formData.cta1Url} onChange={(e) => setFormData({ ...formData, cta1Url: e.target.value })} />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                  <Label htmlFor="cta2">Texto del Botón 2</Label>
-                  <Input id="cta2" value={formData.cta2} onChange={(e) => setFormData({ ...formData, cta2: e.target.value })} />
-              </div>
-              <div>
-                  <Label htmlFor="cta2Url">URL del Botón 2</Label>
-                  <Input id="cta2Url" value={formData.cta2Url} onChange={(e) => setFormData({ ...formData, cta2Url: e.target.value })} />
-              </div>
-            </div>
-            <div className="flex justify-end gap-2">
+            
+            <Accordion type="multiple" defaultValue={['content', 'background']}>
+              <AccordionItem value="content">
+                <AccordionTrigger>Contenido</AccordionTrigger>
+                <AccordionContent className="space-y-4 pt-4">
+                  <div>
+                      <Label htmlFor="headline">Titular</Label>
+                      <Input id="headline" value={formData.headline} onChange={(e) => setFormData({ ...formData, headline: e.target.value })} />
+                  </div>
+                  <div>
+                      <Label htmlFor="subheadline">Subtítulo</Label>
+                      <Textarea id="subheadline" value={formData.subheadline} onChange={(e) => setFormData({ ...formData, subheadline: e.target.value })} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <Label htmlFor="cta1">Texto del Botón 1</Label>
+                        <Input id="cta1" value={formData.cta1} onChange={(e) => setFormData({ ...formData, cta1: e.target.value })} />
+                    </div>
+                    <div>
+                        <Label htmlFor="cta1Url">URL del Botón 1</Label>
+                        <Input id="cta1Url" value={formData.cta1Url} onChange={(e) => setFormData({ ...formData, cta1Url: e.target.value })} />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <Label htmlFor="cta2">Texto del Botón 2</Label>
+                        <Input id="cta2" value={formData.cta2} onChange={(e) => setFormData({ ...formData, cta2: e.target.value })} />
+                    </div>
+                    <div>
+                        <Label htmlFor="cta2Url">URL del Botón 2</Label>
+                        <Input id="cta2Url" value={formData.cta2Url} onChange={(e) => setFormData({ ...formData, cta2Url: e.target.value })} />
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="background">
+                <AccordionTrigger>Fondo</AccordionTrigger>
+                <AccordionContent className="space-y-4 pt-4">
+                   <div>
+                     <Label>Tipo de Fondo</Label>
+                     <RadioGroup
+                        defaultValue={formData.backgroundType}
+                        onValueChange={(value) => setFormData({ ...formData, backgroundType: value })}
+                        className="flex gap-4 mt-2"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="color" id="r-color" />
+                          <Label htmlFor="r-color">Color</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="image" id="r-image" />
+                          <Label htmlFor="r-image">Imagen</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="carousel" id="r-carousel" />
+                          <Label htmlFor="r-carousel">Carrusel</Label>
+                        </div>
+                      </RadioGroup>
+                   </div>
+                   {(formData.backgroundType === 'image' || formData.backgroundType === 'carousel') && (
+                     <div>
+                       <Label>Imágenes</Label>
+                       <div className="grid grid-cols-3 gap-2 mt-2">
+                         {(formData.backgroundImages || []).map((img: string, index: number) => (
+                            <div 
+                              key={index} 
+                              className={cn(
+                                "relative rounded-md overflow-hidden aspect-video cursor-pointer",
+                                formData.backgroundType === 'image' && formData.backgroundImage === img && "ring-2 ring-primary ring-offset-2"
+                              )}
+                              onClick={() => handleImageSelect(img)}
+                            >
+                                <img src={img} alt={`fondo ${index + 1}`} className="w-full h-full object-cover" />
+                            </div>
+                         ))}
+                         <Button
+                           type="button"
+                           variant="outline"
+                           className="aspect-video w-full h-full flex flex-col items-center justify-center"
+                           onClick={() => fileInputRef.current?.click()}
+                         >
+                           <Upload className="h-6 w-6 mb-2" />
+                           Subir
+                         </Button>
+                         <input
+                           type="file"
+                           ref={fileInputRef}
+                           className="hidden"
+                           accept="image/*"
+                           onChange={handleImageUpload}
+                         />
+                       </div>
+                       <p className="text-xs text-muted-foreground mt-2">
+                         {formData.backgroundType === 'image' ? "Selecciona una imagen para el fondo." : "Sube una o más imágenes para el carrusel."}
+                       </p>
+                     </div>
+                   )}
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+            
+            <div className="flex justify-end gap-2 pt-4">
                 <Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
                 <Button type="submit">Guardar</Button>
             </div>
         </form>
     );
 };
+
 
 const EditFeaturesForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData: any) => void, onCancel: () => void }) => {
     const [formData, setFormData] = useState(data.props);
@@ -415,7 +589,17 @@ const componentMap: { [key: string]: { preview: React.ComponentType<any>, edit: 
   'Sección de Héroe': { 
     preview: HeroPreview, 
     edit: EditHeroForm,
-    defaultProps: { headline: 'Tu Producto Increíble', subheadline: 'Un eslogan convincente que capta la atención.', cta1: 'Comenzar', cta2: 'Saber Más', cta1Url: '#', cta2Url: '#' }
+    defaultProps: { 
+      headline: 'Tu Producto Increíble', 
+      subheadline: 'Un eslogan convincente que capta la atención.', 
+      cta1: 'Comenzar', 
+      cta2: 'Saber Más', 
+      cta1Url: '#', 
+      cta2Url: '#',
+      backgroundType: 'color',
+      backgroundImage: 'https://placehold.co/1200x600.png',
+      backgroundImages: [],
+    }
   },
   'Características': { 
     preview: FeaturesPreview, 
