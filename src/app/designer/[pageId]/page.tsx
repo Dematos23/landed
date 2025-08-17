@@ -4,7 +4,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from "next/link"
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { v4 as uuidv4 } from 'uuid';
 import {
   ArrowLeft,
@@ -53,9 +53,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { cn } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { SidebarProvider, Sidebar, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
-import { getLandingPage } from '@/services/landings';
+import { SidebarProvider, Sidebar, SidebarTrigger, SidebarInset, useSidebar } from '@/components/ui/sidebar';
+import { getLandingPage, createLandingPage, updateLandingPage } from '@/services/landings';
 import type { LandingPageData, LandingPageComponent, LandingPageTheme } from '@/lib/types';
+import { useToast } from "@/hooks/use-toast";
 
 
 type ComponentData = LandingPageComponent;
@@ -484,13 +485,16 @@ const defaultTheme: LandingPageTheme = {
     fontFamily: 'Inter',
 };
 
-export default function DesignerPage() {
+function DesignerPageContent() {
   const params = useParams();
+  const router = useRouter();
+  const { toast } = useToast();
   const pageId = params.pageId as string;
   const isNew = pageId === 'new';
 
   const [landingData, setLandingData] = useState<LandingPageData | null>(null);
   const [loading, setLoading] = useState(!isNew);
+  const [isSaving, setIsSaving] = useState(false);
   const [pageName, setPageName] = useState("Cargando...");
   const [isEditingName, setIsEditingName] = useState(false);
   const [components, setComponents] = useState<ComponentData[]>([]);
@@ -522,6 +526,45 @@ export default function DesignerPage() {
       fetchPageData();
     }
   }, [pageId, isNew]);
+
+  const handleSaveDraft = async () => {
+    setIsSaving(true);
+    try {
+      const pageData = {
+        name: pageName,
+        components,
+        theme,
+      };
+
+      if (isNew) {
+        const newPageId = await createLandingPage(pageData);
+        if (newPageId) {
+          toast({
+            title: "¡Página creada!",
+            description: "Tu nueva página ha sido guardada como borrador.",
+          });
+          router.replace(`/designer/${newPageId}`);
+        } else {
+          throw new Error("No se pudo obtener el ID de la nueva página.");
+        }
+      } else {
+        await updateLandingPage(pageId, pageData);
+        toast({
+          title: "¡Borrador guardado!",
+          description: "Tus cambios han sido guardados.",
+        });
+      }
+    } catch (error) {
+      console.error("Error saving draft:", error);
+      toast({
+        variant: "destructive",
+        title: "Error al guardar",
+        description: "No se pudieron guardar los cambios. Inténtalo de nuevo.",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
 
   // Drag and drop state
@@ -677,7 +720,6 @@ export default function DesignerPage() {
           #${landingPreviewId} .hover\\:bg-secondary\\/90:hover { background-color: hsla(${hexToHsl(theme.secondary).replace(/ /g, ', ')}, 0.9); }
         `}
       </style>
-    <SidebarProvider>
       <div className="flex h-screen w-full flex-col bg-background">
         <header className="flex h-14 items-center gap-4 border-b bg-card px-4 sticky top-0 z-40">
           <SidebarTrigger className="md:hidden" />
@@ -732,7 +774,9 @@ export default function DesignerPage() {
           </div>
           <Separator orientation="vertical" className="h-8 hidden md:block" />
           <div className="flex items-center gap-2">
-            <Button variant="outline">Guardar Borrador</Button>
+            <Button variant="outline" onClick={handleSaveDraft} disabled={isSaving}>
+              {isSaving ? "Guardando..." : "Guardar Borrador"}
+            </Button>
             <Button>Publicar</Button>
           </div>
         </header>
@@ -904,7 +948,17 @@ export default function DesignerPage() {
           </SidebarInset>
         </div>
       </div>
-    </SidebarProvider>
     </>
-  )
+  );
 }
+
+
+export default function DesignerPage() {
+  return (
+    <SidebarProvider>
+      <DesignerPageContent />
+    </SidebarProvider>
+  );
+}
+
+    
