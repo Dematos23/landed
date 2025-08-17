@@ -53,7 +53,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { cn } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { SidebarProvider, Sidebar, SidebarTrigger, SidebarInset, useSidebar } from '@/components/ui/sidebar';
+import { SidebarProvider, Sidebar, SidebarTrigger, SidebarInset, useSidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
 import { getLandingPage, createLandingPage, updateLandingPage } from '@/services/landings';
 import type { LandingPageData, LandingPageComponent, LandingPageTheme } from '@/lib/types';
 import { useToast } from "@/hooks/use-toast";
@@ -476,6 +476,7 @@ const initialComponents: ComponentData[] = [
 
 const defaultTheme: LandingPageTheme = {
     primary: '#3F51B5', // Deep Indigo
+    primaryForeground: '#FFFFFF', // White
     secondary: '#7986CB', // Lighter Indigo for secondary elements
     accent: '#7C4DFF', // Vivid Violet
     foreground: '#1A237E', // Darker Indigo for titles
@@ -693,6 +694,7 @@ function DesignerPageContent() {
         {`
           #${landingPreviewId} {
             --primary-hsl: ${hexToHsl(theme.primary)};
+            --primary-foreground-hsl: ${hexToHsl(theme.primaryForeground)};
             --secondary-hsl: ${hexToHsl(theme.secondary)};
             --accent-hsl: ${hexToHsl(theme.accent)};
             --foreground-hsl: ${hexToHsl(theme.foreground)};
@@ -709,7 +711,7 @@ function DesignerPageContent() {
           #${landingPreviewId} .text-muted-foreground { color: hsl(var(--muted-foreground-hsl)); }
           
           #${landingPreviewId} .bg-primary { background-color: hsl(var(--primary-hsl)); }
-          #${landingPreviewId} .text-primary-foreground { color: white; } /* Assuming white foreground for primary for now */
+          #${landingPreviewId} .text-primary-foreground { color: hsl(var(--primary-foreground-hsl)); }
           #${landingPreviewId} .hover\\:bg-primary\\/90:hover { background-color: hsla(${hexToHsl(theme.primary).replace(/ /g, ', ')}, 0.9); }
           #${landingPreviewId} .bg-primary\\/10 { background-color: hsla(${hexToHsl(theme.primary).split(' ').join(', ')}, 0.1); }
           #${landingPreviewId} .bg-primary\\/5 { background-color: hsla(${hexToHsl(theme.primary).split(' ').join(', ')}, 0.05); }
@@ -794,6 +796,10 @@ function DesignerPageContent() {
                   <div className="space-y-2">
                       <Label>Primario</Label>
                       <Input type="color" value={theme.primary} onChange={(e) => handleThemeChange('primary', e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                      <Label>Color Texto Botón</Label>
+                      <Input type="color" value={theme.primaryForeground} onChange={(e) => handleThemeChange('primaryForeground', e.target.value)} />
                   </div>
                    <div className="space-y-2">
                       <Label>Secundario</Label>
@@ -960,5 +966,3 @@ export default function DesignerPage() {
     </SidebarProvider>
   );
 }
-
-    

@@ -41,6 +41,7 @@ export async function createLandingPage(data: Partial<LandingPageData>): Promise
       components: data.components || [],
       theme: data.theme || {
         primary: '#3F51B5',
+        primaryForeground: '#FFFFFF',
         secondary: '#7986CB',
         accent: '#7C4DFF',
         foreground: '#1A237E',

@@ -19,6 +19,7 @@ export interface LandingPageComponent {
  */
 export interface LandingPageTheme {
   primary: string;         // Primary color (buttons, accents)
+  primaryForeground: string; // Color for text on primary elements (like buttons)
   secondary: string;       // Secondary color
   accent: string;          // Accent color
   foreground: string;      // Color for headings and primary text
