@@ -77,9 +77,6 @@ export default function DashboardLayout({
           <div className="flex-1">
             <h1 className="text-lg font-semibold">Dashboard</h1>
           </div>
-          <Button variant="outline" size="sm">
-            Actualizar
-          </Button>
           <UserNav />
         </header>
         <main className="flex-1 p-4 sm:p-6 bg-background/95">
