@@ -23,6 +23,8 @@ import {
   Pencil,
   Palette,
   Upload,
+  Copy,
+  Check,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -38,6 +40,15 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogClose
+} from "@/components/ui/dialog"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Separator } from "@/components/ui/separator"
 import {
@@ -931,10 +942,11 @@ const defaultTheme: LandingPageTheme = {
 
 // This function creates the initial state for a new page
 const createDefaultLandingData = (): Omit<LandingPageData, 'userId' | 'createdAt' | 'updatedAt'> => {
+  const id = uuidv4();
   return {
-    id: uuidv4(),
+    id: id,
     name: "Nueva Página de Aterrizaje",
-    subdomain: '',
+    subdomain: `pagina-${id.substring(0, 8)}`,
     components: [
       { id: uuidv4(), name: 'Sección de Héroe', props: componentMap['Sección de Héroe'].defaultProps },
       { id: uuidv4(), name: 'Características', props: componentMap['Características'].defaultProps },
@@ -958,6 +970,9 @@ function DesignerPageContent() {
   const [editingComponent, setEditingComponent] = useState<ComponentData | null>(null);
   const [viewport, setViewport] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [isEditingName, setIsEditingName] = useState(false);
+  const [showPublishModal, setShowPublishModal] = useState(false);
+  const [publicUrl, setPublicUrl] = useState('');
+  const [isCopied, setIsCopied] = useState(false);
   
   const getDraftKey = (pageId: string) => `landing-page-draft-${pageId}`;
 
@@ -968,7 +983,8 @@ function DesignerPageContent() {
 
     const loadPage = async () => {
       if (savedDraft) {
-        setLandingData(JSON.parse(savedDraft));
+        const draftData = JSON.parse(savedDraft);
+        setLandingData(draftData);
         setLoading(false);
       } else if (isNew) {
         const defaultData = createDefaultLandingData();
@@ -998,7 +1014,7 @@ function DesignerPageContent() {
   // This effect saves any changes to landingData to localStorage
   useEffect(() => {
     if (!loading) {
-      const draftKey = getDraftKey(landingData.id === 'new' && isNew ? 'new' : landingData.id);
+      const draftKey = getDraftKey(isNew ? 'new' : landingData.id);
       localStorage.setItem(draftKey, JSON.stringify(landingData));
     }
   }, [landingData, loading, isNew]);
@@ -1022,30 +1038,36 @@ function DesignerPageContent() {
   
  const handleSaveDraft = async () => {
     setIsSaving(true);
+    let success = false;
+    let pageIdToUse = isNew ? landingData.id : pageIdFromUrl;
+
     try {
-        const pageExists = await getLandingPage(landingData.id);
+        const pageExists = !isNew ? await getLandingPage(pageIdToUse) : null;
 
         if (pageExists) {
-            await updateLandingPage(landingData.id, landingData);
-            toast({
-                title: "¡Borrador guardado!",
-                description: "Tus cambios han sido guardados.",
-            });
+            await updateLandingPage(pageIdToUse, landingData);
+            success = true;
         } else {
-            const success = await createLandingPage(landingData);
-            if (success) {
-                toast({
-                    title: "¡Página creada!",
-                    description: "Tu nueva página ha sido guardada como borrador.",
-                });
+            const created = await createLandingPage(landingData);
+            if (created) {
                 if (isNew) {
                     localStorage.removeItem(getDraftKey('new'));
+                    localStorage.setItem(getDraftKey(landingData.id), JSON.stringify(landingData));
                     router.replace(`/designer/${landingData.id}`);
                 }
-            } else {
-                 throw new Error("No se pudo crear la nueva página.");
+                success = true;
             }
         }
+        
+        if (success) {
+          toast({
+              title: "¡Borrador guardado!",
+              description: "Tus cambios han sido guardados.",
+          });
+        } else {
+          throw new Error("No se pudo guardar la página.");
+        }
+
     } catch (error) {
         console.error("Error saving draft:", error);
         toast({
@@ -1053,9 +1075,11 @@ function DesignerPageContent() {
             title: "Error al guardar",
             description: "No se pudieron guardar los cambios. Inténtalo de nuevo.",
         });
+        success = false;
     } finally {
         setIsSaving(false);
     }
+    return success;
 };
 
 
@@ -1079,6 +1103,47 @@ function DesignerPageContent() {
     } finally {
       setTimeout(() => setIsSaving(false), 300);
     }
+  };
+
+  const handlePublish = async () => {
+    const saved = await handleSaveDraft();
+    if (!saved) {
+      toast({
+        variant: "destructive",
+        title: "Error de publicación",
+        description: "Primero se deben guardar los cambios. Inténtalo de nuevo.",
+      });
+      return;
+    }
+  
+    setIsSaving(true);
+    try {
+      const pageIdToPublish = isNew ? landingData.id : pageIdFromUrl;
+      await updateLandingPage(pageIdToPublish, { isPublished: true });
+      const url = `${window.location.protocol}//${landingData.subdomain}.landed.co`;
+      setPublicUrl(url);
+      setShowPublishModal(true);
+      toast({
+        title: "¡Página publicada!",
+        description: "Tu página ya está disponible públicamente.",
+      });
+    } catch (error) {
+      console.error("Error publishing page:", error);
+      toast({
+        variant: "destructive",
+        title: "Error al publicar",
+        description: "No se pudo publicar la página. Inténtalo de nuevo.",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(publicUrl).then(() => {
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    });
   };
 
   // Drag and drop state
@@ -1304,7 +1369,7 @@ function DesignerPageContent() {
             <Button variant="outline" onClick={handleSaveDraft} disabled={isSaving}>
               {isSaving ? "Guardando..." : "Guardar Borrador"}
             </Button>
-            <Button>Publicar</Button>
+            <Button onClick={handlePublish} disabled={isSaving}>Publicar</Button>
           </div>
         </header>
         <div className="flex flex-1 overflow-hidden">
@@ -1492,6 +1557,39 @@ function DesignerPageContent() {
           </SidebarInset>
         </div>
       </div>
+      <Dialog open={showPublishModal} onOpenChange={setShowPublishModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>¡Página Publicada!</DialogTitle>
+            <DialogDescription>
+              Tu página está ahora en línea. Puedes compartir este enlace con quien quieras.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center space-x-2">
+            <div className="grid flex-1 gap-2">
+              <Label htmlFor="link" className="sr-only">
+                Enlace
+              </Label>
+              <Input
+                id="link"
+                defaultValue={publicUrl}
+                readOnly
+              />
+            </div>
+            <Button type="submit" size="sm" className="px-3" onClick={copyToClipboard}>
+              <span className="sr-only">Copiar</span>
+              {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+            </Button>
+          </div>
+          <DialogFooter className="sm:justify-start">
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">
+                Cerrar
+              </Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
