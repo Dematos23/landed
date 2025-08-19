@@ -294,7 +294,7 @@ export default function PreviewPage() {
           .hover\\:bg-secondary\\/90:hover { background-color: hsla(${hexToHsl(theme.secondary).replace(/ /g, ', ')}, 0.9); }
         `}
       </style>
-      <main>
+      <main className="flex flex-col items-center">
         {data.components.map((component) => {
           const ComponentPreview = componentMap[component.name];
           if (!ComponentPreview) return null;
