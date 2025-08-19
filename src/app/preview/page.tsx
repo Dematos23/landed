@@ -11,73 +11,42 @@ import type { LandingPageComponent, LandingPageTheme, LandingPageData } from '@/
 // --- Component Previews ---
 
 const HeroPreview = ({ 
-  headline, subheadline, cta1, cta2, cta1Url, cta2Url,
-  backgroundType, backgroundImage, backgroundImages
+  headline, subheadline, 
+  cta1, cta2, cta1Url, cta2Url,
+  numberOfButtons, cta1Style, cta2Style
 }: { 
-  headline: string, subheadline: string, cta1: string, cta2: string, cta1Url: string, cta2Url: string,
-  backgroundType: 'color' | 'image' | 'carousel',
-  backgroundImage: string,
-  backgroundImages: string[]
+  headline: string, subheadline: string, 
+  cta1: string, cta2: string, cta1Url: string, cta2Url: string,
+  numberOfButtons: number, cta1Style: string, cta2Style: string
 }) => {
 
-  const backgroundContent = () => {
-    switch (backgroundType) {
-      case 'image':
-        return (
-          <div 
-            className="absolute inset-0 bg-cover bg-center" 
-            style={{ backgroundImage: `url(${backgroundImage})` }}
-          />
-        );
-      case 'carousel':
-        return (
-          <Carousel className="absolute inset-0 w-full h-full" opts={{ loop: true }}>
-            <CarouselContent>
-              {backgroundImages.map((img, index) => (
-                <CarouselItem key={index}>
-                  <div 
-                    className="h-full bg-cover bg-center"
-                    style={{ backgroundImage: `url(${img})` }}
-                  />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            {backgroundImages.length > 1 && (
-              <>
-                <CarouselPrevious className="left-4" />
-                <CarouselNext className="right-4" />
-              </>
-            )}
-          </Carousel>
-        );
-      case 'color':
+  const getButtonStyle = (style: string) => {
+    switch(style) {
+      case 'primary':
+        return "bg-primary hover:bg-primary/90 text-primary-foreground";
+      case 'secondary':
+        return "bg-secondary hover:bg-secondary/90 text-secondary-foreground";
       default:
-        return null; 
+        return "bg-primary hover:bg-primary/90 text-primary-foreground";
     }
-  }
+  };
 
   return (
-    <section className="relative w-full bg-card text-center overflow-hidden py-20 md:py-32 lg:py-40">
-      {backgroundContent()}
-      <div className={cn(
-        "relative container px-4 md:px-6",
-        (backgroundType === 'image' || backgroundType === 'carousel') && "bg-black/50 py-10 rounded-xl"
-      )}>
-        <h1 className={cn(
-          "text-4xl md:text-5xl lg:text-6xl font-bold mb-4",
-          (backgroundType === 'image' || backgroundType === 'carousel') ? "text-white" : "text-card-foreground"
-        )}>{headline}</h1>
-        <p className={cn(
-          "text-lg md:text-xl max-w-3xl mx-auto mb-8",
-           (backgroundType === 'image' || backgroundType === 'carousel') ? "text-gray-200" : "text-muted-foreground"
-        )}>{subheadline}</p>
+    <section className="w-full bg-card text-center py-20 md:py-32 lg:py-40">
+      <div className="container px-4 md:px-6">
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-card-foreground mb-4">{headline}</h1>
+        <p className="text-lg md:text-xl max-w-3xl mx-auto text-muted-foreground mb-8">{subheadline}</p>
         <div className="flex justify-center gap-4">
-          <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-            <a href={cta1Url}>{cta1}</a>
-          </Button>
-          <Button asChild size="lg" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground">
-            <a href={cta2Url}>{cta2}</a>
-          </Button>
+          {numberOfButtons > 0 && (
+            <Button asChild size="lg" className={getButtonStyle(cta1Style)}>
+              <a href={cta1Url}>{cta1}</a>
+            </Button>
+          )}
+          {numberOfButtons > 1 && (
+            <Button asChild size="lg" className={getButtonStyle(cta2Style)}>
+              <a href={cta2Url}>{cta2}</a>
+            </Button>
+          )}
         </div>
       </div>
     </section>

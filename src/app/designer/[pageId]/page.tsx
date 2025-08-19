@@ -21,7 +21,6 @@ import {
   ChevronDown,
   Pencil,
   Palette,
-  Upload,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -76,89 +75,12 @@ type ComponentData = LandingPageComponent;
 const HeroPreview = ({ 
   headline, subheadline, 
   cta1, cta2, cta1Url, cta2Url,
-  numberOfButtons, cta1Style, cta2Style,
-  backgroundType, 
-  imageMode,
-  backgroundImage, backgroundImageDesktop, backgroundImageTablet, backgroundImageMobile, 
-  backgroundImages
+  numberOfButtons, cta1Style, cta2Style
 }: { 
   headline: string, subheadline: string, 
   cta1: string, cta2: string, cta1Url: string, cta2Url: string,
-  numberOfButtons: number, cta1Style: string, cta2Style: string,
-  backgroundType: 'color' | 'image' | 'carousel',
-  imageMode: 'single' | 'responsive',
-  backgroundImage: string,
-  backgroundImageDesktop: string,
-  backgroundImageTablet: string,
-  backgroundImageMobile: string,
-  backgroundImages: string[]
+  numberOfButtons: number, cta1Style: string, cta2Style: string
 }) => {
-  const [currentViewport, setCurrentViewport] = useState('desktop');
-
-  useEffect(() => {
-    // This is a simplified way to sync with the designer's viewport for preview purposes
-    const handleMessage = (event: any) => {
-      if (event.data.type === 'viewportChange') {
-        setCurrentViewport(event.data.viewport);
-      }
-    };
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, []);
-
-  const backgroundContent = () => {
-    switch (backgroundType) {
-      case 'image':
-        if (imageMode === 'responsive') {
-           return (
-            <>
-              <div 
-                className="absolute inset-0 bg-cover bg-center rounded-lg hidden md:hidden lg:block" // Desktop
-                style={{ backgroundImage: `url(${backgroundImageDesktop})` }}
-              />
-              <div 
-                className="absolute inset-0 bg-cover bg-center rounded-lg hidden md:block lg:hidden" // Tablet
-                style={{ backgroundImage: `url(${backgroundImageTablet})` }}
-              />
-              <div 
-                className="absolute inset-0 bg-cover bg-center rounded-lg block md:hidden" // Mobile
-                style={{ backgroundImage: `url(${backgroundImageMobile})` }}
-              />
-            </>
-           )
-        }
-        return (
-          <div 
-            className="absolute inset-0 bg-cover bg-center rounded-lg" 
-            style={{ backgroundImage: `url(${backgroundImage})` }}
-          />
-        );
-      case 'carousel':
-        return (
-          <Carousel className="absolute inset-0 w-full h-full rounded-lg" opts={{ loop: true }}>
-            <CarouselContent>
-              {backgroundImages.map((img, index) => (
-                <CarouselItem key={index}>
-                  <div 
-                    className="h-full bg-cover bg-center"
-                    style={{ backgroundImage: `url(${img})` }}
-                  />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            {backgroundImages.length > 1 && (
-              <>
-                <CarouselPrevious className="left-4" />
-                <CarouselNext className="right-4" />
-              </>
-            )}
-          </Carousel>
-        );
-      case 'color':
-      default:
-        return null; // The background color will be handled by the parent div class
-    }
-  }
 
   const getButtonStyle = (style: string) => {
     switch(style) {
@@ -172,32 +94,20 @@ const HeroPreview = ({
   };
 
   return (
-    <div className="relative w-full bg-card dark:bg-gray-800 rounded-lg shadow-md text-center pointer-events-none overflow-hidden">
-      {backgroundContent()}
-      <div className={cn(
-        "relative p-8",
-        (backgroundType === 'image' || backgroundType === 'carousel') && "bg-black/50 rounded-lg text-white"
-      )}>
-        <h1 className={cn(
-          "text-4xl font-bold mb-4",
-          (backgroundType === 'image' || backgroundType === 'carousel') ? "text-white" : "text-card-foreground dark:text-white"
-        )}>{headline}</h1>
-        <p className={cn(
-          "text-lg mb-6",
-           (backgroundType === 'image' || backgroundType === 'carousel') ? "text-gray-200" : "text-muted-foreground dark:text-gray-300"
-        )}>{subheadline}</p>
-        <div className="flex justify-center gap-4">
-          {numberOfButtons > 0 && (
-            <Button asChild size="lg" className={getButtonStyle(cta1Style)}>
-              <a href={cta1Url}>{cta1}</a>
-            </Button>
-          )}
-          {numberOfButtons > 1 && (
-            <Button asChild size="lg" className={getButtonStyle(cta2Style)}>
-              <a href={cta2Url}>{cta2}</a>
-            </Button>
-          )}
-        </div>
+    <div className="w-full bg-card dark:bg-gray-800 rounded-lg shadow-md text-center pointer-events-none p-8">
+      <h1 className="text-4xl font-bold text-card-foreground dark:text-white mb-4">{headline}</h1>
+      <p className="text-lg text-muted-foreground dark:text-gray-300 mb-6">{subheadline}</p>
+      <div className="flex justify-center gap-4">
+        {numberOfButtons > 0 && (
+          <Button asChild size="lg" className={getButtonStyle(cta1Style)}>
+            <a href={cta1Url}>{cta1}</a>
+          </Button>
+        )}
+        {numberOfButtons > 1 && (
+          <Button asChild size="lg" className={getButtonStyle(cta2Style)}>
+            <a href={cta2Url}>{cta2}</a>
+          </Button>
+        )}
       </div>
     </div>
   )
@@ -284,50 +194,16 @@ const FooterPreview = ({ copyright, links }: { copyright: string, links: { text:
 
 const EditHeroForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData: any) => void, onCancel: () => void }) => {
     const [formData, setFormData] = useState(data.props);
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const fileInputRefDesktop = useRef<HTMLInputElement>(null);
-    const fileInputRefTablet = useRef<HTMLInputElement>(null);
-    const fileInputRefMobile = useRef<HTMLInputElement>(null);
-
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         onSave(formData);
-    };
-    
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, fieldName?: keyof typeof formData) => {
-        if (e.target.files && e.target.files[0]) {
-            const file = e.target.files[0];
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const newImage = reader.result as string;
-
-                if (fieldName) {
-                    setFormData({ ...formData, [fieldName]: newImage });
-                } else {
-                     const updatedImages = [...(formData.backgroundImages || []), newImage];
-                     setFormData({ 
-                        ...formData, 
-                        backgroundImages: updatedImages,
-                        ...(formData.backgroundType === 'image' && { backgroundImage: newImage })
-                    });
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
-
-    const handleImageSelect = (imgUrl: string) => {
-      if (formData.backgroundType === 'image') {
-        setFormData({ ...formData, backgroundImage: imgUrl });
-      }
     };
 
     return (
         <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 space-y-4">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white">Editar Sección de Héroe</h3>
             
-            <Accordion type="multiple" defaultValue={['content', 'background']}>
+            <Accordion type="multiple" defaultValue={['content']}>
               <AccordionItem value="content">
                 <AccordionTrigger>Contenido</AccordionTrigger>
                 <AccordionContent className="space-y-4 pt-4">
@@ -411,131 +287,6 @@ const EditHeroForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData:
                       </div>
                   )}
                   
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="background">
-                <AccordionTrigger>Fondo</AccordionTrigger>
-                <AccordionContent className="space-y-4 pt-4">
-                   <div>
-                     <Label>Tipo de Fondo</Label>
-                     <RadioGroup
-                        defaultValue={formData.backgroundType}
-                        onValueChange={(value) => setFormData({ ...formData, backgroundType: value })}
-                        className="flex gap-4 mt-2"
-                      >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="color" id="r-color" />
-                          <Label htmlFor="r-color">Color</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="image" id="r-image" />
-                          <Label htmlFor="r-image">Imagen</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="carousel" id="r-carousel" />
-                          <Label htmlFor="r-carousel">Carrusel</Label>
-                        </div>
-                      </RadioGroup>
-                   </div>
-                   {formData.backgroundType === 'image' && (
-                     <div className="space-y-4">
-                       <div>
-                         <Label>Modo de Imagen</Label>
-                         <RadioGroup
-                            defaultValue={formData.imageMode}
-                            onValueChange={(value) => setFormData({ ...formData, imageMode: value })}
-                            className="flex gap-4 mt-2"
-                          >
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="single" id="r-single" />
-                              <Label htmlFor="r-single">Una sola imagen</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="responsive" id="r-responsive" />
-                              <Label htmlFor="r-responsive">Imágenes responsivas</Label>
-                            </div>
-                          </RadioGroup>
-                       </div>
-                       {formData.imageMode === 'single' && (
-                          <div>
-                           <Label>Imagen</Label>
-                           <p className="text-xs text-muted-foreground mb-2">Recomendado: 1200x600px</p>
-                           <div className="grid grid-cols-3 gap-2 mt-2">
-                             {(formData.backgroundImages || []).map((img: string, index: number) => (
-                                <div 
-                                  key={index} 
-                                  className={cn(
-                                    "relative rounded-md overflow-hidden aspect-video cursor-pointer",
-                                    formData.backgroundImage === img && "ring-2 ring-primary ring-offset-2"
-                                  )}
-                                  onClick={() => handleImageSelect(img)}
-                                >
-                                    <img src={img} alt={`fondo ${index + 1}`} className="w-full h-full object-cover" />
-                                </div>
-                             ))}
-                             <Button
-                               type="button"
-                               variant="outline"
-                               className="aspect-video w-full h-full flex flex-col items-center justify-center"
-                               onClick={() => fileInputRef.current?.click()}
-                             >
-                               <Upload className="h-6 w-6 mb-2" />
-                               Subir
-                             </Button>
-                             <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e)} />
-                           </div>
-                         </div>
-                       )}
-                       {formData.imageMode === 'responsive' && (
-                         <div className="space-y-4">
-                            <div>
-                                <Label htmlFor='bg-desktop'>Imagen Escritorio</Label>
-                                <p className="text-xs text-muted-foreground mb-1">Recomendado: 1920x1080px</p>
-                                {formData.backgroundImageDesktop && <img src={formData.backgroundImageDesktop} className="w-32 h-auto rounded-md my-2"/>}
-                                <Button type="button" variant="outline" size="sm" onClick={() => fileInputRefDesktop.current?.click()}>Subir</Button>
-                                <input type="file" ref={fileInputRefDesktop} className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'backgroundImageDesktop')} />
-                            </div>
-                             <div>
-                                <Label htmlFor='bg-tablet'>Imagen Tableta</Label>
-                                <p className="text-xs text-muted-foreground mb-1">Recomendado: 1024x768px</p>
-                                {formData.backgroundImageTablet && <img src={formData.backgroundImageTablet} className="w-32 h-auto rounded-md my-2"/>}
-                                <Button type="button" variant="outline" size="sm" onClick={() => fileInputRefTablet.current?.click()}>Subir</Button>
-                                <input type="file" ref={fileInputRefTablet} className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'backgroundImageTablet')} />
-                            </div>
-                             <div>
-                                <Label htmlFor='bg-mobile'>Imagen Móvil</Label>
-                                <p className="text-xs text-muted-foreground mb-1">Recomendado: 480x800px</p>
-                                {formData.backgroundImageMobile && <img src={formData.backgroundImageMobile} className="w-32 h-auto rounded-md my-2"/>}
-                                <Button type="button" variant="outline" size="sm" onClick={() => fileInputRefMobile.current?.click()}>Subir</Button>
-                                <input type="file" ref={fileInputRefMobile} className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'backgroundImageMobile')} />
-                            </div>
-                         </div>
-                       )}
-                     </div>
-                   )}
-                   {formData.backgroundType === 'carousel' && (
-                     <div>
-                       <Label>Imágenes para Carrusel</Label>
-                       <p className="text-xs text-muted-foreground mb-2">Sube una o más imágenes para el carrusel.</p>
-                       <div className="grid grid-cols-3 gap-2 mt-2">
-                         {(formData.backgroundImages || []).map((img: string, index: number) => (
-                            <div key={index} className="relative rounded-md overflow-hidden aspect-video">
-                                <img src={img} alt={`fondo ${index + 1}`} className="w-full h-full object-cover" />
-                            </div>
-                         ))}
-                         <Button
-                           type="button"
-                           variant="outline"
-                           className="aspect-video w-full h-full flex flex-col items-center justify-center"
-                           onClick={() => fileInputRef.current?.click()}
-                         >
-                           <Upload className="h-6 w-6 mb-2" />
-                           Subir
-                         </Button>
-                         <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e)} />
-                       </div>
-                     </div>
-                   )}
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
@@ -773,13 +524,6 @@ const componentMap: { [key: string]: { preview: React.ComponentType<any>, edit: 
       numberOfButtons: 2,
       cta1Style: 'primary',
       cta2Style: 'secondary',
-      backgroundType: 'color',
-      imageMode: 'single',
-      backgroundImage: 'https://placehold.co/1200x600.png',
-      backgroundImageDesktop: 'https://placehold.co/1920x1080.png',
-      backgroundImageTablet: 'https://placehold.co/1024x768.png',
-      backgroundImageMobile: 'https://placehold.co/480x800.png',
-      backgroundImages: [],
     }
   },
   'Características': { 
@@ -1220,7 +964,7 @@ function DesignerPageContent() {
                       <Label>Primario</Label>
                       <Input type="color" value={theme.primary} onChange={(e) => handleThemeChange('primary', e.target.value)} />
                   </div>
-                  <div className="space-y-2">
+                   <div className="space-y-2">
                       <Label>Color Texto Botón</Label>
                       <Input type="color" value={theme.primaryForeground} onChange={(e) => handleThemeChange('primaryForeground', e.target.value)} />
                   </div>
@@ -1323,7 +1067,7 @@ function DesignerPageContent() {
                               <EditComponent data={component} onSave={handleSave} onCancel={handleCancel} />
                             ) : (
                               <>
-                                <ComponentPreview {...component.props} viewport={viewport} />
+                                <ComponentPreview {...component.props} />
                                 <div className="absolute top-2 right-2 hidden group-hover:flex gap-2">
                                     <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/80 hover:bg-white cursor-move">
                                         <GripVertical className="h-4 w-4" />
