@@ -1,8 +1,19 @@
 
-"use server";
+"use client";
 
 import { db, auth } from "@/lib/firebase";
-import { collection, doc, getDoc, setDoc, updateDoc, deleteDoc, serverTimestamp, query, where, getDocs } from "firebase/firestore";
+import { 
+  collection, 
+  doc, 
+  getDoc, 
+  setDoc, 
+  updateDoc, 
+  serverTimestamp, 
+  query, 
+  where, 
+  getDocs,
+  Timestamp
+} from "firebase/firestore";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { v4 as uuidv4 } from 'uuid';
 import type { LandingPageData } from "@/lib/types";
@@ -18,10 +29,9 @@ const getCurrentUser = (): Promise<User | null> => {
   });
 };
 
-
 /**
- * Creates a new landing page document in Firestore.
- * @param {Partial<LandingPageData>} data - The initial data for the new landing page, must include an ID.
+ * Creates a new landing page document in Firestore from the client.
+ * @param {Partial<LandingPageData>} data - The initial data for the new landing page.
  * @returns {Promise<boolean>} True on success, false on failure.
  */
 export async function createLandingPage(data: Partial<LandingPageData>): Promise<boolean> {
@@ -31,22 +41,17 @@ export async function createLandingPage(data: Partial<LandingPageData>): Promise
       throw new Error("Authentication required to create a landing page.");
     }
     
-    if (!data.id) {
-        throw new Error("An ID must be provided to create a landing page.");
-    }
-
+    const pageId = data.id || uuidv4();
     const now = serverTimestamp();
 
-    // The data parameter already contains the structure of LandingPageData from the client
     const newLanding: LandingPageData = {
       userId: currentUser.uid,
-      createdAt: now,
-      updatedAt: now,
+      createdAt: now as Timestamp,
+      updatedAt: now as Timestamp,
       isPublished: false,
-      // Ensure all fields from data are spread, and default values are applied if missing
-      id: data.id,
+      id: pageId,
       name: data.name || "Nueva Página de Aterrizaje",
-      subdomain: data.subdomain || `pagina-${data.id.substring(0, 8)}`,
+      subdomain: data.subdomain || `pagina-${pageId.substring(0, 8)}`,
       components: data.components || [],
       theme: data.theme || {
         primary: '#3F51B5',
@@ -78,8 +83,6 @@ export async function getLandingPage(pageId: string): Promise<LandingPageData | 
   try {
     const currentUser = await getCurrentUser();
     if (!currentUser) {
-      // Allow fetching if the user is not logged in, for published pages, but for now we restrict it.
-      // This could be changed later if we want public pages.
       console.error("Authentication required.");
       return null;
     }
@@ -89,9 +92,7 @@ export async function getLandingPage(pageId: string): Promise<LandingPageData | 
 
     if (docSnap.exists()) {
         const data = docSnap.data() as LandingPageData;
-        // Only return data if the user owns the page
         if(data.userId === currentUser.uid) {
-            // Ensure backwards compatibility for pages saved before padding was introduced
             const sanitizedComponents = data.components.map(component => {
                 if (!component.props.padding) {
                     return {
@@ -104,14 +105,11 @@ export async function getLandingPage(pageId: string): Promise<LandingPageData | 
                 }
                 return component;
             });
-
             return { ...data, components: sanitizedComponents };
         }
         console.error("User does not have permission to access this page.");
         return null;
     } else {
-      // This is expected when checking for a new page, so not an error.
-      // console.log("No such document!");
       return null;
     }
   } catch (error) {
@@ -135,17 +133,7 @@ export async function getUserLandings(): Promise<LandingPageData[]> {
         const q = query(landingsCollection, where("userId", "==", currentUser.uid));
         const querySnapshot = await getDocs(q);
         
-        const landings = querySnapshot.docs.map(doc => {
-            const data = doc.data() as Omit<LandingPageData, 'createdAt' | 'updatedAt'> & { createdAt: any, updatedAt: any };
-            return {
-                ...data,
-                // Firestore Timestamps need to be handled carefully in Server Components
-                // For now, we'll pass them as-is, but they might need conversion for the client
-                createdAt: data.createdAt,
-                updatedAt: data.updatedAt,
-            } as LandingPageData;
-        });
-        return landings;
+        return querySnapshot.docs.map(doc => doc.data() as LandingPageData);
 
     } catch (error) {
         console.error("Error fetching user landings: ", error);
@@ -153,9 +141,8 @@ export async function getUserLandings(): Promise<LandingPageData[]> {
     }
 }
 
-
 /**
- * Updates a landing page document in Firestore.
+ * Updates a landing page document in Firestore from the client.
  * @param {string} pageId - The ID of the landing page to update.
  * @param {Partial<LandingPageData>} data - The data to update.
  * @returns {Promise<boolean>} True on success, false on failure.
@@ -163,16 +150,16 @@ export async function getUserLandings(): Promise<LandingPageData[]> {
 export async function updateLandingPage(pageId: string, data: Partial<LandingPageData>): Promise<boolean> {
   try {
     const currentUser = await getCurrentUser();
-     if (!currentUser) {
+    if (!currentUser) {
       throw new Error("Authentication required.");
     }
-
     const pageRef = doc(db, "landings", pageId);
-    // We don't need to check for existence here again as the save handler does it.
-    // We just need to make sure we have a user.
+    
+    // Ensure client cannot set isPublished
+    const { isPublished, ...clientSafeData } = data;
 
     await updateDoc(pageRef, {
-      ...data,
+      ...clientSafeData,
       updatedAt: serverTimestamp(),
     });
     return true;
@@ -189,12 +176,13 @@ export async function updateLandingPage(pageId: string, data: Partial<LandingPag
  */
 export async function deleteLandingPage(pageId: string): Promise<boolean> {
   try {
+    const currentUser = await getCurrentUser();
     const pageRef = doc(db, "landings", pageId);
-    // Ensure the page exists and the user has permission before deleting
-    const existingPage = await getLandingPage(pageId);
-    if (!existingPage) {
-        // getLandingPage already handles auth check and console logs
-        return false; 
+    const docSnap = await getDoc(pageRef);
+
+    if (!docSnap.exists() || docSnap.data().userId !== currentUser?.uid) {
+        console.error("User does not have permission to delete this page or page does not exist.");
+        return false;
     }
 
     await deleteDoc(pageRef);

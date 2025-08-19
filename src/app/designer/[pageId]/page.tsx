@@ -88,7 +88,8 @@ import { cn } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SidebarProvider, Sidebar, SidebarTrigger, SidebarInset, useSidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
-import { getLandingPage, createLandingPage, updateLandingPage } from '@/services/landings';
+import { getLandingPage, createLandingPage, updateLandingPage } from '@/services/landings.client';
+import { publishLanding } from '@/actions/landings';
 import type { LandingPageData, LandingPageComponent, LandingPageTheme } from '@/lib/types';
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from '@/components/ui/switch';
@@ -1595,14 +1596,14 @@ const componentMap: { [key: string]: { preview: React.ComponentType<any>, edit: 
 };
 
 const defaultTheme: LandingPageTheme = {
-    primary: '#3F51B5', // Deep Indigo
-    primaryForeground: '#FFFFFF', // White
-    secondary: '#7986CB', // Lighter Indigo for secondary elements
-    accent: '#7C4DFF', // Vivid Violet
-    foreground: '#1A237E', // Darker Indigo for titles
-    mutedForeground: '#5C6BC0', // Softer Indigo for text
-    background1: '#E8EAF6', // Light Indigo
-    background2: '#FFFFFF', // White
+    primary: '#5CA0D3',
+    primaryForeground: '#FFFFFF',
+    secondary: '#7CC47D',
+    accent: '#F7A35C',
+    foreground: '#333333',
+    mutedForeground: '#5C6BC0',
+    background1: '#F5F5F5',
+    background2: '#FFFFFF',
     fontFamily: 'Inter',
 };
 
@@ -1642,7 +1643,6 @@ function DesignerPageContent() {
   
   const getDraftKey = (pageId: string) => `landing-page-draft-${pageId}`;
 
-  // This effect handles the data loading logic
   useEffect(() => {
     const draftKey = getDraftKey(pageIdFromUrl);
     const savedDraft = localStorage.getItem(draftKey);
@@ -1677,7 +1677,6 @@ function DesignerPageContent() {
     loadPage();
   }, [pageIdFromUrl, isNew, router, toast]);
 
-  // This effect saves any changes to landingData to localStorage
   useEffect(() => {
     if (!loading) {
       const draftKey = getDraftKey(isNew ? 'new' : landingData.id);
@@ -1705,39 +1704,39 @@ function DesignerPageContent() {
  const handleSaveDraft = async () => {
     setIsSaving(true);
     let success = false;
-    
-    try {
-        if (isNew) {
-            const created = await createLandingPage(landingData);
-            if (created) {
-                localStorage.removeItem(getDraftKey('new'));
-                router.replace(`/designer/${landingData.id}`);
-                success = true;
-            }
-        } else {
-            success = await updateLandingPage(pageIdFromUrl, landingData);
-        }
+    let newPageId = isNew ? landingData.id : pageIdFromUrl;
 
+    try {
+      if (isNew) {
+        success = await createLandingPage(landingData);
         if (success) {
-            toast({
-                title: "¡Borrador guardado!",
-                description: "Tus cambios han sido guardados.",
-            });
-        } else {
-            throw new Error("No se pudo guardar la página.");
+          localStorage.removeItem(getDraftKey('new'));
+          router.replace(`/designer/${newPageId}`);
         }
-    } catch (error) {
-        console.error("Error saving draft:", error);
+      } else {
+        success = await updateLandingPage(pageIdFromUrl, landingData);
+      }
+
+      if (success) {
         toast({
-            variant: "destructive",
-            title: "Error al guardar",
-            description: "No se pudieron guardar los cambios. Inténtalo de nuevo.",
+          title: "¡Borrador guardado!",
+          description: "Tus cambios han sido guardados.",
         });
+      } else {
+        throw new Error("Failed to save draft.");
+      }
+    } catch (error) {
+      console.error("Error saving draft:", error);
+      toast({
+        variant: "destructive",
+        title: "Error al guardar",
+        description: "No se pudieron guardar los cambios. Inténtalo de nuevo.",
+      });
     } finally {
-        setIsSaving(false);
+      setIsSaving(false);
     }
     return success;
-};
+  };
 
 
   const handlePreview = async () => {
@@ -1776,14 +1775,19 @@ function DesignerPageContent() {
     setIsSaving(true);
     try {
       const pageIdToPublish = isNew ? landingData.id : pageIdFromUrl;
-      await updateLandingPage(pageIdToPublish, { ...landingData, isPublished: true });
-      const url = `${window.location.protocol}//${landingData.subdomain}.landed.co`;
-      setPublicUrl(url);
-      setShowPublishModal(true);
-      toast({
-        title: "¡Página publicada!",
-        description: "Tu página ya está disponible públicamente.",
-      });
+      const published = await publishLanding(pageIdToPublish);
+
+      if (published) {
+          const url = `${window.location.protocol}//${landingData.subdomain}.landed.co`;
+          setPublicUrl(url);
+          setShowPublishModal(true);
+          toast({
+            title: "¡Página publicada!",
+            description: "Tu página ya está disponible públicamente.",
+          });
+      } else {
+          throw new Error("Failed to publish page via server action.");
+      }
     } catch (error) {
       console.error("Error publishing page:", error);
       toast({

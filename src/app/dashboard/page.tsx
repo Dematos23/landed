@@ -23,7 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Skeleton } from "@/components/ui/skeleton"
-import { getUserLandings, deleteLandingPage } from "@/services/landings"
+import { getUserLandings, deleteLandingPage } from "@/services/landings.client"
 import type { LandingPageData } from "@/lib/types"
 import { useToast } from "@/hooks/use-toast"
 import {
