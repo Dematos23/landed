@@ -163,7 +163,8 @@ function getInitialData(): PreviewData | null {
 }
 
 export default function PreviewPage() {
-  const [data, setData] = useState<PreviewData | null>(getInitialData);
+  const [data, setData] = useState<PreviewData | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // This effect handles updates if the data is set after the initial render
@@ -177,20 +178,32 @@ export default function PreviewPage() {
       }
     };
 
-    window.addEventListener('storage', handleStorageChange);
-
-    // If data is still null, try fetching it again in case of a race condition
-    if (!data) {
+    const loadData = () => {
       const currentData = getInitialData();
       if (currentData) {
         setData(currentData);
+        setLoading(false);
+      } else {
+        // If data is not there, wait for a moment for it to be set by the other tab.
+        // This is a fallback for race conditions.
+        setTimeout(() => {
+            const freshData = getInitialData();
+            if(freshData) {
+                setData(freshData);
+            }
+            setLoading(false);
+        }, 500)
       }
     }
+    
+    loadData();
+
+    window.addEventListener('storage', handleStorageChange);
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, [data]);
+  }, []);
 
   const theme = data?.theme;
 
@@ -232,8 +245,12 @@ export default function PreviewPage() {
     return `${h} ${s}% ${l}%`;
   }
 
-  if (!data || !theme) {
+  if (loading) {
     return <div className="flex h-screen items-center justify-center">Cargando previsualización...</div>;
+  }
+  
+  if (!data || !theme) {
+    return <div className="flex h-screen items-center justify-center">No se encontraron datos para la previsualización.</div>;
   }
 
   return (

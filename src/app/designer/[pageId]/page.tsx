@@ -872,14 +872,28 @@ function DesignerPageContent() {
 };
 
 
-  const handlePreview = () => {
-    const previewData = {
-      name: landingData.name,
-      components: landingData.components,
-      theme: landingData.theme,
-    };
-    localStorage.setItem('landing-page-preview-data', JSON.stringify(previewData));
-    window.open('/preview', '_blank');
+  const handlePreview = async () => {
+    setIsSaving(true); // Show visual feedback
+    try {
+      const previewData = {
+        name: landingData.name,
+        components: landingData.components,
+        theme: landingData.theme,
+      };
+      // This operation is synchronous and very fast, but we add a brief feedback
+      localStorage.setItem('landing-page-preview-data', JSON.stringify(previewData));
+      window.open('/preview', '_blank');
+    } catch (error) {
+       console.error("Error saving preview data:", error);
+       toast({
+         variant: "destructive",
+         title: "Error de Previsualización",
+         description: "No se pudieron preparar los datos para la previsualización.",
+       });
+    } finally {
+      // Deactivate loading state after a short delay to ensure the user sees it.
+      setTimeout(() => setIsSaving(false), 300);
+    }
   };
 
   // Drag and drop state
@@ -1098,7 +1112,7 @@ function DesignerPageContent() {
           </div>
           <Separator orientation="vertical" className="h-8 hidden md:block" />
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={handlePreview}>
+            <Button variant="outline" size="icon" onClick={handlePreview} disabled={isSaving}>
               <Eye className="h-4 w-4" />
               <span className="sr-only">Previsualizar</span>
             </Button>
@@ -1292,7 +1306,3 @@ export default function DesignerPage() {
     </SidebarProvider>
   );
 }
-
-    
-
-    
