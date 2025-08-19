@@ -1,4 +1,5 @@
 
+
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -170,9 +171,15 @@ const FeaturesPreview = ({ title, features, backgroundType, backgroundImage }: {
   );
 };
 
-const CtaPreview = ({ title, subtitle, buttonText, buttonUrl }: { title: string, subtitle: string, buttonText: string, buttonUrl: string }) => (
-    <div className="w-full bg-card dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none">
-        <div className="text-center">
+const CtaPreview = ({ title, subtitle, buttonText, buttonUrl, backgroundType, backgroundImage }: { title: string, subtitle: string, buttonText: string, buttonUrl: string, backgroundType: 'color' | 'image', backgroundImage: string }) => {
+  const backgroundStyles: React.CSSProperties =
+    backgroundType === 'image' && backgroundImage
+      ? { backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+      : {};
+      
+  return (
+    <div className="relative w-full bg-card dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none" style={backgroundStyles}>
+        <div className="relative z-10 text-center">
             <h2 className="text-3xl font-bold text-card-foreground dark:text-white">{title}</h2>
             <p className="mt-2 text-lg text-muted-foreground dark:text-gray-300">{subtitle}</p>
             <Button size="lg" asChild className="mt-6 bg-primary hover:bg-primary/90 text-primary-foreground">
@@ -180,7 +187,8 @@ const CtaPreview = ({ title, subtitle, buttonText, buttonUrl }: { title: string,
             </Button>
         </div>
     </div>
-);
+  )
+};
 
 const TestimonialsPreview = ({ title, testimonials }: { title: string, testimonials: { quote: string, name: string, company: string }[] }) => (
     <div className="w-full bg-card dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none">
@@ -594,29 +602,96 @@ const EditFeaturesForm = ({ data, onSave, onCancel }: { data: any, onSave: (newD
 
 const EditCtaForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData: any) => void, onCancel: () => void }) => {
     const [formData, setFormData] = useState(data.props);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         onSave(formData);
     };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const dataUrl = event.target?.result as string;
+          setFormData({ ...formData, backgroundImage: dataUrl });
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    
     return (
         <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 space-y-4">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white">Editar Sección de CTA</h3>
-            <div>
-                <Label htmlFor="cta-title">Título</Label>
-                <Input id="cta-title" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
-            </div>
-            <div>
-                <Label htmlFor="cta-subtitle">Subtítulo</Label>
-                <Input id="cta-subtitle" value={formData.subtitle} onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })} />
-            </div>
-            <div>
-                <Label htmlFor="cta-button">Texto del Botón</Label>
-                <Input id="cta-button" value={formData.buttonText} onChange={(e) => setFormData({ ...formData, buttonText: e.target.value })} />
-            </div>
-             <div>
-                <Label htmlFor="cta-button-url">URL del Botón</Label>
-                <Input id="cta-button-url" value={formData.buttonUrl} onChange={(e) => setFormData({ ...formData, buttonUrl: e.target.value })} />
-            </div>
+            <Accordion type="multiple" defaultValue={['content']} className="w-full">
+              <AccordionItem value="content">
+                <AccordionTrigger>Contenido</AccordionTrigger>
+                <AccordionContent className="space-y-4 pt-4">
+                  <div>
+                      <Label htmlFor="cta-title">Título</Label>
+                      <Input id="cta-title" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
+                  </div>
+                  <div>
+                      <Label htmlFor="cta-subtitle">Subtítulo</Label>
+                      <Input id="cta-subtitle" value={formData.subtitle} onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })} />
+                  </div>
+                  <div>
+                      <Label htmlFor="cta-button">Texto del Botón</Label>
+                      <Input id="cta-button" value={formData.buttonText} onChange={(e) => setFormData({ ...formData, buttonText: e.target.value })} />
+                  </div>
+                  <div>
+                      <Label htmlFor="cta-button-url">URL del Botón</Label>
+                      <Input id="cta-button-url" value={formData.buttonUrl} onChange={(e) => setFormData({ ...formData, buttonUrl: e.target.value })} />
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+               <AccordionItem value="background">
+                  <AccordionTrigger>Fondo</AccordionTrigger>
+                  <AccordionContent className="space-y-4 pt-4">
+                    <RadioGroup
+                        defaultValue={formData.backgroundType}
+                        onValueChange={(value) => setFormData({ ...formData, backgroundType: value })}
+                        className="flex items-center gap-4"
+                    >
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="color" id="r-color-cta" />
+                            <Label htmlFor="r-color-cta">Color</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="image" id="r-image-cta" />
+                            <Label htmlFor="r-image-cta">Imagen</Label>
+                        </div>
+                    </RadioGroup>
+
+                    {formData.backgroundType === 'image' && (
+                        <div className="space-y-2 border p-4 rounded-md">
+                           <Label>Imagen de Fondo</Label>
+                           <p className="text-sm text-muted-foreground">Recomendado: 1200x300px</p>
+                           <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              ref={fileInputRef}
+                              onChange={handleFileChange}
+                           />
+                           <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
+                               <Upload className="mr-2 h-4 w-4" /> Subir Imagen
+                           </Button>
+                           {formData.backgroundImage && (
+                               <Image
+                                  src={formData.backgroundImage}
+                                  alt="Preview"
+                                  width={100}
+                                  height={100}
+                                  className="object-cover rounded-md aspect-square mt-2"
+                               />
+                           )}
+                        </div>
+                    )}
+                  </AccordionContent>
+              </AccordionItem>
+            </Accordion>
             <div className="flex justify-end gap-2">
                 <Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
                 <Button type="submit">Guardar</Button>
@@ -798,7 +873,14 @@ const componentMap: { [key: string]: { preview: React.ComponentType<any>, edit: 
   'CTA': { 
     preview: CtaPreview, 
     edit: EditCtaForm,
-    defaultProps: { title: '¿Listo para Empezar?', subtitle: 'Comienza tu prueba gratuita hoy.', buttonText: 'Regístrate Ahora', buttonUrl: '#' }
+    defaultProps: { 
+        title: '¿Listo para Empezar?', 
+        subtitle: 'Comienza tu prueba gratuita hoy.', 
+        buttonText: 'Regístrate Ahora', 
+        buttonUrl: '#',
+        backgroundType: 'color',
+        backgroundImage: '',
+    }
   },
   'Testimonios': { 
     preview: TestimonialsPreview, 

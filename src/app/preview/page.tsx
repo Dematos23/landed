@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -99,9 +100,15 @@ const FeaturesPreview = ({ title, features, backgroundType, backgroundImage }: {
   </section>
 )};
 
-const CtaPreview = ({ title, subtitle, buttonText, buttonUrl }: { title: string, subtitle: string, buttonText: string, buttonUrl: string }) => (
-    <section className="w-full bg-card py-12 md:py-24 lg:py-32">
-        <div className="container px-4 md:px-6 text-center">
+const CtaPreview = ({ title, subtitle, buttonText, buttonUrl, backgroundType, backgroundImage }: { title: string, subtitle: string, buttonText: string, buttonUrl: string, backgroundType: 'color' | 'image', backgroundImage: string }) => {
+  const backgroundStyles: React.CSSProperties =
+    backgroundType === 'image' && backgroundImage
+      ? { backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+      : {};
+      
+  return (
+    <section className="relative w-full bg-card py-12 md:py-24 lg:py-32" style={backgroundStyles}>
+        <div className="container relative z-10 px-4 md:px-6 text-center">
             <h2 className="text-3xl font-bold text-card-foreground">{title}</h2>
             <p className="mt-2 text-lg text-muted-foreground">{subtitle}</p>
             <Button size="lg" asChild className="mt-6 bg-primary hover:bg-primary/90 text-primary-foreground">
@@ -109,7 +116,8 @@ const CtaPreview = ({ title, subtitle, buttonText, buttonUrl }: { title: string,
             </Button>
         </div>
     </section>
-);
+  )
+};
 
 const TestimonialsPreview = ({ title, testimonials }: { title: string, testimonials: { quote: string, name: string, company: string }[] }) => (
     <section className="w-full bg-card py-12 md:py-24 lg:py-32">
