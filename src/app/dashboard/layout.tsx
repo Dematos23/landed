@@ -45,9 +45,15 @@ export default function DashboardLayout({
         <SidebarContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/dashboard" isActive tooltip="Dashboard">
+              <SidebarMenuButton href="/dashboard" tooltip="Dashboard">
                 <LayoutDashboard />
                 Dashboard
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton href="/dashboard/settings" tooltip="Settings">
+                <Settings />
+                Configuración
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
