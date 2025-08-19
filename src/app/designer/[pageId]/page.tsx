@@ -274,18 +274,47 @@ const FooterPreview = ({ copyright, links }: { copyright: string, links: { text:
     </div>
 );
 
-const FormPreview = ({ title, fields, buttonText, layout, layoutImage, backgroundType, backgroundImage }: { title: string, fields: { id: string, type: string, label: string, placeholder: string, required: boolean }[], buttonText: string, layout: string, layoutImage: string, backgroundType: string, backgroundImage: string }) => {
+const FormPreview = ({
+  title,
+  fields,
+  buttonText,
+  layout,
+  layoutImage,
+  backgroundType,
+  backgroundImage,
+  labelColor,
+  fieldBackgroundColor,
+  buttonColor,
+  buttonTextColor,
+  theme
+}: {
+  title: string,
+  fields: { id: string, type: string, label: string, placeholder: string, required: boolean }[],
+  buttonText: string,
+  layout: string,
+  layoutImage: string,
+  backgroundType: string,
+  backgroundImage: string,
+  labelColor: keyof LandingPageTheme,
+  fieldBackgroundColor: keyof LandingPageTheme,
+  buttonColor: keyof LandingPageTheme,
+  buttonTextColor: keyof LandingPageTheme,
+  theme: LandingPageTheme
+}) => {
     const backgroundStyles: React.CSSProperties =
       backgroundType === 'image' && backgroundImage
         ? { backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
         : {};
 
     const renderField = (field: any) => {
+        const fieldStyle: React.CSSProperties = {
+            backgroundColor: theme[fieldBackgroundColor],
+        };
         switch (field.type) {
             case 'textarea':
-                return <Textarea placeholder={field.placeholder} disabled />;
+                return <Textarea placeholder={field.placeholder} disabled style={fieldStyle} />;
             default:
-                return <Input type={field.type} placeholder={field.placeholder} disabled />;
+                return <Input type={field.type} placeholder={field.placeholder} disabled style={fieldStyle} />;
         }
     };
 
@@ -293,11 +322,17 @@ const FormPreview = ({ title, fields, buttonText, layout, layoutImage, backgroun
         <div className="space-y-4">
             {fields.map((field) => (
                 <div key={field.id}>
-                    <Label>{field.label}</Label>
+                    <Label style={{ color: theme[labelColor] }}>{field.label}</Label>
                     {renderField(field)}
                 </div>
             ))}
-            <Button className="w-full" disabled>{buttonText}</Button>
+            <Button 
+              className="w-full" 
+              disabled 
+              style={{ backgroundColor: theme[buttonColor], color: theme[buttonTextColor] }}
+            >
+              {buttonText}
+            </Button>
         </div>
     );
     
@@ -983,6 +1018,17 @@ const EditFormForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData:
       }
     };
     
+    const colorOptions: { value: keyof LandingPageTheme, label: string }[] = [
+      { value: 'primary', label: 'Primario' },
+      { value: 'secondary', label: 'Secundario' },
+      { value: 'accent', label: 'Acento' },
+      { value: 'foreground', label: 'Texto Títulos' },
+      { value: 'mutedForeground', label: 'Texto Normal' },
+      { value: 'primaryForeground', label: 'Texto Botón Primario' },
+      { value: 'background1', label: 'Fondo 1' },
+      { value: 'background2', label: 'Fondo 2' },
+    ];
+    
     return (
         <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 space-y-4">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white">Editar Sección de Formulario</h3>
@@ -1045,6 +1091,40 @@ const EditFormForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData:
                             </Accordion>
                         ))}
                         <Button type="button" variant="outline" onClick={addField}><Plus className="mr-2 h-4 w-4"/>Añadir Campo</Button>
+                    </AccordionContent>
+                </AccordionItem>
+                
+                <AccordionItem value="colors">
+                    <AccordionTrigger>Colores</AccordionTrigger>
+                    <AccordionContent className="space-y-4 pt-4">
+                        <div className="space-y-2">
+                            <Label>Color de Etiquetas (Labels)</Label>
+                            <Select value={formData.labelColor} onValueChange={(value) => setFormData({ ...formData, labelColor: value })}>
+                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                <SelectContent>{colorOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}</SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Fondo de Campos de Texto</Label>
+                            <Select value={formData.fieldBackgroundColor} onValueChange={(value) => setFormData({ ...formData, fieldBackgroundColor: value })}>
+                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                <SelectContent>{colorOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}</SelectContent>
+                            </Select>
+                        </div>
+                         <div className="space-y-2">
+                            <Label>Color del Botón</Label>
+                            <Select value={formData.buttonColor} onValueChange={(value) => setFormData({ ...formData, buttonColor: value })}>
+                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                <SelectContent>{colorOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}</SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Color Texto del Botón</Label>
+                             <Select value={formData.buttonTextColor} onValueChange={(value) => setFormData({ ...formData, buttonTextColor: value })}>
+                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                <SelectContent>{colorOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}</SelectContent>
+                            </Select>
+                        </div>
                     </AccordionContent>
                 </AccordionItem>
 
@@ -1186,6 +1266,10 @@ const componentMap: { [key: string]: { preview: React.ComponentType<any>, edit: 
           layoutImage: '', // URL a la imagen PNG para los layouts no centrados
           backgroundType: 'color',
           backgroundImage: '',
+          labelColor: 'foreground',
+          fieldBackgroundColor: 'background1',
+          buttonColor: 'primary',
+          buttonTextColor: 'primaryForeground',
       }
   },
   'Pie de página': { 
@@ -1759,7 +1843,7 @@ function DesignerPageContent() {
                             <EditComponent data={component} onSave={handleSave} onCancel={handleCancel} />
                           ) : (
                             <>
-                              <ComponentPreview {...component.props} />
+                              <ComponentPreview {...component.props} theme={theme} />
                               <div className="absolute top-2 right-2 hidden group-hover:flex gap-2">
                                   <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/80 hover:bg-white cursor-move">
                                       <GripVertical className="h-4 w-4" />

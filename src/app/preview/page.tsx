@@ -194,7 +194,23 @@ const FooterPreview = ({ copyright, links }: { copyright: string, links: { text:
     </footer>
 );
 
-const FormPreview = ({ title, fields, buttonText, layout, layoutImage, backgroundType, backgroundImage }: { title: string, fields: { id: string, type: string, label: string, placeholder: string, required: boolean }[], buttonText: string, layout: string, layoutImage: string, backgroundType: string, backgroundImage: string }) => {
+const FormPreview = ({ 
+  title, fields, buttonText, layout, layoutImage, backgroundType, backgroundImage,
+  labelColor, fieldBackgroundColor, buttonColor, buttonTextColor, theme
+}: { 
+  title: string, 
+  fields: { id: string, type: string, label: string, placeholder: string, required: boolean }[], 
+  buttonText: string, 
+  layout: string, 
+  layoutImage: string, 
+  backgroundType: string, 
+  backgroundImage: string,
+  labelColor: keyof LandingPageTheme,
+  fieldBackgroundColor: keyof LandingPageTheme,
+  buttonColor: keyof LandingPageTheme,
+  buttonTextColor: keyof LandingPageTheme,
+  theme: LandingPageTheme
+}) => {
     const backgroundStyles: React.CSSProperties =
       backgroundType === 'image' && backgroundImage
         ? { backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
@@ -205,6 +221,10 @@ const FormPreview = ({ title, fields, buttonText, layout, layoutImage, backgroun
             id: field.id,
             placeholder: field.placeholder,
             required: field.required,
+            style: {
+                backgroundColor: theme[fieldBackgroundColor],
+                '--tw-ring-color': theme.primary, // For focus ring
+            } as React.CSSProperties
         };
         switch (field.type) {
             case 'textarea':
@@ -218,11 +238,17 @@ const FormPreview = ({ title, fields, buttonText, layout, layoutImage, backgroun
         <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
             {fields.map((field) => (
                 <div key={field.id}>
-                    <Label htmlFor={field.id}>{field.label}</Label>
+                    <Label htmlFor={field.id} style={{ color: theme[labelColor] }}>{field.label}</Label>
                     {renderField(field)}
                 </div>
             ))}
-            <Button type="submit" className="w-full">{buttonText}</Button>
+            <Button 
+                type="submit" 
+                className="w-full"
+                style={{ backgroundColor: theme[buttonColor], color: theme[buttonTextColor] }}
+            >
+              {buttonText}
+            </Button>
         </form>
     );
     
@@ -393,7 +419,7 @@ export default function PreviewPage() {
         {data.components.map((component) => {
           const ComponentPreview = componentMap[component.name];
           if (!ComponentPreview) return null;
-          return <ComponentPreview key={component.id} {...component.props} />;
+          return <ComponentPreview key={component.id} {...component.props} theme={theme} />;
         })}
       </main>
     </>
