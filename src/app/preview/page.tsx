@@ -3,11 +3,29 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Layers, Star } from "lucide-react"
+import { Layers, Star, Zap, ShieldCheck, Heart, Award, ThumbsUp, Rocket, Gem } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { cn } from '@/lib/utils';
 import type { LandingPageComponent, LandingPageTheme, LandingPageData } from '@/lib/types';
+
+const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
+  Layers,
+  Zap,
+  ShieldCheck,
+  Star,
+  Heart,
+  Award,
+  ThumbsUp,
+  Rocket,
+  Gem,
+};
+
+const IconComponent = ({ name, className }: { name: string; className?: string }) => {
+  const Icon = iconMap[name];
+  return Icon ? <Icon className={className} /> : <Layers className={className} />;
+};
+
 
 // --- Component Previews ---
 
@@ -76,7 +94,7 @@ const HeroPreview = ({
   )
 };
 
-const FeaturesPreview = ({ title, features, backgroundType, backgroundImage }: { title: string, features: { title: string, description: string }[], backgroundType: 'color' | 'image', backgroundImage: string }) => {
+const FeaturesPreview = ({ title, features, backgroundType, backgroundImage }: { title: string, features: { icon: string, title: string, description: string }[], backgroundType: 'color' | 'image', backgroundImage: string }) => {
   const backgroundStyles: React.CSSProperties =
     backgroundType === 'image' && backgroundImage
       ? { backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
@@ -89,7 +107,7 @@ const FeaturesPreview = ({ title, features, backgroundType, backgroundImage }: {
             {features.map((feature, index) => (
             <div key={index} className="text-center">
                 <div className="flex items-center justify-center h-12 w-12 rounded-md bg-primary/10 text-primary mx-auto mb-4">
-                    <Layers className="h-6 w-6"/>
+                    <IconComponent name={feature.icon} className="h-6 w-6"/>
                 </div>
                 <h3 className="text-xl font-semibold text-card-foreground">{feature.title}</h3>
                 <p className="text-muted-foreground mt-2">{feature.description}</p>
