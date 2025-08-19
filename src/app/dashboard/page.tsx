@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { PlusCircle, MoreHorizontal, Pencil, ExternalLink, Trash2, Copy } from "lucide-react"
+import { PlusCircle, MoreHorizontal, Pencil, ExternalLink, Trash2, Copy, Check } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -59,6 +59,7 @@ export default function DashboardPage() {
   const [sites, setSites] = useState<LandingPageData[]>([]);
   const [loading, setLoading] = useState(true);
   const [togglingPublish, setTogglingPublish] = useState<string | null>(null);
+  const [copiedSite, setCopiedSite] = useState<string | null>(null);
   const { toast } = useToast();
 
   const fetchSites = async () => {
@@ -109,6 +110,18 @@ export default function DashboardPage() {
     }
     setTogglingPublish(null);
   }
+  
+  const handleCopyLink = (site: LandingPageData) => {
+    const url = `${window.location.protocol}//${site.subdomain}.landed.co`;
+    navigator.clipboard.writeText(url);
+    setCopiedSite(site.id);
+    toast({
+      title: "¡Enlace copiado!",
+      description: "La URL de tu sitio se ha copiado al portapapeles.",
+    });
+    setTimeout(() => setCopiedSite(null), 2000);
+  };
+
 
   return (
     <div className="flex flex-col gap-6">
@@ -191,6 +204,10 @@ export default function DashboardPage() {
                              <a href={`/p/${site.subdomain}`} target="_blank" rel="noopener noreferrer" className="flex items-center w-full cursor-pointer">
                                 <ExternalLink className="mr-2 h-4 w-4" /> Ver en vivo
                              </a>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleCopyLink(site)} className="flex items-center w-full cursor-pointer">
+                            {copiedSite === site.id ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
+                            Copiar enlace
                           </DropdownMenuItem>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
