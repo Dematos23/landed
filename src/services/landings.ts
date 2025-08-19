@@ -37,9 +37,14 @@ export async function createLandingPage(data: Partial<LandingPageData>): Promise
 
     const now = serverTimestamp();
 
+    // The data parameter already contains the structure of LandingPageData from the client
     const newLanding: LandingPageData = {
-      id: data.id,
       userId: currentUser.uid,
+      createdAt: now,
+      updatedAt: now,
+      isPublished: false,
+      // Ensure all fields from data are spread, and default values are applied if missing
+      id: data.id,
       name: data.name || "Nueva Página de Aterrizaje",
       subdomain: data.subdomain || `pagina-${data.id.substring(0, 8)}`,
       components: data.components || [],
@@ -54,9 +59,6 @@ export async function createLandingPage(data: Partial<LandingPageData>): Promise
         background2: '#FFFFFF',
         fontFamily: 'Inter',
       },
-      isPublished: false,
-      createdAt: now,
-      updatedAt: now,
     };
 
     await setDoc(doc(landingsCollection, newLanding.id), newLanding);
