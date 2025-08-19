@@ -13,11 +13,19 @@ import type { LandingPageComponent, LandingPageTheme, LandingPageData } from '@/
 const HeroPreview = ({ 
   headline, subheadline, 
   cta1, cta2, cta1Url, cta2Url,
-  numberOfButtons, cta1Style, cta2Style
+  numberOfButtons, cta1Style, cta2Style,
+  backgroundType, backgroundImage, imageMode,
+  backgroundImageDesktop, backgroundImageTablet, backgroundImageMobile
 }: { 
   headline: string, subheadline: string, 
   cta1: string, cta2: string, cta1Url: string, cta2Url: string,
-  numberOfButtons: number, cta1Style: string, cta2Style: string
+  numberOfButtons: number, cta1Style: string, cta2Style: string,
+  backgroundType: 'color' | 'image',
+  backgroundImage: string,
+  imageMode: 'single' | 'responsive',
+  backgroundImageDesktop: string,
+  backgroundImageTablet: string,
+  backgroundImageMobile: string,
 }) => {
 
   const getButtonStyle = (style: string) => {
@@ -31,9 +39,23 @@ const HeroPreview = ({
     }
   };
 
+  const backgroundStyles: React.CSSProperties =
+    backgroundType === 'image' && imageMode === 'single' && backgroundImage
+      ? { backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+      : {};
+      
+  const hasResponsiveImages = backgroundType === 'image' && imageMode === 'responsive';
+
   return (
-    <section className="w-full bg-card text-center py-20 md:py-32 lg:py-40">
-      <div className="container px-4 md:px-6">
+    <section className="relative w-full bg-card text-center py-20 md:py-32 lg:py-40" style={backgroundStyles}>
+        {hasResponsiveImages && (
+        <>
+          {backgroundImageDesktop && <img src={backgroundImageDesktop} alt="Desktop background" className="absolute inset-0 w-full h-full object-cover hidden md:block" />}
+          {backgroundImageTablet && <img src={backgroundImageTablet} alt="Tablet background" className="absolute inset-0 w-full h-full object-cover hidden sm:block md:hidden" />}
+          {backgroundImageMobile && <img src={backgroundImageMobile} alt="Mobile background" className="absolute inset-0 w-full h-full object-cover sm:hidden" />}
+        </>
+      )}
+      <div className="container relative z-10 px-4 md:px-6">
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-card-foreground mb-4">{headline}</h1>
         <p className="text-lg md:text-xl max-w-3xl mx-auto text-muted-foreground mb-8">{subheadline}</p>
         <div className="flex justify-center gap-4">
