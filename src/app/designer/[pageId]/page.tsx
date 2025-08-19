@@ -66,6 +66,7 @@ import { SidebarProvider, Sidebar, SidebarTrigger, SidebarInset, useSidebar, Sid
 import { getLandingPage, createLandingPage, updateLandingPage } from '@/services/landings';
 import type { LandingPageData, LandingPageComponent, LandingPageTheme } from '@/lib/types';
 import { useToast } from "@/hooks/use-toast";
+import { serverTimestamp } from 'firebase/firestore';
 
 
 type ComponentData = LandingPageComponent;
@@ -76,19 +77,56 @@ const HeroPreview = ({
   headline, subheadline, 
   cta1, cta2, cta1Url, cta2Url,
   numberOfButtons, cta1Style, cta2Style,
-  backgroundType, backgroundImage, backgroundImages
+  backgroundType, 
+  imageMode,
+  backgroundImage, backgroundImageDesktop, backgroundImageTablet, backgroundImageMobile, 
+  backgroundImages
 }: { 
   headline: string, subheadline: string, 
   cta1: string, cta2: string, cta1Url: string, cta2Url: string,
   numberOfButtons: number, cta1Style: string, cta2Style: string,
   backgroundType: 'color' | 'image' | 'carousel',
+  imageMode: 'single' | 'responsive',
   backgroundImage: string,
+  backgroundImageDesktop: string,
+  backgroundImageTablet: string,
+  backgroundImageMobile: string,
   backgroundImages: string[]
 }) => {
+  const [currentViewport, setCurrentViewport] = useState('desktop');
+
+  useEffect(() => {
+    // This is a simplified way to sync with the designer's viewport for preview purposes
+    const handleMessage = (event: any) => {
+      if (event.data.type === 'viewportChange') {
+        setCurrentViewport(event.data.viewport);
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
 
   const backgroundContent = () => {
     switch (backgroundType) {
       case 'image':
+        if (imageMode === 'responsive') {
+           return (
+            <>
+              <div 
+                className="absolute inset-0 bg-cover bg-center rounded-lg hidden md:hidden lg:block" // Desktop
+                style={{ backgroundImage: `url(${backgroundImageDesktop})` }}
+              />
+              <div 
+                className="absolute inset-0 bg-cover bg-center rounded-lg hidden md:block lg:hidden" // Tablet
+                style={{ backgroundImage: `url(${backgroundImageTablet})` }}
+              />
+              <div 
+                className="absolute inset-0 bg-cover bg-center rounded-lg block md:hidden" // Mobile
+                style={{ backgroundImage: `url(${backgroundImageMobile})` }}
+              />
+            </>
+           )
+        }
         return (
           <div 
             className="absolute inset-0 bg-cover bg-center rounded-lg" 
@@ -247,39 +285,43 @@ const FooterPreview = ({ copyright, links }: { copyright: string, links: { text:
 const EditHeroForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData: any) => void, onCancel: () => void }) => {
     const [formData, setFormData] = useState(data.props);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const fileInputRefDesktop = useRef<HTMLInputElement>(null);
+    const fileInputRefTablet = useRef<HTMLInputElement>(null);
+    const fileInputRefMobile = useRef<HTMLInputElement>(null);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         onSave(formData);
     };
-
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, fieldName?: keyof typeof formData) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
             const reader = new FileReader();
             reader.onloadend = () => {
                 const newImage = reader.result as string;
-                const updatedImages = [...(formData.backgroundImages || []), newImage];
-                setFormData({ 
-                    ...formData, 
-                    backgroundImages: updatedImages,
-                    // If it's single image mode, also set it as the main one
-                    ...(formData.backgroundType === 'image' && { backgroundImage: newImage })
-                });
+
+                if (fieldName) {
+                    setFormData({ ...formData, [fieldName]: newImage });
+                } else {
+                     const updatedImages = [...(formData.backgroundImages || []), newImage];
+                     setFormData({ 
+                        ...formData, 
+                        backgroundImages: updatedImages,
+                        ...(formData.backgroundType === 'image' && { backgroundImage: newImage })
+                    });
+                }
             };
             reader.readAsDataURL(file);
         }
     };
 
+
     const handleImageSelect = (imgUrl: string) => {
       if (formData.backgroundType === 'image') {
         setFormData({ ...formData, backgroundImage: imgUrl });
-      } else if (formData.backgroundType === 'carousel') {
-        // For carousel, you might want a multi-select logic, but for now we'll keep it simple
-        // This function will primarily work for single image selection
       }
     };
-
 
     return (
         <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 space-y-4">
@@ -395,19 +437,89 @@ const EditHeroForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData:
                         </div>
                       </RadioGroup>
                    </div>
-                   {(formData.backgroundType === 'image' || formData.backgroundType === 'carousel') && (
+                   {formData.backgroundType === 'image' && (
+                     <div className="space-y-4">
+                       <div>
+                         <Label>Modo de Imagen</Label>
+                         <RadioGroup
+                            defaultValue={formData.imageMode}
+                            onValueChange={(value) => setFormData({ ...formData, imageMode: value })}
+                            className="flex gap-4 mt-2"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="single" id="r-single" />
+                              <Label htmlFor="r-single">Una sola imagen</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="responsive" id="r-responsive" />
+                              <Label htmlFor="r-responsive">Imágenes responsivas</Label>
+                            </div>
+                          </RadioGroup>
+                       </div>
+                       {formData.imageMode === 'single' && (
+                          <div>
+                           <Label>Imagen</Label>
+                           <p className="text-xs text-muted-foreground mb-2">Recomendado: 1200x600px</p>
+                           <div className="grid grid-cols-3 gap-2 mt-2">
+                             {(formData.backgroundImages || []).map((img: string, index: number) => (
+                                <div 
+                                  key={index} 
+                                  className={cn(
+                                    "relative rounded-md overflow-hidden aspect-video cursor-pointer",
+                                    formData.backgroundImage === img && "ring-2 ring-primary ring-offset-2"
+                                  )}
+                                  onClick={() => handleImageSelect(img)}
+                                >
+                                    <img src={img} alt={`fondo ${index + 1}`} className="w-full h-full object-cover" />
+                                </div>
+                             ))}
+                             <Button
+                               type="button"
+                               variant="outline"
+                               className="aspect-video w-full h-full flex flex-col items-center justify-center"
+                               onClick={() => fileInputRef.current?.click()}
+                             >
+                               <Upload className="h-6 w-6 mb-2" />
+                               Subir
+                             </Button>
+                             <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e)} />
+                           </div>
+                         </div>
+                       )}
+                       {formData.imageMode === 'responsive' && (
+                         <div className="space-y-4">
+                            <div>
+                                <Label htmlFor='bg-desktop'>Imagen Escritorio</Label>
+                                <p className="text-xs text-muted-foreground mb-1">Recomendado: 1920x1080px</p>
+                                {formData.backgroundImageDesktop && <img src={formData.backgroundImageDesktop} className="w-32 h-auto rounded-md my-2"/>}
+                                <Button type="button" variant="outline" size="sm" onClick={() => fileInputRefDesktop.current?.click()}>Subir</Button>
+                                <input type="file" ref={fileInputRefDesktop} className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'backgroundImageDesktop')} />
+                            </div>
+                             <div>
+                                <Label htmlFor='bg-tablet'>Imagen Tableta</Label>
+                                <p className="text-xs text-muted-foreground mb-1">Recomendado: 1024x768px</p>
+                                {formData.backgroundImageTablet && <img src={formData.backgroundImageTablet} className="w-32 h-auto rounded-md my-2"/>}
+                                <Button type="button" variant="outline" size="sm" onClick={() => fileInputRefTablet.current?.click()}>Subir</Button>
+                                <input type="file" ref={fileInputRefTablet} className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'backgroundImageTablet')} />
+                            </div>
+                             <div>
+                                <Label htmlFor='bg-mobile'>Imagen Móvil</Label>
+                                <p className="text-xs text-muted-foreground mb-1">Recomendado: 480x800px</p>
+                                {formData.backgroundImageMobile && <img src={formData.backgroundImageMobile} className="w-32 h-auto rounded-md my-2"/>}
+                                <Button type="button" variant="outline" size="sm" onClick={() => fileInputRefMobile.current?.click()}>Subir</Button>
+                                <input type="file" ref={fileInputRefMobile} className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'backgroundImageMobile')} />
+                            </div>
+                         </div>
+                       )}
+                     </div>
+                   )}
+                   {formData.backgroundType === 'carousel' && (
                      <div>
-                       <Label>Imágenes</Label>
+                       <Label>Imágenes para Carrusel</Label>
+                       <p className="text-xs text-muted-foreground mb-2">Sube una o más imágenes para el carrusel.</p>
                        <div className="grid grid-cols-3 gap-2 mt-2">
                          {(formData.backgroundImages || []).map((img: string, index: number) => (
-                            <div 
-                              key={index} 
-                              className={cn(
-                                "relative rounded-md overflow-hidden aspect-video cursor-pointer",
-                                formData.backgroundType === 'image' && formData.backgroundImage === img && "ring-2 ring-primary ring-offset-2"
-                              )}
-                              onClick={() => handleImageSelect(img)}
-                            >
+                            <div key={index} className="relative rounded-md overflow-hidden aspect-video">
                                 <img src={img} alt={`fondo ${index + 1}`} className="w-full h-full object-cover" />
                             </div>
                          ))}
@@ -420,17 +532,8 @@ const EditHeroForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData:
                            <Upload className="h-6 w-6 mb-2" />
                            Subir
                          </Button>
-                         <input
-                           type="file"
-                           ref={fileInputRef}
-                           className="hidden"
-                           accept="image/*"
-                           onChange={handleImageUpload}
-                         />
+                         <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e)} />
                        </div>
-                       <p className="text-xs text-muted-foreground mt-2">
-                         {formData.backgroundType === 'image' ? "Selecciona una imagen para el fondo." : "Sube una o más imágenes para el carrusel."}
-                       </p>
                      </div>
                    )}
                 </AccordionContent>
@@ -671,7 +774,11 @@ const componentMap: { [key: string]: { preview: React.ComponentType<any>, edit: 
       cta1Style: 'primary',
       cta2Style: 'secondary',
       backgroundType: 'color',
+      imageMode: 'single',
       backgroundImage: 'https://placehold.co/1200x600.png',
+      backgroundImageDesktop: 'https://placehold.co/1920x1080.png',
+      backgroundImageTablet: 'https://placehold.co/1024x768.png',
+      backgroundImageMobile: 'https://placehold.co/480x800.png',
       backgroundImages: [],
     }
   },
@@ -744,93 +851,129 @@ const defaultTheme: LandingPageTheme = {
     fontFamily: 'Inter',
 };
 
+const defaultLandingData: Omit<LandingPageData, 'userId' | 'createdAt' | 'updatedAt'> = {
+  id: '',
+  name: "Nueva Página de Aterrizaje",
+  subdomain: '',
+  components: initialComponents,
+  theme: defaultTheme,
+  isPublished: false,
+};
+
+
 function DesignerPageContent() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
-  const pageId = params.pageId as string;
-  const isNew = pageId === 'new';
+  const pageIdFromUrl = params.pageId as string;
+  const isNew = pageIdFromUrl === 'new';
 
-  const [landingData, setLandingData] = useState<LandingPageData | null>(null);
+  const [landingData, setLandingData] = useState<Omit<LandingPageData, 'userId' | 'createdAt' | 'updatedAt'>>(defaultLandingData);
   const [loading, setLoading] = useState(!isNew);
   const [isSaving, setIsSaving] = useState(false);
-  const [pageName, setPageName] = useState("Cargando...");
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [components, setComponents] = useState<ComponentData[]>([]);
   const [editingComponent, setEditingComponent] = useState<ComponentData | null>(null);
   const [viewport, setViewport] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
-  const [theme, setTheme] = useState<LandingPageTheme>(defaultTheme);
-
+  const [isEditingName, setIsEditingName] = useState(false);
 
   useEffect(() => {
-    if (isNew) {
-      setPageName("Nueva Página de Aterrizaje");
-      setComponents(initialComponents);
-      setTheme(defaultTheme);
-    } else {
-      const fetchPageData = async () => {
+    const fetchPageData = async (pageId: string) => {
         setLoading(true);
         const data = await getLandingPage(pageId);
         if (data) {
           setLandingData(data);
-          setPageName(data.name);
-          setComponents(data.components);
-          setTheme(data.theme);
         } else {
-          // Handle page not found, maybe redirect or show an error
-          setPageName("Página no encontrada");
+          toast({
+            variant: "destructive",
+            title: "Página no encontrada",
+            description: "No se pudo encontrar la página que buscas. Redirigiendo...",
+          });
+          router.push('/dashboard');
         }
         setLoading(false);
       };
-      fetchPageData();
-    }
-  }, [pageId, isNew]);
 
+    if (isNew) {
+      setLandingData({
+          ...defaultLandingData,
+          id: uuidv4(), // Assign a client-side ID for the new page
+          name: "Nueva Página de Aterrizaje",
+      });
+      setLoading(false);
+    } else {
+      fetchPageData(pageIdFromUrl);
+    }
+  }, [pageIdFromUrl, isNew, router, toast]);
+
+  const setPageName = (name: string) => {
+    setLandingData(prev => ({...prev, name}));
+  }
+  const setComponents = (components: ComponentData[] | ((prev: ComponentData[]) => ComponentData[])) => {
+    setLandingData(prev => ({
+      ...prev,
+      components: typeof components === 'function' ? components(prev.components) : components,
+    }));
+  };
+  const setTheme = (theme: LandingPageTheme | ((prev: LandingPageTheme) => LandingPageTheme)) => {
+    setLandingData(prev => ({
+        ...prev,
+        theme: typeof theme === 'function' ? theme(prev.theme) : theme,
+    }));
+  };
+  
   const handleSaveDraft = async () => {
+    if (!landingData?.id) {
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "No hay un ID de página para guardar.",
+        });
+        return;
+    }
     setIsSaving(true);
     try {
-      const pageData = {
-        name: pageName,
-        components,
-        theme,
-      };
+        const existingPage = await getLandingPage(landingData.id);
 
-      if (isNew) {
-        const newPageId = await createLandingPage(pageData);
-        if (newPageId) {
-          toast({
-            title: "¡Página creada!",
-            description: "Tu nueva página ha sido guardada como borrador.",
-          });
-          router.replace(`/designer/${newPageId}`);
+        if (existingPage) {
+            // Page exists, update it
+            await updateLandingPage(landingData.id, landingData);
+            toast({
+                title: "¡Borrador guardado!",
+                description: "Tus cambios han sido guardados.",
+            });
         } else {
-          throw new Error("No se pudo obtener el ID de la nueva página.");
+            // Page doesn't exist, create it
+            const success = await createLandingPage(landingData);
+            if (success) {
+                toast({
+                    title: "¡Página creada!",
+                    description: "Tu nueva página ha sido guardada como borrador.",
+                });
+                // If it's a new page, redirect to the new URL
+                if (isNew) {
+                    router.replace(`/designer/${landingData.id}`);
+                }
+            } else {
+                 throw new Error("No se pudo crear la nueva página.");
+            }
         }
-      } else {
-        await updateLandingPage(pageId, pageData);
-        toast({
-          title: "¡Borrador guardado!",
-          description: "Tus cambios han sido guardados.",
-        });
-      }
     } catch (error) {
-      console.error("Error saving draft:", error);
-      toast({
-        variant: "destructive",
-        title: "Error al guardar",
-        description: "No se pudieron guardar los cambios. Inténtalo de nuevo.",
-      });
+        console.error("Error saving draft:", error);
+        toast({
+            variant: "destructive",
+            title: "Error al guardar",
+            description: "No se pudieron guardar los cambios. Inténtalo de nuevo.",
+        });
     } finally {
-      setIsSaving(false);
+        setIsSaving(false);
     }
   };
 
 
   const handlePreview = () => {
     const previewData = {
-      name: pageName,
-      components,
-      theme,
+      name: landingData.name,
+      components: landingData.components,
+      theme: landingData.theme,
     };
     localStorage.setItem('landing-page-preview-data', JSON.stringify(previewData));
     window.open('/preview', '_blank');
@@ -840,7 +983,7 @@ function DesignerPageContent() {
   const dragItem = useRef<number | null>(null);
   const dragOverItem = useRef<number | null>(null);
   
-  const handleThemeChange = (key: keyof typeof theme, value: string) => {
+  const handleThemeChange = (key: keyof LandingPageTheme, value: string) => {
     setTheme(prev => ({ ...prev, [key]: value }));
   };
 
@@ -919,7 +1062,7 @@ function DesignerPageContent() {
 
     if (dragItem.current === null || dragOverItem.current === null) return;
     
-    const newComponents = [...components];
+    const newComponents = [...landingData.components];
     const dragItemContent = newComponents.splice(dragItem.current, 1)[0];
     newComponents.splice(dragOverItem.current, 0, dragItemContent);
     
@@ -955,6 +1098,14 @@ function DesignerPageContent() {
       setIsEditingName(false);
     }
   };
+  
+  const pageName = landingData?.name || '';
+  const components = landingData?.components || [];
+  const theme = landingData?.theme || defaultTheme;
+
+  if (loading) {
+    return <div className="flex h-screen items-center justify-center">Cargando diseñador...</div>;
+  }
 
   return (
     <>
@@ -1172,7 +1323,7 @@ function DesignerPageContent() {
                               <EditComponent data={component} onSave={handleSave} onCancel={handleCancel} />
                             ) : (
                               <>
-                                <ComponentPreview {...component.props} />
+                                <ComponentPreview {...component.props} viewport={viewport} />
                                 <div className="absolute top-2 right-2 hidden group-hover:flex gap-2">
                                     <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/80 hover:bg-white cursor-move">
                                         <GripVertical className="h-4 w-4" />

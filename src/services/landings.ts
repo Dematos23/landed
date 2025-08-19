@@ -10,37 +10,38 @@ import type { LandingPageData } from "@/lib/types";
 const landingsCollection = collection(db, "landings");
 
 const getCurrentUser = (): Promise<User | null> => {
-  return new Promise((resolve) => {
-    // onAuthStateChanged returns an unsubscriber, but also resolves with the user
-    // on the initial call if the SDK has already initialized and knows the user state.
+  return new Promise((resolve, reject) => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       unsubscribe();
       resolve(user);
-    });
+    }, reject);
   });
 };
 
 
 /**
  * Creates a new landing page document in Firestore.
- * @param {Partial<LandingPageData>} data - The initial data for the new landing page.
- * @returns {Promise<string | null>} The ID of the newly created landing page, or null on error.
+ * @param {Partial<LandingPageData>} data - The initial data for the new landing page, must include an ID.
+ * @returns {Promise<boolean>} True on success, false on failure.
  */
-export async function createLandingPage(data: Partial<LandingPageData>): Promise<string | null> {
+export async function createLandingPage(data: Partial<LandingPageData>): Promise<boolean> {
   try {
     const currentUser = await getCurrentUser();
     if (!currentUser) {
       throw new Error("Authentication required to create a landing page.");
     }
+    
+    if (!data.id) {
+        throw new Error("An ID must be provided to create a landing page.");
+    }
 
-    const newId = uuidv4();
     const now = serverTimestamp();
 
     const newLanding: LandingPageData = {
-      id: newId,
+      id: data.id,
       userId: currentUser.uid,
       name: data.name || "Nueva Página de Aterrizaje",
-      subdomain: data.subdomain || `pagina-${newId.substring(0, 8)}`,
+      subdomain: data.subdomain || `pagina-${data.id.substring(0, 8)}`,
       components: data.components || [],
       theme: data.theme || {
         primary: '#3F51B5',
@@ -58,11 +59,11 @@ export async function createLandingPage(data: Partial<LandingPageData>): Promise
       updatedAt: now,
     };
 
-    await setDoc(doc(landingsCollection, newId), newLanding);
-    return newId;
+    await setDoc(doc(landingsCollection, newLanding.id), newLanding);
+    return true;
   } catch (error) {
     console.error("Error creating landing page:", error);
-    return null;
+    return false;
   }
 }
 
@@ -75,7 +76,10 @@ export async function getLandingPage(pageId: string): Promise<LandingPageData | 
   try {
     const currentUser = await getCurrentUser();
     if (!currentUser) {
-      throw new Error("Authentication required.");
+      // Allow fetching if the user is not logged in, for published pages, but for now we restrict it.
+      // This could be changed later if we want public pages.
+      console.error("Authentication required.");
+      return null;
     }
     
     const docRef = doc(db, "landings", pageId);
@@ -83,13 +87,15 @@ export async function getLandingPage(pageId: string): Promise<LandingPageData | 
 
     if (docSnap.exists()) {
         const data = docSnap.data() as LandingPageData;
+        // Only return data if the user owns the page
         if(data.userId === currentUser.uid) {
             return data;
         }
         console.error("User does not have permission to access this page.");
         return null;
     } else {
-      console.log("No such document!");
+      // This is expected when checking for a new page, so not an error.
+      // console.log("No such document!");
       return null;
     }
   } catch (error) {
@@ -140,12 +146,14 @@ export async function getUserLandings(): Promise<LandingPageData[]> {
  */
 export async function updateLandingPage(pageId: string, data: Partial<LandingPageData>): Promise<boolean> {
   try {
-    const pageRef = doc(db, "landings", pageId);
-    // Ensure the page exists and the user has permission before updating
-    const existingPage = await getLandingPage(pageId);
-    if (!existingPage) {
-        return false; // getLandingPage already handles auth check
+    const currentUser = await getCurrentUser();
+     if (!currentUser) {
+      throw new Error("Authentication required.");
     }
+
+    const pageRef = doc(db, "landings", pageId);
+    // We don't need to check for existence here again as the save handler does it.
+    // We just need to make sure we have a user.
 
     await updateDoc(pageRef, {
       ...data,
@@ -166,9 +174,11 @@ export async function updateLandingPage(pageId: string, data: Partial<LandingPag
 export async function deleteLandingPage(pageId: string): Promise<boolean> {
   try {
     const pageRef = doc(db, "landings", pageId);
+    // Ensure the page exists and the user has permission before deleting
     const existingPage = await getLandingPage(pageId);
     if (!existingPage) {
-        return false; // getLandingPage already handles auth check
+        // getLandingPage already handles auth check and console logs
+        return false; 
     }
 
     await deleteDoc(pageRef);
