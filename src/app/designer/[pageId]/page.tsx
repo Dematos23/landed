@@ -787,7 +787,7 @@ function DesignerPageContent() {
   const isNew = pageIdFromUrl === 'new';
 
   const [landingData, setLandingData] = useState<Omit<LandingPageData, 'userId' | 'createdAt' | 'updatedAt'>>(() => createDefaultLandingData());
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!isNew);
   const [isSaving, setIsSaving] = useState(false);
   const [editingComponent, setEditingComponent] = useState<ComponentData | null>(null);
   const [viewport, setViewport] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
@@ -1325,5 +1325,3 @@ export default function DesignerPage() {
     </SidebarProvider>
   );
 }
-
-    
