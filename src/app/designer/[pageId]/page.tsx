@@ -1308,7 +1308,11 @@ function DesignerPageContent() {
   const theme = landingData?.theme || defaultTheme;
 
   if (loading) {
-    return <div className="flex h-screen items-center justify-center">Cargando diseñador...</div>;
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+        Cargando diseñador...
+      </div>
+    );
   }
 
   return (
