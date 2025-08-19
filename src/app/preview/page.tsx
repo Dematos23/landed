@@ -75,9 +75,14 @@ const HeroPreview = ({
   )
 };
 
-const FeaturesPreview = ({ title, features }: { title: string, features: { title: string, description: string }[] }) => (
-  <section className="w-full bg-card py-12 md:py-24 lg:py-32">
-     <div className="container px-4 md:px-6">
+const FeaturesPreview = ({ title, features, backgroundType, backgroundImage }: { title: string, features: { title: string, description: string }[], backgroundType: 'color' | 'image', backgroundImage: string }) => {
+  const backgroundStyles: React.CSSProperties =
+    backgroundType === 'image' && backgroundImage
+      ? { backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+      : {};
+  return (
+  <section className="relative w-full bg-card py-12 md:py-24 lg:py-32" style={backgroundStyles}>
+     <div className="container relative z-10 px-4 md:px-6">
         <h2 className="text-3xl font-bold text-center text-card-foreground mb-8 md:mb-12">{title}</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {features.map((feature, index) => (
@@ -92,7 +97,7 @@ const FeaturesPreview = ({ title, features }: { title: string, features: { title
         </div>
      </div>
   </section>
-);
+)};
 
 const CtaPreview = ({ title, subtitle, buttonText, buttonUrl }: { title: string, subtitle: string, buttonText: string, buttonUrl: string }) => (
     <section className="w-full bg-card py-12 md:py-24 lg:py-32">

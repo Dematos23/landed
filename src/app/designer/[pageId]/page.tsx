@@ -139,22 +139,31 @@ const HeroPreview = ({
 };
 
 
-const FeaturesPreview = ({ title, features }: { title: string, features: { title: string, description: string }[] }) => (
-  <div className="w-full bg-card dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none">
-     <h2 className="text-3xl font-bold text-center text-card-foreground dark:text-white mb-8">{title}</h2>
-     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {features.map((feature, index) => (
-          <div key={index} className="text-center">
-              <div className="flex items-center justify-center h-12 w-12 rounded-md bg-primary/10 text-primary mx-auto mb-4">
-                  <Layers className="h-6 w-6"/>
+const FeaturesPreview = ({ title, features, backgroundType, backgroundImage }: { title: string, features: { title: string, description: string }[], backgroundType: 'color' | 'image', backgroundImage: string }) => {
+  const backgroundStyles: React.CSSProperties =
+    backgroundType === 'image' && backgroundImage
+      ? { backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+      : {};
+
+  return (
+    <div className="relative w-full bg-card dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none" style={backgroundStyles}>
+       <div className="relative z-10">
+         <h2 className="text-3xl font-bold text-center text-card-foreground dark:text-white mb-8">{title}</h2>
+         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <div key={index} className="text-center">
+                  <div className="flex items-center justify-center h-12 w-12 rounded-md bg-primary/10 text-primary mx-auto mb-4">
+                      <Layers className="h-6 w-6"/>
+                  </div>
+                  <h3 className="text-lg font-semibold text-card-foreground dark:text-white">{feature.title}</h3>
+                  <p className="text-muted-foreground dark:text-gray-300">{feature.description}</p>
               </div>
-              <h3 className="text-lg font-semibold text-card-foreground dark:text-white">{feature.title}</h3>
-              <p className="text-muted-foreground dark:text-gray-300">{feature.description}</p>
-          </div>
-        ))}
-     </div>
-  </div>
-);
+            ))}
+         </div>
+       </div>
+    </div>
+  );
+};
 
 const CtaPreview = ({ title, subtitle, buttonText, buttonUrl }: { title: string, subtitle: string, buttonText: string, buttonUrl: string }) => (
     <div className="w-full bg-card dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none">
@@ -469,38 +478,106 @@ const EditHeroForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData:
 
 const EditFeaturesForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData: any) => void, onCancel: () => void }) => {
     const [formData, setFormData] = useState(data.props);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         onSave(formData);
     };
+
     const handleFeatureChange = (index: number, field: string, value: string) => {
         const newFeatures = [...formData.features];
         newFeatures[index] = { ...newFeatures[index], [field]: value };
         setFormData({ ...formData, features: newFeatures });
     };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const dataUrl = event.target?.result as string;
+          setFormData({ ...formData, backgroundImage: dataUrl });
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
     return (
         <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 space-y-4">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white">Editar Sección de Características</h3>
-            <div>
-                <Label htmlFor="main-title">Título Principal</Label>
-                <Input id="main-title" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
-            </div>
-            <Accordion type="single" collapsible className="w-full">
-              {formData.features.map((feature: any, index: number) => (
-                  <AccordionItem value={`item-${index}`} key={index}>
-                      <AccordionTrigger>Característica {index + 1}</AccordionTrigger>
-                      <AccordionContent className="space-y-2">
-                          <div>
-                              <Label htmlFor={`feature-title-${index}`}>Título</Label>
-                              <Input id={`feature-title-${index}`} value={feature.title} onChange={(e) => handleFeatureChange(index, 'title', e.target.value)} />
-                          </div>
-                          <div>
-                              <Label htmlFor={`feature-desc-${index}`}>Descripción</Label>
-                              <Textarea id={`feature-desc-${index}`} value={feature.description} onChange={(e) => handleFeatureChange(index, 'description', e.target.value)} />
-                          </div>
-                      </AccordionContent>
-                  </AccordionItem>
-              ))}
+             <Accordion type="multiple" defaultValue={['content']} className="w-full">
+              <AccordionItem value="content">
+                <AccordionTrigger>Contenido</AccordionTrigger>
+                <AccordionContent className="space-y-4 pt-4">
+                  <div>
+                      <Label htmlFor="main-title">Título Principal</Label>
+                      <Input id="main-title" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
+                  </div>
+                  {formData.features.map((feature: any, index: number) => (
+                    <Accordion type="single" collapsible className="w-full" key={index}>
+                        <AccordionItem value={`item-${index}`}>
+                            <AccordionTrigger>Característica {index + 1}</AccordionTrigger>
+                            <AccordionContent className="space-y-2">
+                                <div>
+                                    <Label htmlFor={`feature-title-${index}`}>Título</Label>
+                                    <Input id={`feature-title-${index}`} value={feature.title} onChange={(e) => handleFeatureChange(index, 'title', e.target.value)} />
+                                </div>
+                                <div>
+                                    <Label htmlFor={`feature-desc-${index}`}>Descripción</Label>
+                                    <Textarea id={`feature-desc-${index}`} value={feature.description} onChange={(e) => handleFeatureChange(index, 'description', e.target.value)} />
+                                </div>
+                            </AccordionContent>
+                        </AccordionItem>
+                    </Accordion>
+                  ))}
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="background">
+                  <AccordionTrigger>Fondo</AccordionTrigger>
+                  <AccordionContent className="space-y-4 pt-4">
+                    <RadioGroup
+                        defaultValue={formData.backgroundType}
+                        onValueChange={(value) => setFormData({ ...formData, backgroundType: value })}
+                        className="flex items-center gap-4"
+                    >
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="color" id="r-color-features" />
+                            <Label htmlFor="r-color-features">Color</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="image" id="r-image-features" />
+                            <Label htmlFor="r-image-features">Imagen</Label>
+                        </div>
+                    </RadioGroup>
+
+                    {formData.backgroundType === 'image' && (
+                        <div className="space-y-2 border p-4 rounded-md">
+                           <Label>Imagen de Fondo</Label>
+                           <p className="text-sm text-muted-foreground">Recomendado: 1200x600px</p>
+                           <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              ref={fileInputRef}
+                              onChange={handleFileChange}
+                           />
+                           <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
+                               <Upload className="mr-2 h-4 w-4" /> Subir Imagen
+                           </Button>
+                           {formData.backgroundImage && (
+                               <Image
+                                  src={formData.backgroundImage}
+                                  alt="Preview"
+                                  width={100}
+                                  height={100}
+                                  className="object-cover rounded-md aspect-square mt-2"
+                               />
+                           )}
+                        </div>
+                    )}
+                  </AccordionContent>
+              </AccordionItem>
             </Accordion>
             <div className="flex justify-end gap-2">
                 <Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
@@ -708,7 +785,9 @@ const componentMap: { [key: string]: { preview: React.ComponentType<any>, edit: 
             { title: 'Característica Uno', description: 'Describe brevemente una característica clave.' },
             { title: 'Característica Dos', description: 'Describe brevemente una característica clave.' },
             { title: 'Característica Tres', description: 'Describe brevemente una característica clave.' },
-        ]
+        ],
+        backgroundType: 'color',
+        backgroundImage: '',
     }
   },
   'CTA': { 
