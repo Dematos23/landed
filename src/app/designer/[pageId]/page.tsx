@@ -1143,89 +1143,91 @@ function DesignerPageContent() {
         </header>
         <div className="flex flex-1 overflow-hidden">
           <Sidebar>
-            <Accordion type="multiple" defaultValue={['item-1', 'item-2']} className="w-full">
-              <AccordionItem value="item-1">
-                <AccordionTrigger className="p-4 hover:no-underline">
-                  <div className="flex items-center gap-2">
-                      <Palette className="h-4 w-4" />
-                      <span className="font-semibold text-base">Tema</span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="p-4 pt-0 space-y-4">
-                  <div className="space-y-2">
-                      <Label>Primario</Label>
-                      <Input type="color" value={theme.primary} onChange={(e) => handleThemeChange('primary', e.target.value)} />
-                  </div>
-                   <div className="space-y-2">
-                      <Label>Color Texto Botón</Label>
-                      <Input type="color" value={theme.primaryForeground} onChange={(e) => handleThemeChange('primaryForeground', e.target.value)} />
-                  </div>
-                   <div className="space-y-2">
-                      <Label>Secundario</Label>
-                      <Input type="color" value={theme.secondary} onChange={(e) => handleThemeChange('secondary', e.target.value)} />
-                  </div>
-                   <div className="space-y-2">
-                      <Label>Acentos</Label>
-                      <Input type="color" value={theme.accent} onChange={(e) => handleThemeChange('accent', e.target.value)} />
-                  </div>
-                   <div className="space-y-2">
-                      <Label>Color de Títulos</Label>
-                      <Input type="color" value={theme.foreground} onChange={(e) => handleThemeChange('foreground', e.target.value)} />
-                  </div>
-                  <div className="space-y-2">
-                      <Label>Color de Texto</Label>
-                      <Input type="color" value={theme.mutedForeground} onChange={(e) => handleThemeChange('mutedForeground', e.target.value)} />
-                  </div>
-                  <div className="space-y-2">
-                      <Label>Color de Fondo 1</Label>
-                      <Input type="color" value={theme.background1} onChange={(e) => handleThemeChange('background1', e.target.value)} />
-                  </div>
-                  <div className="space-y-2">
-                      <Label>Color de Fondo 2</Label>
-                      <Input type="color" value={theme.background2} onChange={(e) => handleThemeChange('background2', e.target.value)} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Fuente</Label>
-                    <Select value={theme.fontFamily} onValueChange={(value) => handleThemeChange('fontFamily', value as LandingPageTheme['fontFamily'])}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar fuente" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Inter">Inter</SelectItem>
-                        <SelectItem value="Roboto">Roboto</SelectItem>
-                        <SelectItem value="Lato">Lato</SelectItem>
-                        <SelectItem value="Montserrat">Montserrat</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-2">
-                 <AccordionTrigger className="p-4 hover:no-underline">
-                  <div className="flex items-center gap-2">
-                      <Layers className="h-4 w-4" />
-                      <span className="font-semibold text-base">Componentes</span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="p-4 pt-0">
-                   <div className="flex flex-col gap-2">
-                      {Object.keys(componentMap).map(
-                        (componentName) => (
-                          <Button
-                            key={componentName}
-                            variant="ghost"
-                            className="justify-start gap-2"
-                            onClick={() => addComponent(componentName)}
-                          >
-                            <GripVertical className="h-4 w-4 text-muted-foreground" />
-                            {componentName}
-                          </Button>
-                        )
-                      )}
+            <SidebarContent>
+                <Accordion type="multiple" defaultValue={['item-1', 'item-2']} className="w-full">
+                <AccordionItem value="item-1">
+                    <AccordionTrigger className="p-4 hover:no-underline">
+                    <div className="flex items-center gap-2">
+                        <Palette className="h-4 w-4" />
+                        <span className="font-semibold text-base">Tema</span>
                     </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+                    </AccordionTrigger>
+                    <AccordionContent className="p-4 pt-0 space-y-4">
+                    <div className="space-y-2">
+                        <Label>Primario</Label>
+                        <Input type="color" value={theme.primary} onChange={(e) => handleThemeChange('primary', e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Color Texto Botón</Label>
+                        <Input type="color" value={theme.primaryForeground} onChange={(e) => handleThemeChange('primaryForeground', e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Secundario</Label>
+                        <Input type="color" value={theme.secondary} onChange={(e) => handleThemeChange('secondary', e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Acentos</Label>
+                        <Input type="color" value={theme.accent} onChange={(e) => handleThemeChange('accent', e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Color de Títulos</Label>
+                        <Input type="color" value={theme.foreground} onChange={(e) => handleThemeChange('foreground', e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Color de Texto</Label>
+                        <Input type="color" value={theme.mutedForeground} onChange={(e) => handleThemeChange('mutedForeground', e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Color de Fondo 1</Label>
+                        <Input type="color" value={theme.background1} onChange={(e) => handleThemeChange('background1', e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Color de Fondo 2</Label>
+                        <Input type="color" value={theme.background2} onChange={(e) => handleThemeChange('background2', e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Fuente</Label>
+                        <Select value={theme.fontFamily} onValueChange={(value) => handleThemeChange('fontFamily', value as LandingPageTheme['fontFamily'])}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar fuente" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Inter">Inter</SelectItem>
+                            <SelectItem value="Roboto">Roboto</SelectItem>
+                            <SelectItem value="Lato">Lato</SelectItem>
+                            <SelectItem value="Montserrat">Montserrat</SelectItem>
+                        </SelectContent>
+                        </Select>
+                    </div>
+                    </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="item-2">
+                    <AccordionTrigger className="p-4 hover:no-underline">
+                    <div className="flex items-center gap-2">
+                        <Layers className="h-4 w-4" />
+                        <span className="font-semibold text-base">Componentes</span>
+                    </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="p-4 pt-0">
+                    <div className="flex flex-col gap-2">
+                        {Object.keys(componentMap).map(
+                            (componentName) => (
+                            <Button
+                                key={componentName}
+                                variant="ghost"
+                                className="justify-start gap-2"
+                                onClick={() => addComponent(componentName)}
+                            >
+                                <GripVertical className="h-4 w-4 text-muted-foreground" />
+                                {componentName}
+                            </Button>
+                            )
+                        )}
+                        </div>
+                    </AccordionContent>
+                </AccordionItem>
+                </Accordion>
+            </SidebarContent>
           </Sidebar>
           <SidebarInset>
             <main className="flex-1 overflow-auto bg-muted/40 transition-all duration-300" onDrop={handleDrop}>
