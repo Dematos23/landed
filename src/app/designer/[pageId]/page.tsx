@@ -221,7 +221,10 @@ const EditHeroForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData:
     const [formData, setFormData] = useState(data.props);
     const [uploadedImages, setUploadedImages] = useState<string[]>([]);
     
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const fileInputRefSingle = useRef<HTMLInputElement>(null);
+    const fileInputRefDesktop = useRef<HTMLInputElement>(null);
+    const fileInputRefTablet = useRef<HTMLInputElement>(null);
+    const fileInputRefMobile = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
       // If there are existing images in props, load them into state
@@ -232,7 +235,7 @@ const EditHeroForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData:
       if (formData.backgroundImageMobile) existingImages.push(formData.backgroundImageMobile);
       const uniqueImages = [...new Set(existingImages.filter(Boolean))];
       setUploadedImages(uniqueImages);
-    }, []);
+    }, [formData.backgroundImage, formData.backgroundImageDesktop, formData.backgroundImageMobile, formData.backgroundImageTablet]);
 
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -252,6 +255,15 @@ const EditHeroForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData:
         reader.readAsDataURL(file);
       }
     };
+    
+    const getFileInputRef = (target: string) => {
+        switch (target) {
+            case 'backgroundImageDesktop': return fileInputRefDesktop;
+            case 'backgroundImageTablet': return fileInputRefTablet;
+            case 'backgroundImageMobile': return fileInputRefMobile;
+            default: return fileInputRefSingle;
+        }
+    }
 
     return (
         <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 space-y-4">
@@ -349,51 +361,96 @@ const EditHeroForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData:
                     <RadioGroup
                         defaultValue={formData.backgroundType}
                         onValueChange={(value) => setFormData({ ...formData, backgroundType: value })}
+                        className="flex items-center gap-4"
                     >
                         <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="color" id="r1" />
-                        <Label htmlFor="r1">Color</Label>
+                            <RadioGroupItem value="color" id="r-color" />
+                            <Label htmlFor="r-color">Color</Label>
                         </div>
                         <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="image" id="r2" />
-                        <Label htmlFor="r2">Imagen</Label>
+                            <RadioGroupItem value="image" id="r-image" />
+                            <Label htmlFor="r-image">Imagen</Label>
                         </div>
                     </RadioGroup>
 
                     {formData.backgroundType === 'image' && (
-                        <div className="space-y-4">
-                            <input
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                ref={fileInputRef}
-                                onChange={(e) => handleFileChange(e, 'backgroundImage')}
-                            />
-                            <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
-                                <Upload className="mr-2 h-4 w-4" /> Subir Imagen
-                            </Button>
-
-                            {uploadedImages.length > 0 && (
-                              <div className="space-y-2">
-                                <Label>Imágenes Subidas</Label>
-                                <div className="grid grid-cols-3 gap-2">
-                                  {uploadedImages.map((imgSrc, index) => (
-                                    <Image
-                                      key={index}
-                                      src={imgSrc}
-                                      alt={`Uploaded image ${index + 1}`}
-                                      width={100}
-                                      height={100}
-                                      className={cn(
-                                        "object-cover rounded-md cursor-pointer aspect-square",
-                                        formData.backgroundImage === imgSrc && "ring-2 ring-primary ring-offset-2"
-                                      )}
-                                      onClick={() => setFormData({ ...formData, backgroundImage: imgSrc })}
-                                    />
-                                  ))}
+                        <div className="space-y-4 border p-4 rounded-md">
+                            <RadioGroup
+                                defaultValue={formData.imageMode}
+                                onValueChange={(value) => setFormData({ ...formData, imageMode: value })}
+                                className="flex items-center gap-4"
+                            >
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="single" id="r-single" />
+                                    <Label htmlFor="r-single">Una sola imagen</Label>
                                 </div>
-                              </div>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="responsive" id="r-responsive" />
+                                    <Label htmlFor="r-responsive">Imágenes responsivas</Label>
+                                </div>
+                            </RadioGroup>
+                            
+                            <Separator />
+
+                            {formData.imageMode === 'single' ? (
+                                <div className="space-y-2">
+                                    <Label>Imagen de Fondo</Label>
+                                    <p className="text-sm text-muted-foreground">Recomendado: 1200x600px</p>
+                                     <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        ref={fileInputRefSingle}
+                                        onChange={(e) => handleFileChange(e, 'backgroundImage')}
+                                    />
+                                    <Button type="button" variant="outline" onClick={() => fileInputRefSingle.current?.click()}>
+                                        <Upload className="mr-2 h-4 w-4" /> Subir Imagen
+                                    </Button>
+                                    {formData.backgroundImage && (
+                                        <Image
+                                            src={formData.backgroundImage}
+                                            alt="Preview"
+                                            width={100}
+                                            height={100}
+                                            className="object-cover rounded-md aspect-square mt-2"
+                                        />
+                                    )}
+                                </div>
+                            ) : (
+                               <div className="space-y-4">
+                                  {['Desktop', 'Tablet', 'Mobile'].map((device) => {
+                                    const targetKey = `backgroundImage${device}` as keyof typeof formData;
+                                    const recommendedSize = device === 'Desktop' ? '1920x1080px' : device === 'Tablet' ? '1024x768px' : '768x1024px';
+                                    
+                                    return (
+                                        <div key={device} className="space-y-2">
+                                            <Label>Imagen para {device}</Label>
+                                            <p className="text-sm text-muted-foreground">Recomendado: {recommendedSize}</p>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                className="hidden"
+                                                ref={getFileInputRef(targetKey)}
+                                                onChange={(e) => handleFileChange(e, targetKey)}
+                                            />
+                                            <Button type="button" variant="outline" onClick={() => getFileInputRef(targetKey).current?.click()}>
+                                                <Upload className="mr-2 h-4 w-4" /> Subir Imagen
+                                            </Button>
+                                            {formData[targetKey] && (
+                                                <Image
+                                                    src={formData[targetKey]}
+                                                    alt={`${device} preview`}
+                                                    width={100}
+                                                    height={100}
+                                                    className="object-cover rounded-md aspect-square mt-2"
+                                                />
+                                            )}
+                                        </div>
+                                    );
+                                  })}
+                               </div>
                             )}
+
                         </div>
                     )}
 
@@ -636,6 +693,10 @@ const componentMap: { [key: string]: { preview: React.ComponentType<any>, edit: 
       cta2Style: 'secondary',
       backgroundType: 'color',
       backgroundImage: '',
+      imageMode: 'single',
+      backgroundImageDesktop: '',
+      backgroundImageTablet: '',
+      backgroundImageMobile: '',
     }
   },
   'Características': { 
@@ -1231,5 +1292,7 @@ export default function DesignerPage() {
     </SidebarProvider>
   );
 }
+
+    
 
     
