@@ -787,16 +787,31 @@ function DesignerPageContent() {
   const isNew = pageIdFromUrl === 'new';
 
   const [landingData, setLandingData] = useState<Omit<LandingPageData, 'userId' | 'createdAt' | 'updatedAt'>>(() => createDefaultLandingData());
-  const [loading, setLoading] = useState(!isNew);
+  const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [editingComponent, setEditingComponent] = useState<ComponentData | null>(null);
   const [viewport, setViewport] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [isEditingName, setIsEditingName] = useState(false);
+  
+  const getDraftKey = (pageId: string) => `landing-page-draft-${pageId}`;
 
+  // This effect handles the data loading logic
   useEffect(() => {
-    const fetchPageData = async (pageId: string) => {
+    const draftKey = getDraftKey(pageIdFromUrl);
+    const savedDraft = localStorage.getItem(draftKey);
+
+    const loadPage = async () => {
+      if (savedDraft) {
+        setLandingData(JSON.parse(savedDraft));
+        setLoading(false);
+      } else if (isNew) {
+        const defaultData = createDefaultLandingData();
+        setLandingData(defaultData);
+        localStorage.setItem(getDraftKey('new'), JSON.stringify(defaultData));
+        setLoading(false);
+      } else {
         setLoading(true);
-        const data = await getLandingPage(pageId);
+        const data = await getLandingPage(pageIdFromUrl);
         if (data) {
           setLandingData(data);
         } else {
@@ -808,15 +823,20 @@ function DesignerPageContent() {
           router.push('/dashboard');
         }
         setLoading(false);
-      };
-
-    if (isNew) {
-      setLandingData(createDefaultLandingData());
-      setLoading(false);
-    } else {
-      fetchPageData(pageIdFromUrl);
-    }
+      }
+    };
+    
+    loadPage();
   }, [pageIdFromUrl, isNew, router, toast]);
+
+  // This effect saves any changes to landingData to localStorage
+  useEffect(() => {
+    if (!loading) {
+      const draftKey = getDraftKey(landingData.id === 'new' && isNew ? 'new' : landingData.id);
+      localStorage.setItem(draftKey, JSON.stringify(landingData));
+    }
+  }, [landingData, loading, isNew]);
+
 
   const setPageName = (name: string) => {
     setLandingData(prev => ({...prev, name}));
@@ -853,6 +873,7 @@ function DesignerPageContent() {
                     description: "Tu nueva página ha sido guardada como borrador.",
                 });
                 if (isNew) {
+                    localStorage.removeItem(getDraftKey('new'));
                     router.replace(`/designer/${landingData.id}`);
                 }
             } else {
