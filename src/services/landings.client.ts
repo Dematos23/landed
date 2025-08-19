@@ -12,7 +12,8 @@ import {
   query, 
   where, 
   getDocs,
-  Timestamp
+  Timestamp,
+  deleteDoc
 } from "firebase/firestore";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { v4 as uuidv4 } from 'uuid';

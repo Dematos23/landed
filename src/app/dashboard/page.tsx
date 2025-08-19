@@ -10,10 +10,6 @@ import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card"
 import {
   DropdownMenu,
@@ -24,6 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getUserLandings, deleteLandingPage } from "@/services/landings.client"
+import { publishLanding, unpublishLanding } from "@/actions/landings"
 import type { LandingPageData } from "@/lib/types"
 import { useToast } from "@/hooks/use-toast"
 import {
@@ -37,6 +34,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { cn } from "@/lib/utils"
 
 function SiteSkeleton() {
   return (
@@ -50,7 +48,7 @@ function SiteSkeleton() {
           </div>
         </div>
         <div className="flex items-center gap-4">
-           <Skeleton className="h-4 w-24" />
+           <Skeleton className="h-8 w-24" />
            <Skeleton className="h-8 w-8 rounded-full" />
         </div>
       </CardContent>
@@ -61,9 +59,11 @@ function SiteSkeleton() {
 export default function DashboardPage() {
   const [sites, setSites] = useState<LandingPageData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [togglingPublish, setTogglingPublish] = useState<string | null>(null);
   const { toast } = useToast();
 
   const fetchSites = async () => {
+    setLoading(true);
     const userSites = await getUserLandings();
     setSites(userSites);
     setLoading(false);
@@ -88,6 +88,27 @@ export default function DashboardPage() {
         description: "No se pudo eliminar el sitio. Inténtalo de nuevo.",
       });
     }
+  }
+  
+  const handleTogglePublish = async (site: LandingPageData) => {
+    setTogglingPublish(site.id);
+    const action = site.isPublished ? unpublishLanding : publishLanding;
+    const success = await action(site.id);
+    
+    if (success) {
+      toast({
+        title: `¡Éxito!`,
+        description: `Tu sitio ha sido ${site.isPublished ? 'despublicado' : 'publicado'}.`,
+      });
+      fetchSites();
+    } else {
+       toast({
+        variant: "destructive",
+        title: "Error",
+        description: `No se pudo ${site.isPublished ? 'despublicar' : 'publicar'} el sitio. Inténtalo de nuevo.`,
+      });
+    }
+    setTogglingPublish(null);
   }
 
 
@@ -124,19 +145,31 @@ export default function DashboardPage() {
                       </svg>
                     </div>
                     <div>
-                      <h3 className="font-semibold">{site.name}</h3>
-                      <a href={`https://${site.subdomain}.landed.co`} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:underline">
+                      <div className="flex items-center gap-2">
+                         <span
+                            className={cn(
+                              "h-2.5 w-2.5 rounded-full",
+                              site.isPublished ? "bg-green-500" : "bg-gray-400"
+                            )}
+                          />
+                        <h3 className="font-semibold">{site.name}</h3>
+                      </div>
+                      <a href={`/p/${site.subdomain}`} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:underline">
                         {site.subdomain}.landed.co
                       </a>
                     </div>
                   </div>
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span>0 vistas</span>
-                      <span className="mx-2">&#183;</span>
-                      <span>0% conversión</span>
-                      <a href={`https://${site.subdomain}.landed.co`} target="_blank" rel="noopener noreferrer" className="hover:text-primary">
-                        <ExternalLink className="h-4 w-4" />
-                      </a>
+                      <Button 
+                        variant={site.isPublished ? "outline" : "default"} 
+                        size="sm"
+                        onClick={() => handleTogglePublish(site)}
+                        disabled={togglingPublish === site.id}
+                      >
+                         {togglingPublish === site.id 
+                            ? "Cargando..." 
+                            : site.isPublished ? 'Detener' : 'Publicar'}
+                      </Button>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
@@ -155,6 +188,11 @@ export default function DashboardPage() {
                             <Link href={`/designer/${site.id}`} className="flex items-center w-full cursor-pointer">
                               <Pencil className="mr-2 h-4 w-4" /> Editar
                             </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                             <a href={`/p/${site.subdomain}`} target="_blank" rel="noopener noreferrer" className="flex items-center w-full cursor-pointer">
+                                <ExternalLink className="mr-2 h-4 w-4" /> Ver en vivo
+                             </a>
                           </DropdownMenuItem>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>

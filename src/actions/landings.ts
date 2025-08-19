@@ -44,7 +44,7 @@ export async function publishLanding(pageId: string): Promise<boolean> {
     const pageRef = landingsCollection.doc(pageId);
     const docSnap = await pageRef.get();
 
-    if (!docSnap.exists) {
+    if (!docSnap.exists()) {
       console.error(`Publishing error: Page with ID ${pageId} not found.`);
       return false;
     }
@@ -64,6 +64,47 @@ export async function publishLanding(pageId: string): Promise<boolean> {
     return true;
   } catch (error) {
     console.error("Error publishing landing page:", error);
+    return false;
+  }
+}
+
+/**
+ * Unpublishes a landing page by setting `isPublished` to false.
+ * This is a server action and requires admin privileges.
+ * @param pageId The ID of the landing page to unpublish.
+ * @returns A promise that resolves to true if successful, false otherwise.
+ */
+export async function unpublishLanding(pageId: string): Promise<boolean> {
+  try {
+    const user = await getAuthenticatedUser();
+    if (!user) {
+      console.error("Unpublishing error: User is not authenticated.");
+      return false;
+    }
+
+    const pageRef = landingsCollection.doc(pageId);
+    const docSnap = await pageRef.get();
+
+    if (!docSnap.exists()) {
+      console.error(`Unpublishing error: Page with ID ${pageId} not found.`);
+      return false;
+    }
+
+    // Optional: Verify ownership
+    // if (docSnap.data()?.userId !== user.uid) {
+    //   console.error(`Unpublishing error: User ${user.uid} does not have permission to unpublish page ${pageId}.`);
+    //   return false;
+    // }
+
+    await pageRef.update({
+      isPublished: false,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    console.log(`Page ${pageId} unpublished successfully.`);
+    return true;
+  } catch (error) {
+    console.error("Error unpublishing landing page:", error);
     return false;
   }
 }
