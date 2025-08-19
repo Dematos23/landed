@@ -121,7 +121,7 @@ const HeroPreview = ({
   numberOfButtons, cta1Style, cta2Style,
   backgroundType, backgroundImage, imageMode,
   backgroundImageDesktop, backgroundImageTablet, backgroundImageMobile,
-  padding
+  padding = { top: 0, bottom: 0, left: 0, right: 0 }
 }: { 
   headline: string, subheadline: string, 
   cta1: string, cta2: string, cta1Url: string, cta2Url: string,
@@ -189,7 +189,7 @@ const HeroPreview = ({
 };
 
 
-const FeaturesPreview = ({ title, features, backgroundType, backgroundImage, padding }: { title: string, features: { icon: string, title: string, description: string }[], backgroundType: 'color' | 'image', backgroundImage: string, padding: { top: number, bottom: number, left: number, right: number } }) => {
+const FeaturesPreview = ({ title, features, backgroundType, backgroundImage, padding = { top: 0, bottom: 0, left: 0, right: 0 } }: { title: string, features: { icon: string, title: string, description: string }[], backgroundType: 'color' | 'image', backgroundImage: string, padding: { top: number, bottom: number, left: number, right: number } }) => {
   const backgroundAndPaddingStyles: React.CSSProperties = {
       ...(backgroundType === 'image' && backgroundImage
         ? { backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
@@ -220,7 +220,7 @@ const FeaturesPreview = ({ title, features, backgroundType, backgroundImage, pad
   );
 };
 
-const CtaPreview = ({ title, subtitle, buttonText, buttonUrl, backgroundType, backgroundImage, padding }: { title: string, subtitle: string, buttonText: string, buttonUrl: string, backgroundType: 'color' | 'image', backgroundImage: string, padding: { top: number, bottom: number, left: number, right: number } }) => {
+const CtaPreview = ({ title, subtitle, buttonText, buttonUrl, backgroundType, backgroundImage, padding = { top: 0, bottom: 0, left: 0, right: 0 } }: { title: string, subtitle: string, buttonText: string, buttonUrl: string, backgroundType: 'color' | 'image', backgroundImage: string, padding: { top: number, bottom: number, left: number, right: number } }) => {
   const backgroundAndPaddingStyles: React.CSSProperties = {
     ...(backgroundType === 'image' && backgroundImage
       ? { backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
@@ -244,7 +244,7 @@ const CtaPreview = ({ title, subtitle, buttonText, buttonUrl, backgroundType, ba
   )
 };
 
-const TestimonialsPreview = ({ title, testimonials, padding }: { title: string, testimonials: { quote: string, name: string, company: string }[], padding: { top: number, bottom: number, left: number, right: number } }) => (
+const TestimonialsPreview = ({ title, testimonials, padding = { top: 0, bottom: 0, left: 0, right: 0 } }: { title: string, testimonials: { quote: string, name: string, company: string }[], padding: { top: number, bottom: number, left: number, right: number } }) => (
     <div className="w-full bg-card dark:bg-gray-800 rounded-lg shadow-md pointer-events-none" style={{ paddingTop: `${padding.top}px`, paddingBottom: `${padding.bottom}px`, paddingLeft: `${padding.left}px`, paddingRight: `${padding.right}px`}}>
         <h2 className="text-3xl font-bold text-center text-card-foreground dark:text-white mb-8">{title}</h2>
         <div className="grid md:grid-cols-2 gap-8">
@@ -264,7 +264,7 @@ const TestimonialsPreview = ({ title, testimonials, padding }: { title: string, 
     </div>
 );
 
-const FaqPreview = ({ title, faqs, padding }: { title: string, faqs: { question: string, answer: string }[], padding: { top: number, bottom: number, left: number, right: number } }) => (
+const FaqPreview = ({ title, faqs, padding = { top: 0, bottom: 0, left: 0, right: 0 } }: { title: string, faqs: { question: string, answer: string }[], padding: { top: number, bottom: number, left: number, right: number } }) => (
     <div className="w-full bg-card dark:bg-gray-800 rounded-lg shadow-md pointer-events-none" style={{ paddingTop: `${padding.top}px`, paddingBottom: `${padding.bottom}px`, paddingLeft: `${padding.left}px`, paddingRight: `${padding.right}px`}}>
         <h2 className="text-3xl font-bold text-center text-card-foreground dark:text-white mb-8">{title}</h2>
         <div className="space-y-4">
@@ -278,7 +278,7 @@ const FaqPreview = ({ title, faqs, padding }: { title: string, faqs: { question:
     </div>
 );
 
-const FooterPreview = ({ copyright, links, padding }: { copyright: string, links: { text: string, url: string }[], padding: { top: number, bottom: number, left: number, right: number } }) => (
+const FooterPreview = ({ copyright, links, padding = { top: 0, bottom: 0, left: 0, right: 0 } }: { copyright: string, links: { text: string, url: string }[], padding: { top: number, bottom: number, left: number, right: number } }) => (
     <div className="w-full bg-gray-900 text-white rounded-lg shadow-md pointer-events-none" style={{ paddingTop: `${padding.top}px`, paddingBottom: `${padding.bottom}px`, paddingLeft: `${padding.left}px`, paddingRight: `${padding.right}px`}}>
         <div className="flex justify-between items-center">
             <p>{copyright}</p>
@@ -304,7 +304,7 @@ const FormPreview = ({
   buttonColor,
   buttonTextColor,
   theme,
-  padding
+  padding = { top: 0, bottom: 0, left: 0, right: 0 }
 }: {
   title: string,
   fields: { id: string, type: string, label: string, placeholder: string, required: boolean }[],

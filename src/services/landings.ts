@@ -91,7 +91,21 @@ export async function getLandingPage(pageId: string): Promise<LandingPageData | 
         const data = docSnap.data() as LandingPageData;
         // Only return data if the user owns the page
         if(data.userId === currentUser.uid) {
-            return data;
+            // Ensure backwards compatibility for pages saved before padding was introduced
+            const sanitizedComponents = data.components.map(component => {
+                if (!component.props.padding) {
+                    return {
+                        ...component,
+                        props: {
+                            ...component.props,
+                            padding: { top: 80, bottom: 80, left: 32, right: 32 }
+                        }
+                    };
+                }
+                return component;
+            });
+
+            return { ...data, components: sanitizedComponents };
         }
         console.error("User does not have permission to access this page.");
         return null;
