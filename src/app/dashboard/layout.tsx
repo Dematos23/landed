@@ -67,8 +67,6 @@ export default function DashboardLayout({
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
-          <Separator />
-          <UserNav />
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
