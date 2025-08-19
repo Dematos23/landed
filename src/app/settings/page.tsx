@@ -114,9 +114,9 @@ export default function SettingsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Configuración</h2>
+        <h2 className="text-2xl font-bold tracking-tight">Configuración de Dominios</h2>
         <p className="text-muted-foreground">
-          Gestiona la configuración de tu cuenta y tus dominios.
+          Gestiona tus dominios personalizados para tus páginas de aterrizaje.
         </p>
       </div>
 

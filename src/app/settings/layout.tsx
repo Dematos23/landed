@@ -26,7 +26,7 @@ import { Logo } from "@/components/icons"
 import { UserNav } from "@/components/user-nav"
 import { Separator } from "@/components/ui/separator"
 
-export default function DashboardLayout({
+export default function SettingsLayout({
   children,
 }: {
   children: React.ReactNode
@@ -65,7 +65,7 @@ export default function DashboardLayout({
         <header className="flex h-14 items-center gap-4 border-b bg-card px-4 sm:px-6 sticky top-0 z-30">
           <SidebarTrigger className="md:hidden" />
           <div className="flex-1">
-            <h1 className="text-lg font-semibold">Dashboard</h1>
+            <h1 className="text-lg font-semibold">Configuración</h1>
           </div>
           <UserNav />
         </header>
