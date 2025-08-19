@@ -390,7 +390,10 @@ const FormPreview = ({
 // --- Component Edit Forms ---
 
 const EditHeroForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData: any) => void, onCancel: () => void }) => {
-    const [formData, setFormData] = useState(data.props);
+    const [formData, setFormData] = useState({
+        ...data.props,
+        padding: data.props.padding || { top: 80, bottom: 80, left: 32, right: 32 }
+    });
     const [uploadedImages, setUploadedImages] = useState<string[]>([]);
     
     const fileInputRefSingle = useRef<HTMLInputElement>(null);
@@ -674,7 +677,10 @@ const EditHeroForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData:
 
 
 const EditFeaturesForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData: any) => void, onCancel: () => void }) => {
-    const [formData, setFormData] = useState(data.props);
+    const [formData, setFormData] = useState({
+        ...data.props,
+        padding: data.props.padding || { top: 80, bottom: 80, left: 32, right: 32 }
+    });
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -840,7 +846,10 @@ const EditFeaturesForm = ({ data, onSave, onCancel }: { data: any, onSave: (newD
 };
 
 const EditCtaForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData: any) => void, onCancel: () => void }) => {
-    const [formData, setFormData] = useState(data.props);
+    const [formData, setFormData] = useState({
+        ...data.props,
+        padding: data.props.padding || { top: 80, bottom: 80, left: 32, right: 32 }
+    });
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -974,7 +983,10 @@ const EditCtaForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData: 
 };
 
 const EditTestimonialsForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData: any) => void, onCancel: () => void }) => {
-    const [formData, setFormData] = useState(data.props);
+    const [formData, setFormData] = useState({
+        ...data.props,
+        padding: data.props.padding || { top: 80, bottom: 80, left: 32, right: 32 }
+    });
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         onSave(formData);
@@ -1062,7 +1074,10 @@ const EditTestimonialsForm = ({ data, onSave, onCancel }: { data: any, onSave: (
 };
 
 const EditFaqForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData: any) => void, onCancel: () => void }) => {
-    const [formData, setFormData] = useState(data.props);
+    const [formData, setFormData] = useState({
+        ...data.props,
+        padding: data.props.padding || { top: 80, bottom: 80, left: 32, right: 32 }
+    });
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         onSave(formData);
@@ -1145,7 +1160,10 @@ const EditFaqForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData: 
 };
 
 const EditFooterForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData: any) => void, onCancel: () => void }) => {
-    const [formData, setFormData] = useState(data.props);
+    const [formData, setFormData] = useState({
+        ...data.props,
+        padding: data.props.padding || { top: 32, bottom: 32, left: 32, right: 32 }
+    });
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         onSave(formData);
@@ -1228,7 +1246,10 @@ const EditFooterForm = ({ data, onSave, onCancel }: { data: any, onSave: (newDat
 };
 
 const EditFormForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData: any) => void, onCancel: () => void }) => {
-    const [formData, setFormData] = useState(data.props);
+    const [formData, setFormData] = useState({
+        ...data.props,
+        padding: data.props.padding || { top: 80, bottom: 80, left: 32, right: 32 }
+    });
     const fileInputRef = useRef<HTMLInputElement>(null);
     const layoutFileInputRef = useRef<HTMLInputElement>(null);
 
