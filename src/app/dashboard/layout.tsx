@@ -1,3 +1,4 @@
+
 "use client"
 import Link from "next/link"
 import {
@@ -52,21 +53,6 @@ export default function DashboardLayout({
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter className="p-4 flex flex-col gap-4">
-          <Separator />
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton href="#" tooltip="Configuración">
-                <Settings />
-                Configuración
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton href="#" tooltip="Ayuda">
-                <LifeBuoy />
-                Ayuda
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
