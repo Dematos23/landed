@@ -60,7 +60,7 @@ export default function LoginPage() {
         uid,
         email,
         displayName: displayName || email?.split('@')[0] || 'Usuario',
-        photoURL: photoURL || `https://avatar.vercel.sh/${email}.png`,
+        photoURL: photoURL || null, // Ensure photoURL is null if not present
         createdAt: new Date()
       });
     }
@@ -152,7 +152,7 @@ export default function LoginPage() {
       setShowLoadingSpinner(false);
     } finally {
         setIsSubmitting(false);
-        // Do not set showLoadingSpinner to false here for successful cases,
+        // Do not set showLoadingSpinner to false for successful cases,
         // as we want it to remain visible until redirection.
     }
   };

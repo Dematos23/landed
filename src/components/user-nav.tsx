@@ -1,3 +1,4 @@
+
 "use client"
 
 import { getAuth, signOut } from "firebase/auth";
@@ -35,22 +36,33 @@ export function UserNav() {
     }
   };
 
+  const user = auth.currentUser;
+  const hasPhoto = !!user?.photoURL;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={auth.currentUser?.photoURL || "https://placehold.co/100x100.png"} alt="@user" data-ai-hint="user avatar" />
-            <AvatarFallback>{auth.currentUser?.email?.[0].toUpperCase() || 'U'}</AvatarFallback>
+            {hasPhoto ? (
+              <AvatarImage src={user.photoURL!} alt={user.displayName || 'User Avatar'} data-ai-hint="user avatar" />
+            ) : null}
+            <AvatarFallback>
+              {hasPhoto ? (
+                user.email?.[0].toUpperCase() || 'U'
+              ) : (
+                <User className="h-4 w-4" />
+              )}
+            </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{auth.currentUser?.displayName || 'Usuario'}</p>
+            <p className="text-sm font-medium leading-none">{user?.displayName || 'Usuario'}</p>
             <p className="text-xs leading-none text-muted-foreground">
-              {auth.currentUser?.email}
+              {user?.email}
             </p>
           </div>
         </DropdownMenuLabel>
