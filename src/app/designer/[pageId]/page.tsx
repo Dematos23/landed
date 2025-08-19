@@ -91,6 +91,7 @@ import { SidebarProvider, Sidebar, SidebarTrigger, SidebarInset, useSidebar, Sid
 import { getLandingPage, createLandingPage, updateLandingPage } from '@/services/landings';
 import type { LandingPageData, LandingPageComponent, LandingPageTheme } from '@/lib/types';
 import { useToast } from "@/hooks/use-toast";
+import { Switch } from '@/components/ui/switch';
 
 type ComponentData = LandingPageComponent;
 
@@ -272,6 +273,60 @@ const FooterPreview = ({ copyright, links }: { copyright: string, links: { text:
         </div>
     </div>
 );
+
+const FormPreview = ({ title, fields, buttonText, layout, layoutImage, backgroundType, backgroundImage }: { title: string, fields: { id: string, type: string, label: string, placeholder: string, required: boolean }[], buttonText: string, layout: string, layoutImage: string, backgroundType: string, backgroundImage: string }) => {
+    const backgroundStyles: React.CSSProperties =
+      backgroundType === 'image' && backgroundImage
+        ? { backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+        : {};
+
+    const renderField = (field: any) => {
+        switch (field.type) {
+            case 'textarea':
+                return <Textarea placeholder={field.placeholder} disabled />;
+            default:
+                return <Input type={field.type} placeholder={field.placeholder} disabled />;
+        }
+    };
+
+    const formContent = (
+        <div className="space-y-4">
+            {fields.map((field) => (
+                <div key={field.id}>
+                    <Label>{field.label}</Label>
+                    {renderField(field)}
+                </div>
+            ))}
+            <Button className="w-full" disabled>{buttonText}</Button>
+        </div>
+    );
+    
+    return (
+        <div className="relative w-full bg-card dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none overflow-hidden" style={backgroundStyles}>
+            <div className="relative z-10">
+                <h2 className="text-3xl font-bold text-center text-card-foreground dark:text-white mb-8">{title}</h2>
+                {layout === 'centered' && (
+                    <div className="max-w-md mx-auto">{formContent}</div>
+                )}
+                {layout !== 'centered' && (
+                    <div className={cn("grid md:grid-cols-2 gap-8 items-center")}>
+                        {layout === 'left-image' && (
+                            <div className="w-full h-full flex items-center justify-center">
+                                {layoutImage && <Image src={layoutImage} alt="Form visual" width={400} height={500} className="object-contain max-h-full" />}
+                            </div>
+                        )}
+                        <div>{formContent}</div>
+                        {layout === 'right-image' && (
+                            <div className="w-full h-full flex items-center justify-center">
+                               {layoutImage && <Image src={layoutImage} alt="Form visual" width={400} height={500} className="object-contain max-h-full" />}
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
 
 // --- Component Edit Forms ---
 
@@ -890,6 +945,161 @@ const EditFooterForm = ({ data, onSave, onCancel }: { data: any, onSave: (newDat
     );
 };
 
+const EditFormForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData: any) => void, onCancel: () => void }) => {
+    const [formData, setFormData] = useState(data.props);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const layoutFileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSave(formData);
+    };
+
+    const handleFieldChange = (index: number, field: keyof typeof formData.fields[0], value: any) => {
+        const newFields = [...formData.fields];
+        newFields[index] = { ...newFields[index], [field]: value };
+        setFormData({ ...formData, fields: newFields });
+    };
+
+    const addField = () => {
+        const newField = { id: uuidv4(), type: 'text', label: 'Nuevo Campo', placeholder: '', required: false };
+        setFormData({ ...formData, fields: [...formData.fields, newField] });
+    };
+
+    const removeField = (index: number) => {
+        const newFields = formData.fields.filter((_: any, i: number) => i !== index);
+        setFormData({ ...formData, fields: newFields });
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, target: 'backgroundImage' | 'layoutImage') => {
+      const file = e.target.files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const dataUrl = event.target?.result as string;
+          setFormData({ ...formData, [target]: dataUrl });
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    
+    return (
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 space-y-4">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">Editar Sección de Formulario</h3>
+            
+            <Accordion type="multiple" defaultValue={['content', 'fields']} className="w-full">
+                <AccordionItem value="content">
+                    <AccordionTrigger>Contenido y Botón</AccordionTrigger>
+                    <AccordionContent className="space-y-4 pt-4">
+                        <div>
+                            <Label htmlFor="form-title">Título</Label>
+                            <Input id="form-title" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
+                        </div>
+                        <div>
+                            <Label htmlFor="form-button-text">Texto del Botón</Label>
+                            <Input id="form-button-text" value={formData.buttonText} onChange={(e) => setFormData({ ...formData, buttonText: e.target.value })} />
+                        </div>
+                    </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="fields">
+                    <AccordionTrigger>Campos del Formulario</AccordionTrigger>
+                    <AccordionContent className="space-y-4 pt-4">
+                        {formData.fields.map((field: any, index: number) => (
+                            <Accordion type="single" collapsible className="w-full border rounded-md px-2" key={field.id}>
+                                <AccordionItem value={`field-${index}`} className="border-b-0">
+                                    <div className="flex items-center">
+                                      <AccordionTrigger className="flex-1">{field.label || `Campo ${index + 1}`}</AccordionTrigger>
+                                      <Button variant="ghost" size="icon" onClick={() => removeField(index)} className="h-8 w-8">
+                                          <Trash2 className="h-4 w-4 text-red-500" />
+                                      </Button>
+                                    </div>
+                                    <AccordionContent className="space-y-4 pt-2">
+                                        <div>
+                                            <Label>Etiqueta</Label>
+                                            <Input value={field.label} onChange={(e) => handleFieldChange(index, 'label', e.target.value)} />
+                                        </div>
+                                        <div>
+                                            <Label>Tipo de Campo</Label>
+                                            <Select value={field.type} onValueChange={(value) => handleFieldChange(index, 'type', value)}>
+                                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="text">Texto</SelectItem>
+                                                    <SelectItem value="email">Email</SelectItem>
+                                                    <SelectItem value="textarea">Área de texto</SelectItem>
+                                                    <SelectItem value="tel">Teléfono</SelectItem>
+                                                    <SelectItem value="number">Número</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div>
+                                            <Label>Placeholder</Label>
+                                            <Input value={field.placeholder} onChange={(e) => handleFieldChange(index, 'placeholder', e.target.value)} />
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <Switch id={`required-${index}`} checked={field.required} onCheckedChange={(checked) => handleFieldChange(index, 'required', checked)} />
+                                            <Label htmlFor={`required-${index}`}>Requerido</Label>
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
+                            </Accordion>
+                        ))}
+                        <Button type="button" variant="outline" onClick={addField}><Plus className="mr-2 h-4 w-4"/>Añadir Campo</Button>
+                    </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="layout">
+                    <AccordionTrigger>Diseño</AccordionTrigger>
+                    <AccordionContent className="space-y-4 pt-4">
+                        <RadioGroup
+                            defaultValue={formData.layout}
+                            onValueChange={(value) => setFormData({ ...formData, layout: value })}
+                            className="flex items-center gap-4"
+                        >
+                            <div className="flex items-center space-x-2"><RadioGroupItem value="centered" id="l-centered" /><Label htmlFor="l-centered">Centrado</Label></div>
+                            <div className="flex items-center space-x-2"><RadioGroupItem value="left-image" id="l-left-image" /><Label htmlFor="l-left-image">Imagen a la Izquierda</Label></div>
+                            <div className="flex items-center space-x-2"><RadioGroupItem value="right-image" id="l-right-image" /><Label htmlFor="l-right-image">Imagen a la Derecha</Label></div>
+                        </RadioGroup>
+
+                        {formData.layout !== 'centered' && (
+                            <div className="space-y-2 border p-4 rounded-md">
+                                <Label>Imagen de Diseño (PNG)</Label>
+                                <p className="text-sm text-muted-foreground">Esta imagen aparecerá junto al formulario.</p>
+                                <input type="file" accept="image/png, image/jpeg, image/gif" className="hidden" ref={layoutFileInputRef} onChange={(e) => handleFileChange(e, 'layoutImage')} />
+                                <Button type="button" variant="outline" onClick={() => layoutFileInputRef.current?.click()}><Upload className="mr-2 h-4 w-4" /> Subir Imagen</Button>
+                                {formData.layoutImage && <Image src={formData.layoutImage} alt="Preview" width={100} height={100} className="object-cover rounded-md aspect-square mt-2" />}
+                            </div>
+                        )}
+                    </AccordionContent>
+                </AccordionItem>
+                
+                <AccordionItem value="background">
+                    <AccordionTrigger>Fondo</AccordionTrigger>
+                    <AccordionContent className="space-y-4 pt-4">
+                        <RadioGroup defaultValue={formData.backgroundType} onValueChange={(value) => setFormData({ ...formData, backgroundType: value })} className="flex items-center gap-4">
+                            <div className="flex items-center space-x-2"><RadioGroupItem value="color" id="r-color-form" /><Label htmlFor="r-color-form">Color</Label></div>
+                            <div className="flex items-center space-x-2"><RadioGroupItem value="image" id="r-image-form" /><Label htmlFor="r-image-form">Imagen</Label></div>
+                        </RadioGroup>
+                        {formData.backgroundType === 'image' && (
+                            <div className="space-y-2 border p-4 rounded-md">
+                               <Label>Imagen de Fondo</Label>
+                               <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={(e) => handleFileChange(e, 'backgroundImage')} />
+                               <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}><Upload className="mr-2 h-4 w-4" /> Subir Imagen</Button>
+                               {formData.backgroundImage && <Image src={formData.backgroundImage} alt="Preview" width={100} height={100} className="object-cover rounded-md aspect-square mt-2" />}
+                            </div>
+                        )}
+                    </AccordionContent>
+                </AccordionItem>
+            </Accordion>
+            
+            <div className="flex justify-end gap-2 pt-4">
+                <Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
+                <Button type="submit">Guardar</Button>
+            </div>
+        </form>
+    );
+};
+
 
 const componentMap: { [key: string]: { preview: React.ComponentType<any>, edit: React.ComponentType<any>, defaultProps: any } } = {
   'Sección de Héroe': { 
@@ -960,6 +1170,23 @@ const componentMap: { [key: string]: { preview: React.ComponentType<any>, edit: 
             { question: '¿Puedo cambiar mi plan?', answer: 'Sí, puedes cambiar de plan en cualquier momento.' },
         ]
     }
+  },
+  'Formulario': {
+      preview: FormPreview,
+      edit: EditFormForm,
+      defaultProps: {
+          title: "Contáctanos",
+          fields: [
+              { id: uuidv4(), type: 'text', label: 'Nombre', placeholder: 'Tu nombre completo', required: true },
+              { id: uuidv4(), type: 'email', label: 'Correo Electrónico', placeholder: 'tu@email.com', required: true },
+              { id: uuidv4(), type: 'textarea', label: 'Mensaje', placeholder: '¿En qué podemos ayudarte?', required: false },
+          ],
+          buttonText: 'Enviar Mensaje',
+          layout: 'centered', // 'centered', 'left-image', 'right-image'
+          layoutImage: '', // URL a la imagen PNG para los layouts no centrados
+          backgroundType: 'color',
+          backgroundImage: '',
+      }
   },
   'Pie de página': { 
     preview: FooterPreview, 
@@ -1156,7 +1383,7 @@ function DesignerPageContent() {
     setIsSaving(true);
     try {
       const pageIdToPublish = isNew ? landingData.id : pageIdFromUrl;
-      await updateLandingPage(pageIdToPublish, { isPublished: true });
+      await updateLandingPage(pageIdToPublish, { ...landingData, isPublished: true });
       const url = `${window.location.protocol}//${landingData.subdomain}.landed.co`;
       setPublicUrl(url);
       setShowPublishModal(true);

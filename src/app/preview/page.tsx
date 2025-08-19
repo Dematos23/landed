@@ -8,6 +8,10 @@ import { Button } from "@/components/ui/button"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { cn } from '@/lib/utils';
 import type { LandingPageComponent, LandingPageTheme, LandingPageData } from '@/lib/types';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import Image from 'next/image';
 
 const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
   Layers,
@@ -190,6 +194,65 @@ const FooterPreview = ({ copyright, links }: { copyright: string, links: { text:
     </footer>
 );
 
+const FormPreview = ({ title, fields, buttonText, layout, layoutImage, backgroundType, backgroundImage }: { title: string, fields: { id: string, type: string, label: string, placeholder: string, required: boolean }[], buttonText: string, layout: string, layoutImage: string, backgroundType: string, backgroundImage: string }) => {
+    const backgroundStyles: React.CSSProperties =
+      backgroundType === 'image' && backgroundImage
+        ? { backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+        : {};
+
+    const renderField = (field: any) => {
+        const props = {
+            id: field.id,
+            placeholder: field.placeholder,
+            required: field.required,
+        };
+        switch (field.type) {
+            case 'textarea':
+                return <Textarea {...props} />;
+            default:
+                return <Input type={field.type} {...props} />;
+        }
+    };
+
+    const formContent = (
+        <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+            {fields.map((field) => (
+                <div key={field.id}>
+                    <Label htmlFor={field.id}>{field.label}</Label>
+                    {renderField(field)}
+                </div>
+            ))}
+            <Button type="submit" className="w-full">{buttonText}</Button>
+        </form>
+    );
+    
+    return (
+        <section className="relative w-full bg-card py-12 md:py-24" style={backgroundStyles}>
+            <div className="container relative z-10 px-4 md:px-6">
+                <h2 className="text-3xl font-bold text-center text-card-foreground mb-8">{title}</h2>
+                {layout === 'centered' && (
+                    <div className="max-w-md mx-auto">{formContent}</div>
+                )}
+                {layout !== 'centered' && (
+                    <div className={cn("grid md:grid-cols-2 gap-8 items-center")}>
+                        {layout === 'left-image' && (
+                             <div className="relative w-full h-full min-h-[300px]">
+                                {layoutImage && <Image src={layoutImage} alt="Form visual" layout="fill" objectFit="contain" />}
+                            </div>
+                        )}
+                        <div>{formContent}</div>
+                        {layout === 'right-image' && (
+                             <div className="relative w-full h-full min-h-[300px]">
+                               {layoutImage && <Image src={layoutImage} alt="Form visual" layout="fill" objectFit="contain" />}
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+        </section>
+    );
+};
+
 
 const componentMap: { [key: string]: React.ComponentType<any> } = {
   'Sección de Héroe': HeroPreview,
@@ -197,6 +260,7 @@ const componentMap: { [key: string]: React.ComponentType<any> } = {
   'CTA': CtaPreview,
   'Testimonios': TestimonialsPreview,
   'Preguntas Frecuentes': FaqPreview,
+  'Formulario': FormPreview,
   'Pie de página': FooterPreview,
 };
 
@@ -335,5 +399,3 @@ export default function PreviewPage() {
     </>
   );
 }
-
-    
