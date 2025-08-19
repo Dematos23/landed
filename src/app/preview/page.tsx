@@ -151,23 +151,28 @@ type PreviewData = Omit<LandingPageData, 'id' | 'userId' | 'subdomain' | 'isPubl
 
 const PREVIEW_DATA_KEY = 'landing-page-preview-data';
 
-function getInitialData(): PreviewData | null {
-  // This function runs only on the client
-  try {
-    const storedData = localStorage.getItem(PREVIEW_DATA_KEY);
-    return storedData ? JSON.parse(storedData) : null;
-  } catch (error) {
-    console.error("Error parsing preview data from localStorage", error);
-    return null;
-  }
-}
-
 export default function PreviewPage() {
   const [data, setData] = useState<PreviewData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // This effect handles updates if the data is set after the initial render
+    const loadPreviewData = () => {
+      try {
+        const storedData = localStorage.getItem(PREVIEW_DATA_KEY);
+        if (storedData) {
+          setData(JSON.parse(storedData));
+        }
+      } catch (error) {
+        console.error("Error parsing preview data from localStorage", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    // Initial load
+    loadPreviewData();
+
+    // Listen for changes from the designer tab
     const handleStorageChange = (event: StorageEvent) => {
       if (event.key === PREVIEW_DATA_KEY && event.newValue) {
         try {
@@ -177,26 +182,6 @@ export default function PreviewPage() {
         }
       }
     };
-
-    const loadData = () => {
-      const currentData = getInitialData();
-      if (currentData) {
-        setData(currentData);
-        setLoading(false);
-      } else {
-        // If data is not there, wait for a moment for it to be set by the other tab.
-        // This is a fallback for race conditions.
-        setTimeout(() => {
-            const freshData = getInitialData();
-            if(freshData) {
-                setData(freshData);
-            }
-            setLoading(false);
-        }, 500)
-      }
-    }
-    
-    loadData();
 
     window.addEventListener('storage', handleStorageChange);
 
@@ -297,3 +282,5 @@ export default function PreviewPage() {
     </>
   );
 }
+
+    

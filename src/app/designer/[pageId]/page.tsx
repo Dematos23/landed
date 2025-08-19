@@ -873,14 +873,13 @@ function DesignerPageContent() {
 
 
   const handlePreview = async () => {
-    setIsSaving(true); // Show visual feedback
+    setIsSaving(true);
     try {
       const previewData = {
         name: landingData.name,
         components: landingData.components,
         theme: landingData.theme,
       };
-      // This operation is synchronous and very fast, but we add a brief feedback
       localStorage.setItem('landing-page-preview-data', JSON.stringify(previewData));
       window.open('/preview', '_blank');
     } catch (error) {
@@ -891,7 +890,6 @@ function DesignerPageContent() {
          description: "No se pudieron preparar los datos para la previsualización.",
        });
     } finally {
-      // Deactivate loading state after a short delay to ensure the user sees it.
       setTimeout(() => setIsSaving(false), 300);
     }
   };
@@ -1306,3 +1304,5 @@ export default function DesignerPage() {
     </SidebarProvider>
   );
 }
+
+    
