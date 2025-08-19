@@ -1039,35 +1039,28 @@ function DesignerPageContent() {
  const handleSaveDraft = async () => {
     setIsSaving(true);
     let success = false;
-    let pageIdToUse = isNew ? landingData.id : pageIdFromUrl;
-
+    
     try {
-        const pageExists = !isNew ? await getLandingPage(pageIdToUse) : null;
-
-        if (pageExists) {
-            await updateLandingPage(pageIdToUse, landingData);
-            success = true;
-        } else {
+        if (isNew) {
             const created = await createLandingPage(landingData);
             if (created) {
-                if (isNew) {
-                    localStorage.removeItem(getDraftKey('new'));
-                    localStorage.setItem(getDraftKey(landingData.id), JSON.stringify(landingData));
-                    router.replace(`/designer/${landingData.id}`);
-                }
+                localStorage.removeItem(getDraftKey('new'));
+                router.replace(`/designer/${landingData.id}`);
                 success = true;
             }
-        }
-        
-        if (success) {
-          toast({
-              title: "¡Borrador guardado!",
-              description: "Tus cambios han sido guardados.",
-          });
         } else {
-          throw new Error("No se pudo guardar la página.");
+            await updateLandingPage(pageIdFromUrl, landingData);
+            success = true;
         }
 
+        if (success) {
+            toast({
+                title: "¡Borrador guardado!",
+                description: "Tus cambios han sido guardados.",
+            });
+        } else {
+            throw new Error("No se pudo guardar la página.");
+        }
     } catch (error) {
         console.error("Error saving draft:", error);
         toast({
@@ -1075,7 +1068,6 @@ function DesignerPageContent() {
             title: "Error al guardar",
             description: "No se pudieron guardar los cambios. Inténtalo de nuevo.",
         });
-        success = false;
     } finally {
         setIsSaving(false);
     }
@@ -1602,5 +1594,3 @@ export default function DesignerPage() {
     </SidebarProvider>
   );
 }
-
-    
