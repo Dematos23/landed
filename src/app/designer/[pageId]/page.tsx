@@ -1,5 +1,4 @@
 
-
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -46,6 +45,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -1385,9 +1390,20 @@ function DesignerPageContent() {
                     </div>
                 )}
                 <div className="flex justify-center">
-                  <Button variant="outline" className="rounded-full" onClick={() => addComponent('Características')}>
-                    <Plus className="mr-2 h-4 w-4" /> Agregar Sección
-                  </Button>
+                   <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" className="rounded-full">
+                        <Plus className="mr-2 h-4 w-4" /> Agregar Sección
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="center">
+                      {Object.keys(componentMap).map((componentName) => (
+                        <DropdownMenuItem key={componentName} onSelect={() => addComponent(componentName)}>
+                          {componentName}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             </main>
