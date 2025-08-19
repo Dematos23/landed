@@ -60,4 +60,16 @@ export interface LandingPageData {
 
   /** The last updated timestamp of the page. */
   updatedAt: Timestamp;
+
+  /** The user's chosen subdomain, denormalized for querying. */
+  userSubdomain?: string;
+
+  /** The URL-friendly slug generated from the page name. */
+  pageSlug?: string;
+
+  /** The full public URL of the page. */
+  publicUrl?: string;
+
+  /** The timestamp when the page was last published. */
+  publishedAt?: Timestamp;
 }

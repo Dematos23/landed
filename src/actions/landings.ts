@@ -4,6 +4,7 @@
 import { admin } from '@/lib/firebase-admin';
 import { getAuth } from 'firebase-admin/auth';
 import { cookies } from 'next/headers';
+import type { LandingPageComponent, LandingPageData } from '@/lib/types';
 
 const db = admin.firestore();
 const landingsCollection = db.collection('landings');
@@ -22,49 +23,84 @@ async function getAuthenticatedUser() {
   }
 }
 
+function toPageSlug(name: string): string {
+  return name.trim().replace(/\s+/g, '-');
+}
+
 /**
- * Publishes a landing page by setting `isPublished` to true.
+ * Publishes a landing page by setting `isPublished` to true and generating its public URL.
  * This is a server action and requires admin privileges.
  * @param pageId The ID of the landing page to publish.
- * @returns A promise that resolves to true if successful, false otherwise.
+ * @returns A promise that resolves to an object indicating success and the public URL, or failure.
  */
-export async function publishLanding(pageId: string): Promise<boolean> {
+export async function publishLanding(pageId: string): Promise<{ success: boolean; publicUrl?: string; needsSubdomain?: boolean; error?: string }> {
   try {
     const user = await getAuthenticatedUser();
-    // TODO: For production, properly handle authentication.
-    // For now, we will assume if there's no user, we deny access.
-    // A robust solution would involve checking the user's claims or permissions.
     if (!user) {
-      console.error("Publishing error: User is not authenticated.");
-      // In a real app, you might throw an error that the client can catch and display.
-      // throw new Error("Authentication required to publish.");
-      return false;
+      return { success: false, error: "Authentication required." };
     }
 
+    const userDocRef = db.collection('users').doc(user.uid);
     const pageRef = landingsCollection.doc(pageId);
-    const docSnap = await pageRef.get();
 
-    if (!docSnap.exists()) {
-      console.error(`Publishing error: Page with ID ${pageId} not found.`);
-      return false;
+    const [userDocSnap, pageDocSnap] = await Promise.all([userDocRef.get(), pageRef.get()]);
+    
+    if (!userDocSnap.exists() || !userDocSnap.data()?.subdomain) {
+      return { success: false, needsSubdomain: true };
+    }
+    const userSubdomain = userDocSnap.data()!.subdomain;
+
+    if (!pageDocSnap.exists()) {
+      return { success: false, error: `Page with ID ${pageId} not found.` };
     }
     
-    // Optional: Verify ownership before publishing
-    // if (docSnap.data()?.userId !== user.uid) {
-    //   console.error(`Publishing error: User ${user.uid} does not have permission to publish page ${pageId}.`);
-    //   return false;
-    // }
+    const landingData = pageDocSnap.data() as LandingPageData;
+
+    if (landingData.userId !== user.uid) {
+      return { success: false, error: "User does not have permission to publish this page." };
+    }
+
+    let pageSlug = toPageSlug(landingData.name);
+
+    // --- Slug Collision Check (Optional but recommended) ---
+    let finalSlug = pageSlug;
+    let suffix = 1;
+    let isUnique = false;
+    while (!isUnique) {
+        const q = query(landingsCollection, 
+            where("userId", "==", user.uid),
+            where("pageSlug", "==", finalSlug),
+            where("isPublished", "==", true)
+        );
+        const collisionSnapshot = await q.get();
+        const collisionDocs = collisionSnapshot.docs.filter(doc => doc.id !== pageId); // Exclude the current page
+        
+        if (collisionDocs.length === 0) {
+            isUnique = true;
+        } else {
+            suffix++;
+            finalSlug = `${pageSlug}-${suffix}`;
+        }
+    }
+    pageSlug = finalSlug;
+    // --- End of Slug Collision Check ---
+
+    const publicUrl = `https://${userSubdomain}.landed.pe/${pageSlug}`;
 
     await pageRef.update({
       isPublished: true,
+      userSubdomain,
+      pageSlug,
+      publicUrl,
+      publishedAt: admin.firestore.FieldValue.serverTimestamp(),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    console.log(`Page ${pageId} published successfully.`);
-    return true;
+    console.log(`Page ${pageId} published successfully at ${publicUrl}.`);
+    return { success: true, publicUrl };
   } catch (error) {
     console.error("Error publishing landing page:", error);
-    return false;
+    return { success: false, error: "An unexpected error occurred." };
   }
 }
 
@@ -90,14 +126,14 @@ export async function unpublishLanding(pageId: string): Promise<boolean> {
       return false;
     }
 
-    // Optional: Verify ownership
-    // if (docSnap.data()?.userId !== user.uid) {
-    //   console.error(`Unpublishing error: User ${user.uid} does not have permission to unpublish page ${pageId}.`);
-    //   return false;
-    // }
+    if (docSnap.data()?.userId !== user.uid) {
+       console.error(`Unpublishing error: User ${user.uid} does not have permission to unpublish page ${pageId}.`);
+       return false;
+    }
 
     await pageRef.update({
       isPublished: false,
+      publishedAt: null, // Clear the published date
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
