@@ -38,7 +38,8 @@ const HeroPreview = ({
   cta1, cta2, cta1Url, cta2Url,
   numberOfButtons, cta1Style, cta2Style,
   backgroundType, backgroundImage, imageMode,
-  backgroundImageDesktop, backgroundImageTablet, backgroundImageMobile
+  backgroundImageDesktop, backgroundImageTablet, backgroundImageMobile,
+  padding
 }: { 
   headline: string, subheadline: string, 
   cta1: string, cta2: string, cta1Url: string, cta2Url: string,
@@ -49,6 +50,7 @@ const HeroPreview = ({
   backgroundImageDesktop: string,
   backgroundImageTablet: string,
   backgroundImageMobile: string,
+  padding: { top: number, bottom: number, left: number, right: number }
 }) => {
 
   const getButtonStyle = (style: string) => {
@@ -62,15 +64,20 @@ const HeroPreview = ({
     }
   };
 
-  const backgroundStyles: React.CSSProperties =
-    backgroundType === 'image' && imageMode === 'single' && backgroundImage
-      ? { backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-      : {};
+  const backgroundAndPaddingStyles: React.CSSProperties = {
+      ...(backgroundType === 'image' && imageMode === 'single' && backgroundImage
+        ? { backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+        : {}),
+      paddingTop: `${padding.top}px`,
+      paddingBottom: `${padding.bottom}px`,
+      paddingLeft: `${padding.left}px`,
+      paddingRight: `${padding.right}px`,
+    };
       
   const hasResponsiveImages = backgroundType === 'image' && imageMode === 'responsive';
 
   return (
-    <section className="relative w-full bg-card text-center py-20 md:py-32 lg:py-40" style={backgroundStyles}>
+    <section className="relative w-full bg-card text-center" style={backgroundAndPaddingStyles}>
         {hasResponsiveImages && (
         <>
           {backgroundImageDesktop && <img src={backgroundImageDesktop} alt="Desktop background" className="absolute inset-0 w-full h-full object-cover hidden md:block" />}
@@ -78,7 +85,7 @@ const HeroPreview = ({
           {backgroundImageMobile && <img src={backgroundImageMobile} alt="Mobile background" className="absolute inset-0 w-full h-full object-cover sm:hidden" />}
         </>
       )}
-      <div className="container relative z-10 px-4 md:px-6">
+      <div className="container relative z-10">
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-card-foreground mb-4">{headline}</h1>
         <p className="text-lg md:text-xl max-w-3xl mx-auto text-muted-foreground mb-8">{subheadline}</p>
         <div className="flex justify-center gap-4">
@@ -98,14 +105,19 @@ const HeroPreview = ({
   )
 };
 
-const FeaturesPreview = ({ title, features, backgroundType, backgroundImage }: { title: string, features: { icon: string, title: string, description: string }[], backgroundType: 'color' | 'image', backgroundImage: string }) => {
-  const backgroundStyles: React.CSSProperties =
-    backgroundType === 'image' && backgroundImage
-      ? { backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-      : {};
+const FeaturesPreview = ({ title, features, backgroundType, backgroundImage, padding }: { title: string, features: { icon: string, title: string, description: string }[], backgroundType: 'color' | 'image', backgroundImage: string, padding: { top: number, bottom: number, left: number, right: number } }) => {
+  const backgroundAndPaddingStyles: React.CSSProperties = {
+      ...(backgroundType === 'image' && backgroundImage
+        ? { backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+        : {}),
+      paddingTop: `${padding.top}px`,
+      paddingBottom: `${padding.bottom}px`,
+      paddingLeft: `${padding.left}px`,
+      paddingRight: `${padding.right}px`,
+    };
   return (
-  <section className="relative w-full bg-card py-12 md:py-24 lg:py-32" style={backgroundStyles}>
-     <div className="container relative z-10 px-4 md:px-6">
+  <section className="relative w-full bg-card" style={backgroundAndPaddingStyles}>
+     <div className="container relative z-10">
         <h2 className="text-3xl font-bold text-center text-card-foreground mb-8 md:mb-12">{title}</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {features.map((feature, index) => (
@@ -122,15 +134,20 @@ const FeaturesPreview = ({ title, features, backgroundType, backgroundImage }: {
   </section>
 )};
 
-const CtaPreview = ({ title, subtitle, buttonText, buttonUrl, backgroundType, backgroundImage }: { title: string, subtitle: string, buttonText: string, buttonUrl: string, backgroundType: 'color' | 'image', backgroundImage: string }) => {
-  const backgroundStyles: React.CSSProperties =
-    backgroundType === 'image' && backgroundImage
+const CtaPreview = ({ title, subtitle, buttonText, buttonUrl, backgroundType, backgroundImage, padding }: { title: string, subtitle: string, buttonText: string, buttonUrl: string, backgroundType: 'color' | 'image', backgroundImage: string, padding: { top: number, bottom: number, left: number, right: number } }) => {
+ const backgroundAndPaddingStyles: React.CSSProperties = {
+    ...(backgroundType === 'image' && backgroundImage
       ? { backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-      : {};
+      : {}),
+    paddingTop: `${padding.top}px`,
+    paddingBottom: `${padding.bottom}px`,
+    paddingLeft: `${padding.left}px`,
+    paddingRight: `${padding.right}px`,
+  };
       
   return (
-    <section className="relative w-full bg-card py-12 md:py-24 lg:py-32" style={backgroundStyles}>
-        <div className="container relative z-10 px-4 md:px-6 text-center">
+    <section className="relative w-full bg-card" style={backgroundAndPaddingStyles}>
+        <div className="container relative z-10 text-center">
             <h2 className="text-3xl font-bold text-card-foreground">{title}</h2>
             <p className="mt-2 text-lg text-muted-foreground">{subtitle}</p>
             <Button size="lg" asChild className="mt-6 bg-primary hover:bg-primary/90 text-primary-foreground">
@@ -141,9 +158,9 @@ const CtaPreview = ({ title, subtitle, buttonText, buttonUrl, backgroundType, ba
   )
 };
 
-const TestimonialsPreview = ({ title, testimonials }: { title: string, testimonials: { quote: string, name: string, company: string }[] }) => (
-    <section className="w-full bg-card py-12 md:py-24 lg:py-32">
-        <div className="container px-4 md:px-6">
+const TestimonialsPreview = ({ title, testimonials, padding }: { title: string, testimonials: { quote: string, name: string, company: string }[], padding: { top: number, bottom: number, left: number, right: number } }) => (
+    <section className="w-full bg-card" style={{ paddingTop: `${padding.top}px`, paddingBottom: `${padding.bottom}px`}}>
+        <div className="container px-4 md:px-6" style={{ paddingLeft: `${padding.left}px`, paddingRight: `${padding.right}px`}}>
             <h2 className="text-3xl font-bold text-center text-card-foreground mb-8 md:mb-12">{title}</h2>
             <div className="grid md:grid-cols-2 gap-8">
                 {testimonials.map((testimonial, index) => (
@@ -165,9 +182,9 @@ const TestimonialsPreview = ({ title, testimonials }: { title: string, testimoni
     </section>
 );
 
-const FaqPreview = ({ title, faqs }: { title: string, faqs: { question: string, answer: string }[] }) => (
-    <section className="w-full bg-card py-12 md:py-24 lg:py-32">
-        <div className="container px-4 md:px-6 max-w-3xl mx-auto">
+const FaqPreview = ({ title, faqs, padding }: { title: string, faqs: { question: string, answer: string }[], padding: { top: number, bottom: number, left: number, right: number } }) => (
+    <section className="w-full bg-card" style={{ paddingTop: `${padding.top}px`, paddingBottom: `${padding.bottom}px`}}>
+        <div className="container max-w-3xl mx-auto" style={{ paddingLeft: `${padding.left}px`, paddingRight: `${padding.right}px`}}>
             <h2 className="text-3xl font-bold text-center text-card-foreground mb-8 md:mb-12">{title}</h2>
             <div className="space-y-6">
                 {faqs.map((faq, index) => (
@@ -181,9 +198,9 @@ const FaqPreview = ({ title, faqs }: { title: string, faqs: { question: string, 
     </section>
 );
 
-const FooterPreview = ({ copyright, links }: { copyright: string, links: { text: string, url: string }[] }) => (
-    <footer className="w-full bg-gray-900 text-white py-6">
-        <div className="container px-4 md:px-6 flex justify-between items-center">
+const FooterPreview = ({ copyright, links, padding }: { copyright: string, links: { text: string, url: string }[], padding: { top: number, bottom: number, left: number, right: number } }) => (
+    <footer className="w-full bg-gray-900 text-white" style={{ paddingTop: `${padding.top}px`, paddingBottom: `${padding.bottom}px`}}>
+        <div className="container flex justify-between items-center" style={{ paddingLeft: `${padding.left}px`, paddingRight: `${padding.right}px`}}>
             <p className="text-sm">{copyright}</p>
             <div className="flex space-x-4">
                 {links.map((link, index) => (
@@ -196,7 +213,7 @@ const FooterPreview = ({ copyright, links }: { copyright: string, links: { text:
 
 const FormPreview = ({ 
   title, fields, buttonText, layout, layoutImage, backgroundType, backgroundImage,
-  labelColor, fieldBackgroundColor, buttonColor, buttonTextColor, theme
+  labelColor, fieldBackgroundColor, buttonColor, buttonTextColor, theme, padding
 }: { 
   title: string, 
   fields: { id: string, type: string, label: string, placeholder: string, required: boolean }[], 
@@ -209,12 +226,16 @@ const FormPreview = ({
   fieldBackgroundColor: keyof LandingPageTheme,
   buttonColor: keyof LandingPageTheme,
   buttonTextColor: keyof LandingPageTheme,
-  theme: LandingPageTheme
+  theme: LandingPageTheme,
+  padding: { top: number, bottom: number, left: number, right: number }
 }) => {
-    const backgroundStyles: React.CSSProperties =
-      backgroundType === 'image' && backgroundImage
+    const backgroundAndPaddingStyles: React.CSSProperties = {
+      ...(backgroundType === 'image' && backgroundImage
         ? { backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-        : {};
+        : {}),
+      paddingTop: `${padding.top}px`,
+      paddingBottom: `${padding.bottom}px`,
+    };
 
     const renderField = (field: any) => {
         const props = {
@@ -253,8 +274,8 @@ const FormPreview = ({
     );
     
     return (
-        <section className="relative w-full bg-card py-12 md:py-24" style={backgroundStyles}>
-            <div className="container relative z-10 px-4 md:px-6">
+        <section className="relative w-full bg-card" style={backgroundAndPaddingStyles}>
+            <div className="container relative z-10" style={{ paddingLeft: `${padding.left}px`, paddingRight: `${padding.right}px`}}>
                 <h2 className="text-3xl font-bold text-center text-card-foreground mb-8">{title}</h2>
                 {layout === 'centered' && (
                     <div className="max-w-md mx-auto">{formContent}</div>

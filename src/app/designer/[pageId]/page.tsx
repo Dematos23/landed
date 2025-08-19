@@ -120,7 +120,8 @@ const HeroPreview = ({
   cta1, cta2, cta1Url, cta2Url,
   numberOfButtons, cta1Style, cta2Style,
   backgroundType, backgroundImage, imageMode,
-  backgroundImageDesktop, backgroundImageTablet, backgroundImageMobile
+  backgroundImageDesktop, backgroundImageTablet, backgroundImageMobile,
+  padding
 }: { 
   headline: string, subheadline: string, 
   cta1: string, cta2: string, cta1Url: string, cta2Url: string,
@@ -131,6 +132,7 @@ const HeroPreview = ({
   backgroundImageDesktop: string,
   backgroundImageTablet: string,
   backgroundImageMobile: string,
+  padding: { top: number, bottom: number, left: number, right: number }
 }) => {
 
   const getButtonStyle = (style: string) => {
@@ -144,15 +146,20 @@ const HeroPreview = ({
     }
   };
 
-  const backgroundStyles: React.CSSProperties =
-    backgroundType === 'image' && imageMode === 'single' && backgroundImage
-      ? { backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-      : {};
+  const backgroundAndPaddingStyles: React.CSSProperties = {
+      ...(backgroundType === 'image' && imageMode === 'single' && backgroundImage
+        ? { backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+        : {}),
+      paddingTop: `${padding.top}px`,
+      paddingBottom: `${padding.bottom}px`,
+      paddingLeft: `${padding.left}px`,
+      paddingRight: `${padding.right}px`,
+    };
   
   const hasResponsiveImages = backgroundType === 'image' && imageMode === 'responsive';
 
   return (
-     <div className="relative w-full bg-card dark:bg-gray-800 rounded-lg shadow-md text-center pointer-events-none p-8" style={backgroundStyles}>
+     <div className="relative w-full bg-card dark:bg-gray-800 rounded-lg shadow-md text-center pointer-events-none" style={backgroundAndPaddingStyles}>
       {hasResponsiveImages && (
         <>
           {backgroundImageDesktop && <img src={backgroundImageDesktop} alt="Desktop background" className="absolute inset-0 w-full h-full object-cover hidden md:block" />}
@@ -182,14 +189,19 @@ const HeroPreview = ({
 };
 
 
-const FeaturesPreview = ({ title, features, backgroundType, backgroundImage }: { title: string, features: { icon: string, title: string, description: string }[], backgroundType: 'color' | 'image', backgroundImage: string }) => {
-  const backgroundStyles: React.CSSProperties =
-    backgroundType === 'image' && backgroundImage
-      ? { backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-      : {};
+const FeaturesPreview = ({ title, features, backgroundType, backgroundImage, padding }: { title: string, features: { icon: string, title: string, description: string }[], backgroundType: 'color' | 'image', backgroundImage: string, padding: { top: number, bottom: number, left: number, right: number } }) => {
+  const backgroundAndPaddingStyles: React.CSSProperties = {
+      ...(backgroundType === 'image' && backgroundImage
+        ? { backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+        : {}),
+      paddingTop: `${padding.top}px`,
+      paddingBottom: `${padding.bottom}px`,
+      paddingLeft: `${padding.left}px`,
+      paddingRight: `${padding.right}px`,
+    };
 
   return (
-    <div className="relative w-full bg-card dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none" style={backgroundStyles}>
+    <div className="relative w-full bg-card dark:bg-gray-800 rounded-lg shadow-md pointer-events-none" style={backgroundAndPaddingStyles}>
        <div className="relative z-10">
          <h2 className="text-3xl font-bold text-center text-card-foreground dark:text-white mb-8">{title}</h2>
          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -208,14 +220,19 @@ const FeaturesPreview = ({ title, features, backgroundType, backgroundImage }: {
   );
 };
 
-const CtaPreview = ({ title, subtitle, buttonText, buttonUrl, backgroundType, backgroundImage }: { title: string, subtitle: string, buttonText: string, buttonUrl: string, backgroundType: 'color' | 'image', backgroundImage: string }) => {
-  const backgroundStyles: React.CSSProperties =
-    backgroundType === 'image' && backgroundImage
+const CtaPreview = ({ title, subtitle, buttonText, buttonUrl, backgroundType, backgroundImage, padding }: { title: string, subtitle: string, buttonText: string, buttonUrl: string, backgroundType: 'color' | 'image', backgroundImage: string, padding: { top: number, bottom: number, left: number, right: number } }) => {
+  const backgroundAndPaddingStyles: React.CSSProperties = {
+    ...(backgroundType === 'image' && backgroundImage
       ? { backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-      : {};
+      : {}),
+    paddingTop: `${padding.top}px`,
+    paddingBottom: `${padding.bottom}px`,
+    paddingLeft: `${padding.left}px`,
+    paddingRight: `${padding.right}px`,
+  };
       
   return (
-    <div className="relative w-full bg-card dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none" style={backgroundStyles}>
+    <div className="relative w-full bg-card dark:bg-gray-800 rounded-lg shadow-md pointer-events-none" style={backgroundAndPaddingStyles}>
         <div className="relative z-10 text-center">
             <h2 className="text-3xl font-bold text-card-foreground dark:text-white">{title}</h2>
             <p className="mt-2 text-lg text-muted-foreground dark:text-gray-300">{subtitle}</p>
@@ -227,8 +244,8 @@ const CtaPreview = ({ title, subtitle, buttonText, buttonUrl, backgroundType, ba
   )
 };
 
-const TestimonialsPreview = ({ title, testimonials }: { title: string, testimonials: { quote: string, name: string, company: string }[] }) => (
-    <div className="w-full bg-card dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none">
+const TestimonialsPreview = ({ title, testimonials, padding }: { title: string, testimonials: { quote: string, name: string, company: string }[], padding: { top: number, bottom: number, left: number, right: number } }) => (
+    <div className="w-full bg-card dark:bg-gray-800 rounded-lg shadow-md pointer-events-none" style={{ paddingTop: `${padding.top}px`, paddingBottom: `${padding.bottom}px`, paddingLeft: `${padding.left}px`, paddingRight: `${padding.right}px`}}>
         <h2 className="text-3xl font-bold text-center text-card-foreground dark:text-white mb-8">{title}</h2>
         <div className="grid md:grid-cols-2 gap-8">
             {testimonials.map((testimonial, index) => (
@@ -247,8 +264,8 @@ const TestimonialsPreview = ({ title, testimonials }: { title: string, testimoni
     </div>
 );
 
-const FaqPreview = ({ title, faqs }: { title: string, faqs: { question: string, answer: string }[] }) => (
-    <div className="w-full bg-card dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none">
+const FaqPreview = ({ title, faqs, padding }: { title: string, faqs: { question: string, answer: string }[], padding: { top: number, bottom: number, left: number, right: number } }) => (
+    <div className="w-full bg-card dark:bg-gray-800 rounded-lg shadow-md pointer-events-none" style={{ paddingTop: `${padding.top}px`, paddingBottom: `${padding.bottom}px`, paddingLeft: `${padding.left}px`, paddingRight: `${padding.right}px`}}>
         <h2 className="text-3xl font-bold text-center text-card-foreground dark:text-white mb-8">{title}</h2>
         <div className="space-y-4">
             {faqs.map((faq, index) => (
@@ -261,8 +278,8 @@ const FaqPreview = ({ title, faqs }: { title: string, faqs: { question: string, 
     </div>
 );
 
-const FooterPreview = ({ copyright, links }: { copyright: string, links: { text: string, url: string }[] }) => (
-    <div className="w-full bg-gray-900 text-white rounded-lg shadow-md p-8 pointer-events-none">
+const FooterPreview = ({ copyright, links, padding }: { copyright: string, links: { text: string, url: string }[], padding: { top: number, bottom: number, left: number, right: number } }) => (
+    <div className="w-full bg-gray-900 text-white rounded-lg shadow-md pointer-events-none" style={{ paddingTop: `${padding.top}px`, paddingBottom: `${padding.bottom}px`, paddingLeft: `${padding.left}px`, paddingRight: `${padding.right}px`}}>
         <div className="flex justify-between items-center">
             <p>{copyright}</p>
             <div className="flex space-x-4">
@@ -286,7 +303,8 @@ const FormPreview = ({
   fieldBackgroundColor,
   buttonColor,
   buttonTextColor,
-  theme
+  theme,
+  padding
 }: {
   title: string,
   fields: { id: string, type: string, label: string, placeholder: string, required: boolean }[],
@@ -299,12 +317,18 @@ const FormPreview = ({
   fieldBackgroundColor: keyof LandingPageTheme,
   buttonColor: keyof LandingPageTheme,
   buttonTextColor: keyof LandingPageTheme,
-  theme: LandingPageTheme
+  theme: LandingPageTheme,
+  padding: { top: number, bottom: number, left: number, right: number }
 }) => {
-    const backgroundStyles: React.CSSProperties =
-      backgroundType === 'image' && backgroundImage
+    const backgroundAndPaddingStyles: React.CSSProperties = {
+      ...(backgroundType === 'image' && backgroundImage
         ? { backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-        : {};
+        : {}),
+      paddingTop: `${padding.top}px`,
+      paddingBottom: `${padding.bottom}px`,
+      paddingLeft: `${padding.left}px`,
+      paddingRight: `${padding.right}px`,
+    };
 
     const renderField = (field: any) => {
         const fieldStyle: React.CSSProperties = {
@@ -337,7 +361,7 @@ const FormPreview = ({
     );
     
     return (
-        <div className="relative w-full bg-card dark:bg-gray-800 rounded-lg shadow-md p-8 pointer-events-none overflow-hidden" style={backgroundStyles}>
+        <div className="relative w-full bg-card dark:bg-gray-800 rounded-lg shadow-md pointer-events-none overflow-hidden" style={backgroundAndPaddingStyles}>
             <div className="relative z-10">
                 <h2 className="text-3xl font-bold text-center text-card-foreground dark:text-white mb-8">{title}</h2>
                 {layout === 'centered' && (
@@ -413,11 +437,21 @@ const EditHeroForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData:
         }
     }
 
+    const handlePaddingChange = (side: string, value: string) => {
+        setFormData({
+            ...formData,
+            padding: {
+                ...formData.padding,
+                [side]: parseInt(value) || 0
+            }
+        });
+    }
+
     return (
         <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 space-y-4">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white">Editar Sección de Héroe</h3>
             
-            <Accordion type="multiple" defaultValue={['content', 'background']} className="w-full">
+            <Accordion type="multiple" defaultValue={['content']} className="w-full">
               <AccordionItem value="content">
                 <AccordionTrigger>Contenido</AccordionTrigger>
                 <AccordionContent className="space-y-4 pt-4">
@@ -604,6 +638,30 @@ const EditHeroForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData:
 
                   </AccordionContent>
               </AccordionItem>
+              <AccordionItem value="spacing">
+                <AccordionTrigger>Espaciado</AccordionTrigger>
+                <AccordionContent className="space-y-4 pt-4">
+                    <Label>Padding (en píxeles)</Label>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <Label htmlFor="paddingTop" className="text-xs text-muted-foreground">Superior</Label>
+                            <Input id="paddingTop" type="number" value={formData.padding.top} onChange={(e) => handlePaddingChange('top', e.target.value)} />
+                        </div>
+                         <div>
+                            <Label htmlFor="paddingBottom" className="text-xs text-muted-foreground">Inferior</Label>
+                            <Input id="paddingBottom" type="number" value={formData.padding.bottom} onChange={(e) => handlePaddingChange('bottom', e.target.value)} />
+                        </div>
+                         <div>
+                            <Label htmlFor="paddingLeft" className="text-xs text-muted-foreground">Izquierdo</Label>
+                            <Input id="paddingLeft" type="number" value={formData.padding.left} onChange={(e) => handlePaddingChange('left', e.target.value)} />
+                        </div>
+                         <div>
+                            <Label htmlFor="paddingRight" className="text-xs text-muted-foreground">Derecho</Label>
+                            <Input id="paddingRight" type="number" value={formData.padding.right} onChange={(e) => handlePaddingChange('right', e.target.value)} />
+                        </div>
+                    </div>
+                </AccordionContent>
+              </AccordionItem>
             </Accordion>
             
             <div className="flex justify-end gap-2 pt-4">
@@ -641,6 +699,16 @@ const EditFeaturesForm = ({ data, onSave, onCancel }: { data: any, onSave: (newD
         reader.readAsDataURL(file);
       }
     };
+    
+    const handlePaddingChange = (side: string, value: string) => {
+        setFormData({
+            ...formData,
+            padding: {
+                ...formData.padding,
+                [side]: parseInt(value) || 0
+            }
+        });
+    }
 
     return (
         <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 space-y-4">
@@ -738,6 +806,30 @@ const EditFeaturesForm = ({ data, onSave, onCancel }: { data: any, onSave: (newD
                     )}
                   </AccordionContent>
               </AccordionItem>
+               <AccordionItem value="spacing">
+                <AccordionTrigger>Espaciado</AccordionTrigger>
+                <AccordionContent className="space-y-4 pt-4">
+                    <Label>Padding (en píxeles)</Label>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <Label htmlFor="paddingTop" className="text-xs text-muted-foreground">Superior</Label>
+                            <Input id="paddingTop" type="number" value={formData.padding.top} onChange={(e) => handlePaddingChange('top', e.target.value)} />
+                        </div>
+                         <div>
+                            <Label htmlFor="paddingBottom" className="text-xs text-muted-foreground">Inferior</Label>
+                            <Input id="paddingBottom" type="number" value={formData.padding.bottom} onChange={(e) => handlePaddingChange('bottom', e.target.value)} />
+                        </div>
+                         <div>
+                            <Label htmlFor="paddingLeft" className="text-xs text-muted-foreground">Izquierdo</Label>
+                            <Input id="paddingLeft" type="number" value={formData.padding.left} onChange={(e) => handlePaddingChange('left', e.target.value)} />
+                        </div>
+                         <div>
+                            <Label htmlFor="paddingRight" className="text-xs text-muted-foreground">Derecho</Label>
+                            <Input id="paddingRight" type="number" value={formData.padding.right} onChange={(e) => handlePaddingChange('right', e.target.value)} />
+                        </div>
+                    </div>
+                </AccordionContent>
+              </AccordionItem>
             </Accordion>
             <div className="flex justify-end gap-2">
                 <Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
@@ -768,6 +860,16 @@ const EditCtaForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData: 
       }
     };
     
+    const handlePaddingChange = (side: string, value: string) => {
+        setFormData({
+            ...formData,
+            padding: {
+                ...formData.padding,
+                [side]: parseInt(value) || 0
+            }
+        });
+    }
+
     return (
         <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 space-y-4">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white">Editar Sección de CTA</h3>
@@ -838,6 +940,30 @@ const EditCtaForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData: 
                     )}
                   </AccordionContent>
               </AccordionItem>
+              <AccordionItem value="spacing">
+                <AccordionTrigger>Espaciado</AccordionTrigger>
+                <AccordionContent className="space-y-4 pt-4">
+                    <Label>Padding (en píxeles)</Label>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <Label htmlFor="paddingTop" className="text-xs text-muted-foreground">Superior</Label>
+                            <Input id="paddingTop" type="number" value={formData.padding.top} onChange={(e) => handlePaddingChange('top', e.target.value)} />
+                        </div>
+                         <div>
+                            <Label htmlFor="paddingBottom" className="text-xs text-muted-foreground">Inferior</Label>
+                            <Input id="paddingBottom" type="number" value={formData.padding.bottom} onChange={(e) => handlePaddingChange('bottom', e.target.value)} />
+                        </div>
+                         <div>
+                            <Label htmlFor="paddingLeft" className="text-xs text-muted-foreground">Izquierdo</Label>
+                            <Input id="paddingLeft" type="number" value={formData.padding.left} onChange={(e) => handlePaddingChange('left', e.target.value)} />
+                        </div>
+                         <div>
+                            <Label htmlFor="paddingRight" className="text-xs text-muted-foreground">Derecho</Label>
+                            <Input id="paddingRight" type="number" value={formData.padding.right} onChange={(e) => handlePaddingChange('right', e.target.value)} />
+                        </div>
+                    </div>
+                </AccordionContent>
+              </AccordionItem>
             </Accordion>
             <div className="flex justify-end gap-2">
                 <Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
@@ -858,33 +984,74 @@ const EditTestimonialsForm = ({ data, onSave, onCancel }: { data: any, onSave: (
         newTestimonials[index] = { ...newTestimonials[index], [field]: value };
         setFormData({ ...formData, testimonials: newTestimonials });
     };
+    const handlePaddingChange = (side: string, value: string) => {
+        setFormData({
+            ...formData,
+            padding: {
+                ...formData.padding,
+                [side]: parseInt(value) || 0
+            }
+        });
+    }
+
     return (
         <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 space-y-4">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white">Editar Sección de Testimonios</h3>
-            <div>
-                <Label htmlFor="main-title">Título Principal</Label>
-                <Input id="main-title" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
-            </div>
-             <Accordion type="single" collapsible className="w-full">
-              {formData.testimonials.map((testimonial: any, index: number) => (
-                  <AccordionItem value={`item-${index}`} key={index}>
-                      <AccordionTrigger>Testimonio {index + 1}</AccordionTrigger>
-                      <AccordionContent className="space-y-2">
-                          <div>
-                              <Label htmlFor={`testimonial-quote-${index}`}>Cita</Label>
-                              <Textarea id={`testimonial-quote-${index}`} value={testimonial.quote} onChange={(e) => handleTestimonialChange(index, 'quote', e.target.value)} />
-                          </div>
-                          <div>
-                              <Label htmlFor={`testimonial-name-${index}`}>Nombre</Label>
-                              <Input id={`testimonial-name-${index}`} value={testimonial.name} onChange={(e) => handleTestimonialChange(index, 'name', e.target.value)} />
-                          </div>
-                          <div>
-                              <Label htmlFor={`testimonial-company-${index}`}>Compañía</Label>
-                              <Input id={`testimonial-company-${index}`} value={testimonial.company} onChange={(e) => handleTestimonialChange(index, 'company', e.target.value)} />
-                          </div>
-                      </AccordionContent>
-                  </AccordionItem>
-              ))}
+             <Accordion type="multiple" defaultValue={['content']} className="w-full">
+                <AccordionItem value="content">
+                    <AccordionTrigger>Contenido</AccordionTrigger>
+                    <AccordionContent className="space-y-4 pt-4">
+                        <div>
+                            <Label htmlFor="main-title">Título Principal</Label>
+                            <Input id="main-title" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
+                        </div>
+                        {formData.testimonials.map((testimonial: any, index: number) => (
+                           <Accordion type="single" collapsible className="w-full" key={index}>
+                             <AccordionItem value={`item-${index}`}>
+                                 <AccordionTrigger>Testimonio {index + 1}</AccordionTrigger>
+                                 <AccordionContent className="space-y-2">
+                                     <div>
+                                         <Label htmlFor={`testimonial-quote-${index}`}>Cita</Label>
+                                         <Textarea id={`testimonial-quote-${index}`} value={testimonial.quote} onChange={(e) => handleTestimonialChange(index, 'quote', e.target.value)} />
+                                     </div>
+                                     <div>
+                                         <Label htmlFor={`testimonial-name-${index}`}>Nombre</Label>
+                                         <Input id={`testimonial-name-${index}`} value={testimonial.name} onChange={(e) => handleTestimonialChange(index, 'name', e.target.value)} />
+                                     </div>
+                                     <div>
+                                         <Label htmlFor={`testimonial-company-${index}`}>Compañía</Label>
+                                         <Input id={`testimonial-company-${index}`} value={testimonial.company} onChange={(e) => handleTestimonialChange(index, 'company', e.target.value)} />
+                                     </div>
+                                 </AccordionContent>
+                             </AccordionItem>
+                           </Accordion>
+                        ))}
+                    </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="spacing">
+                <AccordionTrigger>Espaciado</AccordionTrigger>
+                <AccordionContent className="space-y-4 pt-4">
+                    <Label>Padding (en píxeles)</Label>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <Label htmlFor="paddingTop" className="text-xs text-muted-foreground">Superior</Label>
+                            <Input id="paddingTop" type="number" value={formData.padding.top} onChange={(e) => handlePaddingChange('top', e.target.value)} />
+                        </div>
+                         <div>
+                            <Label htmlFor="paddingBottom" className="text-xs text-muted-foreground">Inferior</Label>
+                            <Input id="paddingBottom" type="number" value={formData.padding.bottom} onChange={(e) => handlePaddingChange('bottom', e.target.value)} />
+                        </div>
+                         <div>
+                            <Label htmlFor="paddingLeft" className="text-xs text-muted-foreground">Izquierdo</Label>
+                            <Input id="paddingLeft" type="number" value={formData.padding.left} onChange={(e) => handlePaddingChange('left', e.target.value)} />
+                        </div>
+                         <div>
+                            <Label htmlFor="paddingRight" className="text-xs text-muted-foreground">Derecho</Label>
+                            <Input id="paddingRight" type="number" value={formData.padding.right} onChange={(e) => handlePaddingChange('right', e.target.value)} />
+                        </div>
+                    </div>
+                </AccordionContent>
+              </AccordionItem>
             </Accordion>
             <div className="flex justify-end gap-2">
                 <Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
@@ -905,29 +1072,69 @@ const EditFaqForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData: 
         newFaqs[index] = { ...newFaqs[index], [field]: value };
         setFormData({ ...formData, faqs: newFaqs });
     };
+     const handlePaddingChange = (side: string, value: string) => {
+        setFormData({
+            ...formData,
+            padding: {
+                ...formData.padding,
+                [side]: parseInt(value) || 0
+            }
+        });
+    }
     return (
         <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 space-y-4">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white">Editar Sección de FAQ</h3>
-            <div>
-                <Label htmlFor="main-title">Título Principal</Label>
-                <Input id="main-title" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
-            </div>
-             <Accordion type="single" collapsible className="w-full">
-              {formData.faqs.map((faq: any, index: number) => (
-                  <AccordionItem value={`item-${index}`} key={index}>
-                      <AccordionTrigger>Pregunta {index + 1}</AccordionTrigger>
-                      <AccordionContent className="space-y-2">
-                          <div>
-                              <Label htmlFor={`faq-question-${index}`}>Pregunta</Label>
-                              <Input id={`faq-question-${index}`} value={faq.question} onChange={(e) => handleFaqChange(index, 'question', e.target.value)} />
-                          </div>
-                          <div>
-                              <Label htmlFor={`faq-answer-${index}`}>Respuesta</Label>
-                              <Textarea id={`faq-answer-${index}`} value={faq.answer} onChange={(e) => handleFaqChange(index, 'answer', e.target.value)} />
-                          </div>
-                      </AccordionContent>
-                  </AccordionItem>
-              ))}
+            <Accordion type="multiple" defaultValue={['content']} className="w-full">
+                <AccordionItem value="content">
+                    <AccordionTrigger>Contenido</AccordionTrigger>
+                    <AccordionContent className="space-y-4 pt-4">
+                        <div>
+                            <Label htmlFor="main-title">Título Principal</Label>
+                            <Input id="main-title" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
+                        </div>
+                        {formData.faqs.map((faq: any, index: number) => (
+                        <Accordion type="single" collapsible className="w-full" key={index}>
+                            <AccordionItem value={`item-${index}`}>
+                                <AccordionTrigger>Pregunta {index + 1}</AccordionTrigger>
+                                <AccordionContent className="space-y-2">
+                                    <div>
+                                        <Label htmlFor={`faq-question-${index}`}>Pregunta</Label>
+                                        <Input id={`faq-question-${index}`} value={faq.question} onChange={(e) => handleFaqChange(index, 'question', e.target.value)} />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor={`faq-answer-${index}`}>Respuesta</Label>
+                                        <Textarea id={`faq-answer-${index}`} value={faq.answer} onChange={(e) => handleFaqChange(index, 'answer', e.target.value)} />
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
+                        </Accordion>
+                        ))}
+                    </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="spacing">
+                <AccordionTrigger>Espaciado</AccordionTrigger>
+                <AccordionContent className="space-y-4 pt-4">
+                    <Label>Padding (en píxeles)</Label>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <Label htmlFor="paddingTop" className="text-xs text-muted-foreground">Superior</Label>
+                            <Input id="paddingTop" type="number" value={formData.padding.top} onChange={(e) => handlePaddingChange('top', e.target.value)} />
+                        </div>
+                         <div>
+                            <Label htmlFor="paddingBottom" className="text-xs text-muted-foreground">Inferior</Label>
+                            <Input id="paddingBottom" type="number" value={formData.padding.bottom} onChange={(e) => handlePaddingChange('bottom', e.target.value)} />
+                        </div>
+                         <div>
+                            <Label htmlFor="paddingLeft" className="text-xs text-muted-foreground">Izquierdo</Label>
+                            <Input id="paddingLeft" type="number" value={formData.padding.left} onChange={(e) => handlePaddingChange('left', e.target.value)} />
+                        </div>
+                         <div>
+                            <Label htmlFor="paddingRight" className="text-xs text-muted-foreground">Derecho</Label>
+                            <Input id="paddingRight" type="number" value={formData.padding.right} onChange={(e) => handlePaddingChange('right', e.target.value)} />
+                        </div>
+                    </div>
+                </AccordionContent>
+              </AccordionItem>
             </Accordion>
             <div className="flex justify-end gap-2">
                 <Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
@@ -948,29 +1155,69 @@ const EditFooterForm = ({ data, onSave, onCancel }: { data: any, onSave: (newDat
         newLinks[index] = { ...newLinks[index], [field]: value };
         setFormData({ ...formData, links: newLinks });
     };
+    const handlePaddingChange = (side: string, value: string) => {
+        setFormData({
+            ...formData,
+            padding: {
+                ...formData.padding,
+                [side]: parseInt(value) || 0
+            }
+        });
+    }
     return (
         <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 space-y-4">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white">Editar Pie de Página</h3>
-            <div>
-                <Label htmlFor="copyright">Texto de Copyright</Label>
-                <Input id="copyright" value={formData.copyright} onChange={(e) => setFormData({ ...formData, copyright: e.target.value })} />
-            </div>
-             <Accordion type="single" collapsible className="w-full">
-              {formData.links.map((link: any, index: number) => (
-                  <AccordionItem value={`item-${index}`} key={index}>
-                      <AccordionTrigger>Enlace {index + 1}</AccordionTrigger>
-                      <AccordionContent className="space-y-2">
-                           <div>
-                              <Label htmlFor={`link-text-${index}`}>Texto</Label>
-                              <Input id={`link-text-${index}`} value={link.text} onChange={(e) => handleLinkChange(index, 'text', e.target.value)} />
-                          </div>
-                           <div>
-                              <Label htmlFor={`link-url-${index}`}>URL</Label>
-                              <Input id={`link-url-${index}`} value={link.url} onChange={(e) => handleLinkChange(index, 'url', e.target.value)} />
-                          </div>
-                      </AccordionContent>
-                  </AccordionItem>
-              ))}
+             <Accordion type="multiple" defaultValue={['content']} className="w-full">
+                <AccordionItem value="content">
+                    <AccordionTrigger>Contenido</AccordionTrigger>
+                    <AccordionContent className="space-y-4 pt-4">
+                        <div>
+                            <Label htmlFor="copyright">Texto de Copyright</Label>
+                            <Input id="copyright" value={formData.copyright} onChange={(e) => setFormData({ ...formData, copyright: e.target.value })} />
+                        </div>
+                        {formData.links.map((link: any, index: number) => (
+                        <Accordion type="single" collapsible className="w-full" key={index}>
+                            <AccordionItem value={`item-${index}`}>
+                                <AccordionTrigger>Enlace {index + 1}</AccordionTrigger>
+                                <AccordionContent className="space-y-2">
+                                    <div>
+                                        <Label htmlFor={`link-text-${index}`}>Texto</Label>
+                                        <Input id={`link-text-${index}`} value={link.text} onChange={(e) => handleLinkChange(index, 'text', e.target.value)} />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor={`link-url-${index}`}>URL</Label>
+                                        <Input id={`link-url-${index}`} value={link.url} onChange={(e) => handleLinkChange(index, 'url', e.target.value)} />
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
+                        </Accordion>
+                        ))}
+                    </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="spacing">
+                    <AccordionTrigger>Espaciado</AccordionTrigger>
+                    <AccordionContent className="space-y-4 pt-4">
+                        <Label>Padding (en píxeles)</Label>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <Label htmlFor="paddingTop" className="text-xs text-muted-foreground">Superior</Label>
+                                <Input id="paddingTop" type="number" value={formData.padding.top} onChange={(e) => handlePaddingChange('top', e.target.value)} />
+                            </div>
+                            <div>
+                                <Label htmlFor="paddingBottom" className="text-xs text-muted-foreground">Inferior</Label>
+                                <Input id="paddingBottom" type="number" value={formData.padding.bottom} onChange={(e) => handlePaddingChange('bottom', e.target.value)} />
+                            </div>
+                            <div>
+                                <Label htmlFor="paddingLeft" className="text-xs text-muted-foreground">Izquierdo</Label>
+                                <Input id="paddingLeft" type="number" value={formData.padding.left} onChange={(e) => handlePaddingChange('left', e.target.value)} />
+                            </div>
+                            <div>
+                                <Label htmlFor="paddingRight" className="text-xs text-muted-foreground">Derecho</Label>
+                                <Input id="paddingRight" type="number" value={formData.padding.right} onChange={(e) => handlePaddingChange('right', e.target.value)} />
+                            </div>
+                        </div>
+                    </AccordionContent>
+              </AccordionItem>
             </Accordion>
             <div className="flex justify-end gap-2">
                 <Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
@@ -1028,6 +1275,16 @@ const EditFormForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData:
       { value: 'background1', label: 'Fondo 1' },
       { value: 'background2', label: 'Fondo 2' },
     ];
+
+    const handlePaddingChange = (side: string, value: string) => {
+        setFormData({
+            ...formData,
+            padding: {
+                ...formData.padding,
+                [side]: parseInt(value) || 0
+            }
+        });
+    }
     
     return (
         <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 space-y-4">
@@ -1170,6 +1427,30 @@ const EditFormForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData:
                         )}
                     </AccordionContent>
                 </AccordionItem>
+                 <AccordionItem value="spacing">
+                    <AccordionTrigger>Espaciado</AccordionTrigger>
+                    <AccordionContent className="space-y-4 pt-4">
+                        <Label>Padding (en píxeles)</Label>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <Label htmlFor="paddingTop" className="text-xs text-muted-foreground">Superior</Label>
+                                <Input id="paddingTop" type="number" value={formData.padding.top} onChange={(e) => handlePaddingChange('top', e.target.value)} />
+                            </div>
+                            <div>
+                                <Label htmlFor="paddingBottom" className="text-xs text-muted-foreground">Inferior</Label>
+                                <Input id="paddingBottom" type="number" value={formData.padding.bottom} onChange={(e) => handlePaddingChange('bottom', e.target.value)} />
+                            </div>
+                            <div>
+                                <Label htmlFor="paddingLeft" className="text-xs text-muted-foreground">Izquierdo</Label>
+                                <Input id="paddingLeft" type="number" value={formData.padding.left} onChange={(e) => handlePaddingChange('left', e.target.value)} />
+                            </div>
+                            <div>
+                                <Label htmlFor="paddingRight" className="text-xs text-muted-foreground">Derecho</Label>
+                                <Input id="paddingRight" type="number" value={formData.padding.right} onChange={(e) => handlePaddingChange('right', e.target.value)} />
+                            </div>
+                        </div>
+                    </AccordionContent>
+              </AccordionItem>
             </Accordion>
             
             <div className="flex justify-end gap-2 pt-4">
@@ -1201,6 +1482,7 @@ const componentMap: { [key: string]: { preview: React.ComponentType<any>, edit: 
       backgroundImageDesktop: '',
       backgroundImageTablet: '',
       backgroundImageMobile: '',
+      padding: { top: 80, bottom: 80, left: 32, right: 32 },
     }
   },
   'Características': { 
@@ -1215,6 +1497,7 @@ const componentMap: { [key: string]: { preview: React.ComponentType<any>, edit: 
         ],
         backgroundType: 'color',
         backgroundImage: '',
+        padding: { top: 80, bottom: 80, left: 32, right: 32 },
     }
   },
   'CTA': { 
@@ -1227,6 +1510,7 @@ const componentMap: { [key: string]: { preview: React.ComponentType<any>, edit: 
         buttonUrl: '#',
         backgroundType: 'color',
         backgroundImage: '',
+        padding: { top: 80, bottom: 80, left: 32, right: 32 },
     }
   },
   'Testimonios': { 
@@ -1237,7 +1521,8 @@ const componentMap: { [key: string]: { preview: React.ComponentType<any>, edit: 
         testimonials: [
             { quote: "Este producto ha cambiado mi vida.", name: "Juana Pérez", company: "CEO, Acme Inc." },
             { quote: "Imprescindible para cualquier profesional.", name: "Juan García", company: "Desarrollador, Innovate Corp." },
-        ]
+        ],
+        padding: { top: 80, bottom: 80, left: 32, right: 32 },
     }
   },
   'Preguntas Frecuentes': { 
@@ -1248,7 +1533,8 @@ const componentMap: { [key: string]: { preview: React.ComponentType<any>, edit: 
         faqs: [
             { question: '¿Cuál es la política de reembolso?', answer: 'Ofrecemos una garantía de 30 días.' },
             { question: '¿Puedo cambiar mi plan?', answer: 'Sí, puedes cambiar de plan en cualquier momento.' },
-        ]
+        ],
+        padding: { top: 80, bottom: 80, left: 32, right: 32 },
     }
   },
   'Formulario': {
@@ -1270,6 +1556,7 @@ const componentMap: { [key: string]: { preview: React.ComponentType<any>, edit: 
           fieldBackgroundColor: 'background1',
           buttonColor: 'primary',
           buttonTextColor: 'primaryForeground',
+          padding: { top: 80, bottom: 80, left: 32, right: 32 },
       }
   },
   'Pie de página': { 
@@ -1280,7 +1567,8 @@ const componentMap: { [key: string]: { preview: React.ComponentType<any>, edit: 
         links: [
             { text: 'Política de Privacidad', url: '#' },
             { text: 'Términos de Servicio', url: '#' },
-        ]
+        ],
+        padding: { top: 32, bottom: 32, left: 32, right: 32 },
     }
   },
 };
@@ -1728,21 +2016,20 @@ function DesignerPageContent() {
                   </div>
                   </AccordionTrigger>
                   <AccordionContent className="p-4 pt-0">
-                  <div className="flex flex-col gap-2">
-                      {Object.keys(componentMap).map(
-                          (componentName) => (
-                          <Button
-                              key={componentName}
-                              variant="ghost"
-                              className="justify-start gap-2"
-                              onClick={() => addComponent(componentName)}
-                          >
-                              <GripVertical className="h-4 w-4 text-muted-foreground" />
-                              {componentName}
-                          </Button>
-                          )
-                      )}
-                      </div>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="w-full">
+                                <Plus className="mr-2 h-4 w-4" /> Agregar Componente
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            {Object.keys(componentMap).map((componentName) => (
+                                <DropdownMenuItem key={componentName} onSelect={() => addComponent(componentName)}>
+                                    {componentName}
+                                </DropdownMenuItem>
+                            ))}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                   </AccordionContent>
               </AccordionItem>
               </Accordion>
@@ -1887,22 +2174,6 @@ function DesignerPageContent() {
                       <p className="text-gray-500 dark:text-gray-400 mt-2">Comienza a construir tu página agregando un componente desde el panel izquierdo.</p>
                   </div>
               )}
-              <div className="flex justify-center">
-                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="rounded-full">
-                      <Plus className="mr-2 h-4 w-4" /> Agregar Sección
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="center">
-                    {Object.keys(componentMap).map((componentName) => (
-                      <DropdownMenuItem key={componentName} onSelect={() => addComponent(componentName)}>
-                        {componentName}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
             </div>
           </main>
         </SidebarInset>
