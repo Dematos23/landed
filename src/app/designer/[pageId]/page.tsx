@@ -1011,7 +1011,7 @@ function DesignerPageContent() {
   const isNew = pageIdFromUrl === 'new';
 
   const [landingData, setLandingData] = useState<Omit<LandingPageData, 'userId' | 'createdAt' | 'updatedAt'>>(() => createDefaultLandingData());
-  const [loading, setLoading] = useState(!isNew);
+  const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [editingComponent, setEditingComponent] = useState<ComponentData | null>(null);
   const [viewport, setViewport] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
@@ -1095,8 +1095,7 @@ function DesignerPageContent() {
                 success = true;
             }
         } else {
-            await updateLandingPage(pageIdFromUrl, landingData);
-            success = true;
+            success = await updateLandingPage(pageIdFromUrl, landingData);
         }
 
         if (success) {
