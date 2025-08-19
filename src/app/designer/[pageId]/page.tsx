@@ -1143,7 +1143,7 @@ function DesignerPageContent() {
         </header>
         <div className="flex flex-1 overflow-hidden">
           <Sidebar>
-            <Accordion type="single" collapsible defaultValue="item-1" className="w-full">
+            <Accordion type="multiple" defaultValue={['item-1', 'item-2']} className="w-full">
               <AccordionItem value="item-1">
                 <AccordionTrigger className="p-4 hover:no-underline">
                   <div className="flex items-center gap-2">
