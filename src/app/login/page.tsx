@@ -63,6 +63,7 @@ export default function LoginPage() {
       await handleUserInFirestore(result.user);
       router.push('/dashboard');
     } catch (error: any) {
+      console.error("Google Sign-In error:", error);
       toast({
         variant: "destructive",
         title: "Error de inicio de sesión",

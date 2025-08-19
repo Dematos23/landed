@@ -5,7 +5,7 @@ import { db, auth } from "@/lib/firebase";
 import { collection, doc, getDoc, setDoc, updateDoc, deleteDoc, serverTimestamp, query, where, getDocs } from "firebase/firestore";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { v4 as uuidv4 } from 'uuid';
-import type { LandingPageData, LandingPageTheme, LandingPageComponent } from "@/lib/types";
+import type { LandingPageData } from "@/lib/types";
 
 const landingsCollection = collection(db, "landings");
 
