@@ -2036,21 +2036,17 @@ function DesignerPageContent() {
                       <span className="font-semibold text-base">Componentes</span>
                   </div>
                   </AccordionTrigger>
-                  <AccordionContent className="p-4 pt-0">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="w-full">
-                                <Plus className="mr-2 h-4 w-4" /> Agregar Componente
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                            {Object.keys(componentMap).map((componentName) => (
-                                <DropdownMenuItem key={componentName} onSelect={() => addComponent(componentName)}>
-                                    {componentName}
-                                </DropdownMenuItem>
-                            ))}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                  <AccordionContent className="p-4 pt-0 space-y-2">
+                     {Object.keys(componentMap).map((componentName) => (
+                        <Button
+                            key={componentName}
+                            variant="outline"
+                            className="w-full justify-start"
+                            onClick={() => addComponent(componentName)}
+                        >
+                            <Plus className="mr-2 h-4 w-4" /> {componentName}
+                        </Button>
+                    ))}
                   </AccordionContent>
               </AccordionItem>
               </Accordion>
@@ -2195,6 +2191,25 @@ function DesignerPageContent() {
                       <p className="text-gray-500 dark:text-gray-400 mt-2">Comienza a construir tu página agregando un componente desde el panel izquierdo.</p>
                   </div>
               )}
+               <div className="flex justify-center p-4">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="lg">
+                        <Plus className="mr-2 h-4 w-4" /> Agregar Componente
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="center">
+                      {Object.keys(componentMap).map((componentName) => (
+                        <DropdownMenuItem
+                          key={componentName}
+                          onSelect={() => addComponent(componentName)}
+                        >
+                          {componentName}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+              </div>
             </div>
           </main>
         </SidebarInset>
