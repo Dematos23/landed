@@ -3,8 +3,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import Image from "next/image"
-import { PlusCircle, MoreHorizontal, Pencil, ExternalLink, Trash2 } from "lucide-react"
+import { PlusCircle, MoreHorizontal, Pencil, ExternalLink, Trash2, Copy } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -100,7 +99,7 @@ export default function DashboardPage() {
         title: `¡Éxito!`,
         description: `Tu sitio ha sido ${site.isPublished ? 'despublicado' : 'publicado'}.`,
       });
-      fetchSites();
+      await fetchSites();
     } else {
        toast({
         variant: "destructive",
@@ -110,7 +109,6 @@ export default function DashboardPage() {
     }
     setTogglingPublish(null);
   }
-
 
   return (
     <div className="flex flex-col gap-6">
