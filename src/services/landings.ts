@@ -10,11 +10,13 @@ import type { LandingPageData } from "@/lib/types";
 const landingsCollection = collection(db, "landings");
 
 const getCurrentUser = (): Promise<User | null> => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
+    // onAuthStateChanged returns an unsubscriber, but also resolves with the user
+    // on the initial call if the SDK has already initialized and knows the user state.
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       unsubscribe();
       resolve(user);
-    }, reject);
+    });
   });
 };
 
