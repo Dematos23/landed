@@ -32,6 +32,7 @@ import {
   ThumbsUp,
   Rocket,
   Gem,
+  Loader2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -90,6 +91,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { SidebarProvider, Sidebar, SidebarTrigger, SidebarInset, useSidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
 import { getLandingPage, createLandingPage, updateLandingPage } from '@/services/landings.client';
 import { publishLanding } from '@/actions/landings';
+import { claimUserSubdomain } from '@/actions/users';
 import type { LandingPageData, LandingPageComponent, LandingPageTheme } from '@/lib/types';
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from '@/components/ui/switch';
@@ -1613,7 +1615,6 @@ const createDefaultLandingData = (): Omit<LandingPageData, 'userId' | 'createdAt
   return {
     id: id,
     name: "Nueva Página de Aterrizaje",
-    subdomain: `pagina-${id.substring(0, 8)}`,
     components: [
       { id: uuidv4(), name: 'Sección de Héroe', props: componentMap['Sección de Héroe'].defaultProps },
       { id: uuidv4(), name: 'Características', props: componentMap['Características'].defaultProps },
@@ -1637,9 +1638,13 @@ function DesignerPageContent() {
   const [editingComponent, setEditingComponent] = useState<ComponentData | null>(null);
   const [viewport, setViewport] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [isEditingName, setIsEditingName] = useState(false);
+  
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [publicUrl, setPublicUrl] = useState('');
   const [isCopied, setIsCopied] = useState(false);
+  
+  const [showSubdomainModal, setShowSubdomainModal] = useState(false);
+
   
   const getDraftKey = (pageId: string) => `landing-page-draft-${pageId}`;
 
@@ -1708,7 +1713,7 @@ function DesignerPageContent() {
 
     try {
       if (isNew) {
-        success = await createLandingPage(landingData);
+        success = await createLandingPage(landingData as LandingPageData);
         if (success) {
           localStorage.removeItem(getDraftKey('new'));
           router.replace(`/designer/${newPageId}`);
@@ -1775,28 +1780,43 @@ function DesignerPageContent() {
     setIsSaving(true);
     try {
       const pageIdToPublish = isNew ? landingData.id : pageIdFromUrl;
-      const published = await publishLanding(pageIdToPublish);
+      const result = await publishLanding(pageIdToPublish);
 
-      if (published) {
-          const url = `${window.location.protocol}//${landingData.subdomain}.landed.co`;
-          setPublicUrl(url);
+      if (result.success && result.publicUrl) {
+          setPublicUrl(result.publicUrl);
           setShowPublishModal(true);
           toast({
             title: "¡Página publicada!",
             description: "Tu página ya está disponible públicamente.",
           });
+      } else if (result.needsSubdomain) {
+          setShowSubdomainModal(true);
       } else {
-          throw new Error("Failed to publish page via server action.");
+          throw new Error(result.error || "Failed to publish page via server action.");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error publishing page:", error);
       toast({
         variant: "destructive",
         title: "Error al publicar",
-        description: "No se pudo publicar la página. Inténtalo de nuevo.",
+        description: error.message || "No se pudo publicar la página. Inténtalo de nuevo.",
       });
     } finally {
       setIsSaving(false);
+    }
+  };
+  
+  const handleSubdomainClaim = async (subdomain: string) => {
+    const result = await claimUserSubdomain(subdomain);
+    if (result.success) {
+      toast({ title: "¡Subdominio guardado!", description: `Tu subdominio ${result.normalized} ha sido reservado.`});
+      setShowSubdomainModal(false);
+      // Retry publishing
+      await handlePublish();
+      return true;
+    } else {
+      toast({ variant: "destructive", title: "Error", description: result.error });
+      return false;
     }
   };
 
@@ -2251,8 +2271,61 @@ function DesignerPageContent() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <SubdomainModal
+        open={showSubdomainModal}
+        onOpenChange={setShowSubdomainModal}
+        onClaim={handleSubdomainClaim}
+      />
     </>
   );
+}
+
+function SubdomainModal({ open, onOpenChange, onClaim }: { open: boolean, onOpenChange: (open: boolean) => void, onClaim: (subdomain: string) => Promise<boolean> }) {
+  const [subdomain, setSubdomain] = useState('');
+  const [isClaiming, setIsClaiming] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsClaiming(true);
+    const success = await onClaim(subdomain);
+    if (!success) {
+      setIsClaiming(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Elige tu subdominio</DialogTitle>
+            <DialogDescription>
+              Necesitas un subdominio para publicar tu página. Será tu dirección única en Landed.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Input
+                id="subdomain"
+                placeholder="tu-empresa"
+                value={subdomain}
+                onChange={(e) => setSubdomain(e.target.value)}
+                disabled={isClaiming}
+              />
+              <span className="text-sm text-muted-foreground">.landed.pe</span>
+            </div>
+             <DialogFooter>
+                <DialogClose asChild>
+                    <Button type="button" variant="ghost" disabled={isClaiming}>Cancelar</Button>
+                </DialogClose>
+                <Button type="submit" disabled={isClaiming || !subdomain}>
+                  {isClaiming && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Reservar y Publicar
+                </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+  )
 }
 
 

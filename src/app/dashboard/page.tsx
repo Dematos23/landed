@@ -92,28 +92,47 @@ export default function DashboardPage() {
   
   const handleTogglePublish = async (site: LandingPageData) => {
     setTogglingPublish(site.id);
-    const action = site.isPublished ? unpublishLanding : publishLanding;
-    const success = await action(site.id);
-    
-    if (success) {
-      toast({
-        title: `¡Éxito!`,
-        description: `Tu sitio ha sido ${site.isPublished ? 'despublicado' : 'publicado'}.`,
-      });
-      await fetchSites();
-    } else {
-       toast({
-        variant: "destructive",
-        title: "Error",
-        description: `No se pudo ${site.isPublished ? 'despublicar' : 'publicar'} el sitio. Inténtalo de nuevo.`,
-      });
+    try {
+      if (site.isPublished) {
+        const success = await unpublishLanding(site.id);
+        if (success) {
+          toast({ title: `¡Éxito!`, description: `Tu sitio ha sido despublicado.` });
+          await fetchSites();
+        } else {
+          throw new Error("Error al despublicar");
+        }
+      } else {
+        const result = await publishLanding(site.id);
+        if (result.success) {
+          toast({ title: `¡Éxito!`, description: `Tu sitio ha sido publicado.` });
+          await fetchSites();
+        } else if (result.needsSubdomain) {
+           toast({
+            variant: "destructive",
+            title: "Falta subdominio",
+            description: "Por favor, edita la página en el diseñador para configurar tu subdominio antes de publicar.",
+          });
+        } else {
+           throw new Error(result.error || "Error al publicar");
+        }
+      }
+    } catch (error: any) {
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: error.message || `No se pudo cambiar el estado de publicación. Inténtalo de nuevo.`,
+        });
+    } finally {
+        setTogglingPublish(null);
     }
-    setTogglingPublish(null);
   }
   
   const handleCopyLink = (site: LandingPageData) => {
-    const url = `${window.location.protocol}//${site.subdomain}.landed.co`;
-    navigator.clipboard.writeText(url);
+    if (!site.publicUrl) {
+      toast({ variant: "destructive", title: "Error", description: "Esta página no tiene una URL pública." });
+      return;
+    }
+    navigator.clipboard.writeText(site.publicUrl);
     setCopiedSite(site.id);
     toast({
       title: "¡Enlace copiado!",
@@ -165,8 +184,8 @@ export default function DashboardPage() {
                           />
                         <h3 className="font-semibold">{site.name}</h3>
                       </div>
-                      <a href={`/p/${site.subdomain}`} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:underline">
-                        {site.subdomain}.landed.co
+                      <a href={site.publicUrl || '#'} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:underline">
+                        {site.publicUrl ? site.publicUrl.replace('https://', '') : "Aún no publicado"}
                       </a>
                     </div>
                   </div>
@@ -200,15 +219,19 @@ export default function DashboardPage() {
                               <Pencil className="mr-2 h-4 w-4" /> Editar
                             </Link>
                           </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                             <a href={`/p/${site.subdomain}`} target="_blank" rel="noopener noreferrer" className="flex items-center w-full cursor-pointer">
-                                <ExternalLink className="mr-2 h-4 w-4" /> Ver en vivo
-                             </a>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleCopyLink(site)} className="flex items-center w-full cursor-pointer">
-                            {copiedSite === site.id ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
-                            Copiar enlace
-                          </DropdownMenuItem>
+                          {site.isPublished && site.publicUrl && (
+                            <>
+                              <DropdownMenuItem asChild>
+                                 <a href={site.publicUrl} target="_blank" rel="noopener noreferrer" className="flex items-center w-full cursor-pointer">
+                                    <ExternalLink className="mr-2 h-4 w-4" /> Ver en vivo
+                                 </a>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleCopyLink(site)} className="flex items-center w-full cursor-pointer">
+                                {copiedSite === site.id ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
+                                Copiar enlace
+                              </DropdownMenuItem>
+                            </>
+                          )}
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer">
