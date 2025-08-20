@@ -1,7 +1,7 @@
 
 "use client"
 
-import { getAuth, signOut } from "firebase/auth";
+import { getAuth, signOut as clientSignOut } from "firebase/auth";
 import { useRouter } from 'next/navigation';
 import {
   Avatar,
@@ -16,11 +16,11 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { CreditCard, LifeBuoy, LogOut, Settings, User } from "lucide-react"
+import { CreditCard, LogOut, User } from "lucide-react"
 import { app } from '@/lib/firebase';
+import { signOut as serverSignOut } from '@/actions/auth';
 
 const auth = getAuth(app);
 
@@ -29,7 +29,8 @@ export function UserNav() {
 
   const handleSignOut = async () => {
     try {
-      await signOut(auth);
+      await clientSignOut(auth);
+      await serverSignOut();
       router.push('/login');
     } catch (error) {
       console.error("Error signing out: ", error);

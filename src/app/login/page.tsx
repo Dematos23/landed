@@ -21,6 +21,7 @@ import { Logo, GoogleIcon } from '@/components/icons';
 import { app, db } from '@/lib/firebase';
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from 'lucide-react';
+import { signInWithIdToken } from '@/actions/auth';
 
 const auth = getAuth(app);
 
@@ -42,10 +43,16 @@ export default function LoginPage() {
   const [showLoadingSpinner, setShowLoadingSpinner] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(user => {
-      if (user && user.emailVerified) {
-        setShowLoadingSpinner(true);
-        router.push('/dashboard');
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        if (user.emailVerified) {
+          setShowLoadingSpinner(true);
+          const idToken = await user.getIdToken(true);
+          await signInWithIdToken(idToken);
+          router.push('/dashboard');
+        }
+      } else {
+        setShowLoadingSpinner(false);
       }
     });
     return () => unsubscribe();
@@ -79,6 +86,8 @@ export default function LoginPage() {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       await handleUserInFirestore(result.user);
+      const idToken = await result.user.getIdToken(true);
+      await signInWithIdToken(idToken);
       // The onAuthStateChanged listener will handle the redirect
     } catch (error: any) {
       console.error("Google Sign-In error:", error);
@@ -121,6 +130,8 @@ export default function LoginPage() {
           setIsSubmitting(false);
           return;
         }
+        const idToken = await userCredential.user.getIdToken(true);
+        await signInWithIdToken(idToken);
         // The onAuthStateChanged listener will handle the redirect
       }
     } catch (error: any) {
