@@ -2,10 +2,9 @@
 
 import { notFound } from 'next/navigation';
 import { headers } from 'next/headers';
-import { admin } from '@/lib/firebase-admin';
+import { db, auth } from '@/lib/firebase-admin';
 import type { LandingPageData } from '@/lib/types';
 import { getUserRole } from '@/actions/users'; // Server action to check role
-import { getAuth } from 'firebase-admin/auth';
 import { cookies } from 'next/headers';
 
 import { Layers, Star, Zap, ShieldCheck, Heart, Award, ThumbsUp, Rocket, Gem } from "lucide-react"
@@ -189,7 +188,7 @@ const componentMap: { [key: string]: React.ComponentType<any> } = {
 };
 
 async function getPageData(userSubdomain: string, pageSlug: string): Promise<LandingPageData | null> {
-    const landingsRef = admin.firestore().collection('landings');
+    const landingsRef = db.collection('landings');
     const querySnapshot = await landingsRef
       .where('userSubdomain', '==', userSubdomain)
       .where('pageSlug', '==', pageSlug)
@@ -226,7 +225,7 @@ async function getAuthenticatedUser() {
   try {
     const sessionCookie = cookies().get('__session')?.value;
     if (!sessionCookie) return null;
-    return await getAuth().verifySessionCookie(sessionCookie, true);
+    return await auth.verifySessionCookie(sessionCookie, true);
   } catch (error) {
     return null;
   }

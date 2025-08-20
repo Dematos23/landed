@@ -1,13 +1,11 @@
 
 "use server";
 
-import { admin } from '@/lib/firebase-admin';
-import { getAuth } from 'firebase-admin/auth';
+import { db, auth, FieldValue } from '@/lib/firebase-admin';
 import { cookies } from 'next/headers';
 import type { LandingPageData } from '@/lib/types';
 import { getUserRole } from './users';
 
-const db = admin.firestore();
 const landingsCollection = db.collection('landings');
 
 async function getAuthenticatedUser() {
@@ -16,7 +14,7 @@ async function getAuthenticatedUser() {
     if (!sessionCookie) {
       return null;
     }
-    const decodedIdToken = await getAuth().verifySessionCookie(sessionCookie, true);
+    const decodedIdToken = await auth.verifySessionCookie(sessionCookie, true);
     return decodedIdToken;
   } catch (error) {
     console.error("Error verifying session cookie:", error);
@@ -96,8 +94,8 @@ export async function publishLanding(pageId: string): Promise<{ success: boolean
       pageSlug,
       publicUrl,
       devPublicUrl,
-      publishedAt: admin.firestore.FieldValue.serverTimestamp(),
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      publishedAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
     });
 
     console.log(`Page ${pageId} published successfully at ${publicUrl}`);
@@ -149,7 +147,7 @@ export async function unpublishLanding(pageId: string): Promise<boolean> {
     await pageRef.update({
       isPublished: false,
       publishedAt: null, // Clear the published date
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
     });
 
     console.log(`Page ${pageId} unpublished successfully.`);

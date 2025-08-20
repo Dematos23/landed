@@ -1,11 +1,8 @@
 
 "use server";
 
-import { admin } from '@/lib/firebase-admin';
-import { getAuth } from 'firebase-admin/auth';
+import { db, auth } from '@/lib/firebase-admin';
 import { cookies } from 'next/headers';
-
-const db = admin.firestore();
 
 async function getAuthenticatedUser() {
   try {
@@ -13,7 +10,7 @@ async function getAuthenticatedUser() {
     if (!sessionCookie) {
       return null;
     }
-    const decodedIdToken = await getAuth().verifySessionCookie(sessionCookie, true);
+    const decodedIdToken = await auth.verifySessionCookie(sessionCookie, true);
     return decodedIdToken;
   } catch (error) {
     console.error("Error verifying session cookie:", error);
