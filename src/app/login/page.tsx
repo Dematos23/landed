@@ -54,14 +54,20 @@ export default function LoginPage() {
   const handleUserInFirestore = async (firebaseUser: FirebaseUser) => {
     const userRef = doc(db, "users", firebaseUser.uid);
     const userSnap = await getDoc(userRef);
+
     if (!userSnap.exists()) {
       const { uid, email, displayName, photoURL } = firebaseUser;
+      
+      const adminEmails = (process.env.NEXT_PUBLIC_ADMINS || '').split(',');
+      const role = email && adminEmails.includes(email) ? 'admin' : 'client';
+      
       await setDoc(userRef, {
         uid,
         email,
         displayName: displayName || email?.split('@')[0] || 'Usuario',
-        photoURL: photoURL || null, // Ensure photoURL is null if not present
-        createdAt: new Date()
+        photoURL: photoURL || null,
+        createdAt: new Date(),
+        role: role,
       });
     }
   };
@@ -101,6 +107,7 @@ export default function LoginPage() {
           description: "Hemos enviado un enlace de verificación a tu correo electrónico. Por favor, revisa tu bandeja de entrada.",
         });
         setIsSignUp(false);
+        setShowLoadingSpinner(false);
       } else {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         if (!userCredential.user.emailVerified) {
@@ -152,8 +159,6 @@ export default function LoginPage() {
       setShowLoadingSpinner(false);
     } finally {
         setIsSubmitting(false);
-        // Do not set showLoadingSpinner to false for successful cases,
-        // as we want it to remain visible until redirection.
     }
   };
 

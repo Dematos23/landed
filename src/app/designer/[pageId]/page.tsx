@@ -33,6 +33,7 @@ import {
   Rocket,
   Gem,
   Loader2,
+  ExternalLink,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -41,13 +42,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel"
 import {
   Dialog,
   DialogContent,
@@ -88,7 +82,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { cn } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { SidebarProvider, Sidebar, SidebarTrigger, SidebarInset, useSidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
+import { SidebarProvider, Sidebar, SidebarTrigger, SidebarInset, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
 import { getLandingPage, createLandingPage, updateLandingPage } from '@/services/landings.client';
 import { publishLanding } from '@/actions/landings';
 import { claimUserSubdomain } from '@/actions/users';
@@ -397,24 +391,10 @@ const EditHeroForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData:
         ...data.props,
         padding: data.props.padding || { top: 80, bottom: 80, left: 32, right: 32 }
     });
-    const [uploadedImages, setUploadedImages] = useState<string[]>([]);
-    
     const fileInputRefSingle = useRef<HTMLInputElement>(null);
     const fileInputRefDesktop = useRef<HTMLInputElement>(null);
     const fileInputRefTablet = useRef<HTMLInputElement>(null);
     const fileInputRefMobile = useRef<HTMLInputElement>(null);
-
-    useEffect(() => {
-      // If there are existing images in props, load them into state
-      const existingImages = [];
-      if (formData.backgroundImage) existingImages.push(formData.backgroundImage);
-      if (formData.backgroundImageDesktop) existingImages.push(formData.backgroundImageDesktop);
-      if (formData.backgroundImageTablet) existingImages.push(formData.backgroundImageTablet);
-      if (formData.backgroundImageMobile) existingImages.push(formData.backgroundImageMobile);
-      const uniqueImages = [...new Set(existingImages.filter(Boolean))];
-      setUploadedImages(uniqueImages);
-    }, [formData.backgroundImage, formData.backgroundImageDesktop, formData.backgroundImageMobile, formData.backgroundImageTablet]);
-
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -427,7 +407,6 @@ const EditHeroForm = ({ data, onSave, onCancel }: { data: any, onSave: (newData:
         const reader = new FileReader();
         reader.onload = (event) => {
           const dataUrl = event.target?.result as string;
-          setUploadedImages(prev => [...new Set([...prev, dataUrl])]);
           setFormData({ ...formData, [target]: dataUrl });
         };
         reader.readAsDataURL(file);
@@ -1639,9 +1618,11 @@ function DesignerPageContent() {
   const [viewport, setViewport] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [isEditingName, setIsEditingName] = useState(false);
   
-  const [showPublishModal, setShowPublishModal] = useState(false);
-  const [publicUrl, setPublicUrl] = useState('');
-  const [isCopied, setIsCopied] = useState(false);
+  const [publishModalState, setPublishModalState] = useState({
+      open: false,
+      publicUrl: '',
+      devPublicUrl: ''
+  });
   
   const [showSubdomainModal, setShowSubdomainModal] = useState(false);
 
@@ -1783,8 +1764,11 @@ function DesignerPageContent() {
       const result = await publishLanding(pageIdToPublish);
 
       if (result.success && result.publicUrl) {
-          setPublicUrl(result.publicUrl);
-          setShowPublishModal(true);
+          setPublishModalState({
+              open: true,
+              publicUrl: result.publicUrl,
+              devPublicUrl: result.devPublicUrl || ''
+          });
           toast({
             title: "¡Página publicada!",
             description: "Tu página ya está disponible públicamente.",
@@ -1818,13 +1802,6 @@ function DesignerPageContent() {
       toast({ variant: "destructive", title: "Error", description: result.error });
       return false;
     }
-  };
-
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(publicUrl).then(() => {
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000);
-    });
   };
 
   // Drag and drop state
@@ -2238,39 +2215,12 @@ function DesignerPageContent() {
           </main>
         </SidebarInset>
       </div>
-      <Dialog open={showPublishModal} onOpenChange={setShowPublishModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>¡Página Publicada!</DialogTitle>
-            <DialogDescription>
-              Tu página está ahora en línea. Puedes compartir este enlace con quien quieras.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex items-center space-x-2">
-            <div className="grid flex-1 gap-2">
-              <Label htmlFor="link" className="sr-only">
-                Enlace
-              </Label>
-              <Input
-                id="link"
-                defaultValue={publicUrl}
-                readOnly
-              />
-            </div>
-            <Button type="submit" size="sm" className="px-3" onClick={copyToClipboard}>
-              <span className="sr-only">Copiar</span>
-              {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-            </Button>
-          </div>
-          <DialogFooter className="sm:justify-start">
-            <DialogClose asChild>
-              <Button type="button" variant="secondary">
-                Cerrar
-              </Button>
-            </DialogClose>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <PublishSuccessModal
+        open={publishModalState.open}
+        onOpenChange={(open) => setPublishModalState(prev => ({ ...prev, open }))}
+        publicUrl={publishModalState.publicUrl}
+        devPublicUrl={publishModalState.devPublicUrl}
+      />
       <SubdomainModal
         open={showSubdomainModal}
         onOpenChange={setShowSubdomainModal}
@@ -2279,6 +2229,73 @@ function DesignerPageContent() {
     </>
   );
 }
+
+
+function PublishSuccessModal({ open, onOpenChange, publicUrl, devPublicUrl }: { open: boolean; onOpenChange: (open: boolean) => void; publicUrl: string; devPublicUrl?: string }) {
+    const [isProdCopied, setIsProdCopied] = useState(false);
+    const [isDevCopied, setIsDevCopied] = useState(false);
+
+    const copyToClipboard = (url: string, type: 'prod' | 'dev') => {
+        navigator.clipboard.writeText(url).then(() => {
+            if (type === 'prod') {
+                setIsProdCopied(true);
+                setTimeout(() => setIsProdCopied(false), 2000);
+            } else {
+                setIsDevCopied(true);
+                setTimeout(() => setIsDevCopied(false), 2000);
+            }
+        });
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>¡Página Publicada!</DialogTitle>
+                    <DialogDescription>
+                        Tu página está ahora en línea. Puedes compartir los siguientes enlaces.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="link-prod">Enlace de Producción</Label>
+                        <div className="flex items-center space-x-2">
+                           <Input id="link-prod" defaultValue={publicUrl} readOnly />
+                            <Button size="sm" className="px-3" onClick={() => copyToClipboard(publicUrl, 'prod')}>
+                                <span className="sr-only">Copiar</span>
+                                {isProdCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                            </Button>
+                             <a href={publicUrl} target="_blank" rel="noopener noreferrer">
+                               <Button size="sm" variant="outline" className="px-3"><ExternalLink className="h-4 w-4" /></Button>
+                            </a>
+                        </div>
+                    </div>
+                    {devPublicUrl && (
+                         <div className="space-y-2">
+                            <Label htmlFor="link-dev">Enlace de Desarrollo (Solo Admins)</Label>
+                            <div className="flex items-center space-x-2">
+                               <Input id="link-dev" defaultValue={devPublicUrl} readOnly />
+                                <Button size="sm" className="px-3" onClick={() => copyToClipboard(devPublicUrl, 'dev')}>
+                                    <span className="sr-only">Copiar</span>
+                                    {isDevCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                                </Button>
+                                <a href={devPublicUrl} target="_blank" rel="noopener noreferrer">
+                                   <Button size="sm" variant="outline" className="px-3"><ExternalLink className="h-4 w-4" /></Button>
+                                </a>
+                            </div>
+                        </div>
+                    )}
+                </div>
+                <DialogFooter className="sm:justify-start">
+                    <DialogClose asChild>
+                        <Button type="button" variant="secondary">Cerrar</Button>
+                    </DialogClose>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
 
 function SubdomainModal({ open, onOpenChange, onClaim }: { open: boolean, onOpenChange: (open: boolean) => void, onClaim: (subdomain: string) => Promise<boolean> }) {
   const [subdomain, setSubdomain] = useState('');

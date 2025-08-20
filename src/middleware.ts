@@ -2,8 +2,9 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-const HOSTNAME = process.env.NEXT_PUBLIC_APP_URL || "landed.pe";
-const APP_HOSTNAME = `app.${HOSTNAME}`;
+const PROD_BASE_DOMAIN = process.env.NEXT_PUBLIC_PROD_BASE_DOMAIN || "landed.pe";
+const DEV_HOST = process.env.NEXT_PUBLIC_DEV_HOST || "localhost:3000";
+const APP_HOSTNAME = `app.${PROD_BASE_DOMAIN}`;
 
 export function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
@@ -13,21 +14,30 @@ export function middleware(request: NextRequest) {
   if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/_next/') || url.pathname.includes('.')) {
     return NextResponse.next();
   }
-
+  
   // Allow requests to the main app (e.g., app.landed.pe/dashboard) to pass through
-  if (hostname === APP_HOSTNAME) {
-      return NextResponse.next();
+  if (hostname === APP_HOSTNAME || hostname === `app.${DEV_HOST}`) {
+      url.pathname = `/app${url.pathname}`;
+      return NextResponse.rewrite(url);
+  }
+
+  // Handle development host routing
+  if (hostname === DEV_HOST) {
+    const pathSegments = url.pathname.split('/').filter(Boolean);
+    if (pathSegments.length > 0) {
+      const userSubdomain = pathSegments[0];
+      const pageSlug = pathSegments.slice(1).join('/');
+      url.pathname = `/_public/${userSubdomain}/${pageSlug || ''}`;
+      return NextResponse.rewrite(url);
+    }
   }
   
-  // Check if it's a custom subdomain
-  const subdomainMatch = hostname.match(`^(.*)\\.${HOSTNAME}$`);
-  
+  // Handle production subdomain routing
+  const subdomainMatch = hostname.match(`^(.*)\\.${PROD_BASE_DOMAIN}$`);
   if (subdomainMatch) {
     const userSubdomain = subdomainMatch[1];
     const pageSlug = url.pathname.slice(1); // remove leading '/'
     
-    // Rewrite to the internal public rendering route
-    // e.g., my-site.landed.pe/about-us -> /_public/my-site/about-us
     url.pathname = `/_public/${userSubdomain}/${pageSlug || ''}`;
     return NextResponse.rewrite(url);
   }
@@ -37,13 +47,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 }

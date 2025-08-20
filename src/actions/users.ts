@@ -22,6 +22,30 @@ async function getAuthenticatedUser() {
 }
 
 /**
+ * Gets the role of a user from Firestore.
+ * @param uid The user's ID.
+ * @returns A promise that resolves to the user's role ('admin' or 'client').
+ */
+export async function getUserRole(uid: string): Promise<'admin' | 'client'> {
+    if (!uid) {
+        return 'client';
+    }
+
+    try {
+        const userDocRef = db.collection('users').doc(uid);
+        const userDoc = await userDocRef.get();
+        
+        if (userDoc.exists) {
+            return userDoc.data()?.role || 'client';
+        }
+        return 'client';
+    } catch (error) {
+        console.error("Error getting user role:", error);
+        return 'client'; // Default to client on error
+    }
+}
+
+/**
  * Claims a unique subdomain for the authenticated user.
  * This function uses a transaction to ensure atomic reservation of the subdomain.
  * @param desiredSubdomain The subdomain string requested by the user.

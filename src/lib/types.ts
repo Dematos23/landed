@@ -43,9 +43,6 @@ export interface LandingPageData {
   /** The name of the page displayed in the user's dashboard. */
   name: string;
 
-  /** The subdomain where the page will be published (e.g., 'my-launch'). */
-  subdomain: string;
-
   /** The list of components that make up the page, in display order. */
   components: LandingPageComponent[];
 
@@ -70,6 +67,9 @@ export interface LandingPageData {
   /** The full public URL of the page. */
   publicUrl?: string;
 
+  /** The full development URL of the page. */
+  devPublicUrl?: string;
+
   /** The timestamp when the page was last published. */
-  publishedAt?: Timestamp;
+  publishedAt?: Timestamp | null;
 }

@@ -1,27 +1,20 @@
 
 
 import { notFound } from 'next/navigation';
+import { headers } from 'next/headers';
 import { admin } from '@/lib/firebase-admin';
 import type { LandingPageData } from '@/lib/types';
+import { getUserRole } from '@/actions/users'; // Server action to check role
+import { getAuth } from 'firebase-admin/auth';
+import { cookies } from 'next/headers';
 
 import { Layers, Star, Zap, ShieldCheck, Heart, Award, ThumbsUp, Rocket, Gem } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { cn } from '@/lib/utils';
-import type { LandingPageComponent, LandingPageTheme } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
-
-// This function can be uncommented to generate static paths at build time if needed.
-// export async function generateStaticParams() {
-//   const snapshot = await admin.firestore().collection('landings').where('isPublished', '==', true).get();
-//   return snapshot.docs.map(doc => ({
-//     userSubdomain: doc.data().userSubdomain,
-//     pageSlug: doc.data().pageSlug,
-//   }));
-// }
 
 const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
   Layers, Zap, ShieldCheck, Star, Heart, Award, ThumbsUp, Rocket, Gem,
@@ -33,8 +26,6 @@ const IconComponent = ({ name, className }: { name: string; className?: string }
 };
 
 // --- Component Previews ---
-// These are the same rendering components from the preview page.
-
 const HeroPreview = ({ 
   headline, subheadline, 
   cta1, cta2, cta1Url, cta2Url,
@@ -197,7 +188,7 @@ const componentMap: { [key: string]: React.ComponentType<any> } = {
   'Testimonios': TestimonialsPreview, 'Preguntas Frecuentes': FaqPreview, 'Formulario': FormPreview, 'Pie de página': FooterPreview,
 };
 
-async function getPublishedPage(userSubdomain: string, pageSlug: string): Promise<LandingPageData | null> {
+async function getPageData(userSubdomain: string, pageSlug: string): Promise<LandingPageData | null> {
     const landingsRef = admin.firestore().collection('landings');
     const querySnapshot = await landingsRef
       .where('userSubdomain', '==', userSubdomain)
@@ -231,9 +222,33 @@ function hexToHsl(H: string) {
     return `${h} ${s}% ${l}%`;
 }
 
+async function getAuthenticatedUser() {
+  try {
+    const sessionCookie = cookies().get('__session')?.value;
+    if (!sessionCookie) return null;
+    return await getAuth().verifySessionCookie(sessionCookie, true);
+  } catch (error) {
+    return null;
+  }
+}
+
 export default async function PublicPage({ params }: { params: { userSubdomain: string, pageSlug: string } }) {
   const { userSubdomain, pageSlug } = params;
-  const data = await getPublishedPage(userSubdomain, pageSlug);
+  const host = headers().get('host') || '';
+  const DEV_HOST = process.env.NEXT_PUBLIC_DEV_HOST || 'localhost:3000';
+
+  if (host === DEV_HOST) {
+      const user = await getAuthenticatedUser();
+      if (!user) {
+          return notFound(); // Or a custom "login required" page
+      }
+      const role = await getUserRole(user.uid);
+      if (role !== 'admin') {
+          return notFound(); // Or a 403 Forbidden page
+      }
+  }
+
+  const data = await getPageData(userSubdomain, pageSlug);
 
   if (!data) {
     return notFound();

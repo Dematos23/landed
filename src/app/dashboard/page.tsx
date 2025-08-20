@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getUserLandings, deleteLandingPage } from "@/services/landings.client"
+import { getCurrentUserRole } from "@/services/users.client"
 import { publishLanding, unpublishLanding } from "@/actions/landings"
 import type { LandingPageData } from "@/lib/types"
 import { useToast } from "@/hooks/use-toast"
@@ -31,7 +32,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { cn } from "@/lib/utils"
 
@@ -61,17 +61,22 @@ export default function DashboardPage() {
   const [togglingPublish, setTogglingPublish] = useState<string | null>(null);
   const [deletingSite, setDeletingSite] = useState<string | null>(null);
   const [copiedSite, setCopiedSite] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<'client' | 'admin'>('client');
   const { toast } = useToast();
 
-  const fetchSites = async () => {
+  const fetchSitesAndRole = async () => {
     setLoading(true);
-    const userSites = await getUserLandings();
+    const [userSites, role] = await Promise.all([
+      getUserLandings(),
+      getCurrentUserRole()
+    ]);
     setSites(userSites);
+    setUserRole(role);
     setLoading(false);
   };
 
   useEffect(() => {
-    fetchSites();
+    fetchSitesAndRole();
   }, []);
 
   const handleDelete = async (siteId: string) => {
@@ -82,7 +87,7 @@ export default function DashboardPage() {
         title: "¡Sitio eliminado!",
         description: "Tu página de aterrizaje ha sido eliminada.",
       });
-      fetchSites(); // Refresh the list
+      fetchSitesAndRole(); // Refresh the list
     } else {
       toast({
         variant: "destructive",
@@ -100,7 +105,7 @@ export default function DashboardPage() {
         const success = await unpublishLanding(site.id);
         if (success) {
           toast({ title: `¡Éxito!`, description: `Tu sitio ha sido despublicado.` });
-          await fetchSites();
+          await fetchSitesAndRole();
         } else {
           throw new Error("Error al despublicar");
         }
@@ -108,7 +113,7 @@ export default function DashboardPage() {
         const result = await publishLanding(site.id);
         if (result.success) {
           toast({ title: `¡Éxito!`, description: `Tu sitio ha sido publicado.` });
-          await fetchSites();
+          await fetchSitesAndRole();
         } else if (result.needsSubdomain) {
            toast({
             variant: "destructive",
@@ -130,16 +135,16 @@ export default function DashboardPage() {
     }
   }
   
-  const handleCopyLink = (site: LandingPageData) => {
-    if (!site.publicUrl) {
+  const handleCopyLink = (url: string) => {
+    if (!url) {
       toast({ variant: "destructive", title: "Error", description: "Esta página no tiene una URL pública." });
       return;
     }
-    navigator.clipboard.writeText(site.publicUrl);
-    setCopiedSite(site.id);
+    navigator.clipboard.writeText(url);
+    setCopiedSite(url);
     toast({
       title: "¡Enlace copiado!",
-      description: "La URL de tu sitio se ha copiado al portapapeles.",
+      description: "La URL se ha copiado al portapapeles.",
     });
     setTimeout(() => setCopiedSite(null), 2000);
   };
@@ -232,12 +237,25 @@ export default function DashboardPage() {
                             <>
                               <DropdownMenuItem asChild>
                                  <a href={site.publicUrl} target="_blank" rel="noopener noreferrer" className="flex items-center w-full cursor-pointer">
-                                    <ExternalLink className="mr-2 h-4 w-4" /> Ver en vivo
+                                    <ExternalLink className="mr-2 h-4 w-4" /> Ver en Prod
                                  </a>
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleCopyLink(site)} className="flex items-center w-full cursor-pointer">
-                                {copiedSite === site.id ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
-                                Copiar enlace
+                              <DropdownMenuItem onClick={() => handleCopyLink(site.publicUrl!)} className="flex items-center w-full cursor-pointer">
+                                {copiedSite === site.publicUrl ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
+                                Copiar enlace Prod
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                           {userRole === 'admin' && site.isPublished && site.devPublicUrl && (
+                            <>
+                              <DropdownMenuItem asChild>
+                                 <a href={site.devPublicUrl} target="_blank" rel="noopener noreferrer" className="flex items-center w-full cursor-pointer">
+                                    <ExternalLink className="mr-2 h-4 w-4" /> Ver en Dev
+                                 </a>
+                              </DropdownMenuItem>
+                               <DropdownMenuItem onClick={() => handleCopyLink(site.devPublicUrl!)} className="flex items-center w-full cursor-pointer">
+                                {copiedSite === site.devPublicUrl ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
+                                Copiar enlace Dev
                               </DropdownMenuItem>
                             </>
                           )}
