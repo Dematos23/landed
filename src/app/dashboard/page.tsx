@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { PlusCircle, MoreHorizontal, Pencil, ExternalLink, Trash2, Copy, Check } from "lucide-react"
+import { PlusCircle, MoreHorizontal, Pencil, ExternalLink, Trash2, Copy, Check, Loader2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -59,6 +59,7 @@ export default function DashboardPage() {
   const [sites, setSites] = useState<LandingPageData[]>([]);
   const [loading, setLoading] = useState(true);
   const [togglingPublish, setTogglingPublish] = useState<string | null>(null);
+  const [deletingSite, setDeletingSite] = useState<string | null>(null);
   const [copiedSite, setCopiedSite] = useState<string | null>(null);
   const { toast } = useToast();
 
@@ -74,6 +75,7 @@ export default function DashboardPage() {
   }, []);
 
   const handleDelete = async (siteId: string) => {
+    setDeletingSite(siteId);
     const success = await deleteLandingPage(siteId);
     if (success) {
       toast({
@@ -88,6 +90,7 @@ export default function DashboardPage() {
         description: "No se pudo eliminar el sitio. Inténtalo de nuevo.",
       });
     }
+    setDeletingSite(null);
   }
   
   const handleTogglePublish = async (site: LandingPageData) => {
@@ -166,7 +169,12 @@ export default function DashboardPage() {
           </>
         ) : (
           sites.map((site) => (
-            <Card key={site.id}>
+            <Card key={site.id} className={cn("relative", deletingSite === site.id && "opacity-50 pointer-events-none")}>
+               {deletingSite === site.id && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  </div>
+                )}
                <CardContent className="flex items-center justify-between p-4">
                   <div className="flex items-center gap-4">
                     <div className="p-2 bg-muted rounded-md">
@@ -194,7 +202,7 @@ export default function DashboardPage() {
                         variant={site.isPublished ? "outline" : "default"} 
                         size="sm"
                         onClick={() => handleTogglePublish(site)}
-                        disabled={togglingPublish === site.id}
+                        disabled={togglingPublish === site.id || deletingSite === site.id}
                       >
                          {togglingPublish === site.id 
                             ? "Cargando..." 
@@ -207,6 +215,7 @@ export default function DashboardPage() {
                             size="icon"
                             variant="ghost"
                             className="h-8 w-8"
+                            disabled={deletingSite === site.id}
                           >
                             <MoreHorizontal className="h-4 w-4" />
                             <span className="sr-only">Toggle menu</span>
