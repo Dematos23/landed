@@ -177,7 +177,7 @@ export default function SettingsPage() {
                <div className="flex items-center gap-2">
                  <Input
                    id="subdomain"
-                   placeholder="tu-empresa"
+                   placeholder="tu-subdominio"
                    value={subdomain}
                    onChange={(e) => setSubdomain(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
                    disabled={isSavingSubdomain}
@@ -329,5 +329,3 @@ export default function SettingsPage() {
     </div>
   )
 }
-
-    
