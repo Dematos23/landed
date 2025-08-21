@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -39,8 +39,12 @@ import {
 } from "@/components/ui/dialog"
 
 import { Badge } from "@/components/ui/badge"
-import { MoreHorizontal, Globe, Trash2, Copy, Check } from "lucide-react"
+import { MoreHorizontal, Globe, Trash2, Copy, Check, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { getCurrentUserProfile } from "@/services/users.client"
+import { claimUserSubdomain } from "@/actions/users"
+import { Skeleton } from "@/components/ui/skeleton"
+
 
 type Domain = {
   id: string
@@ -61,15 +65,34 @@ const TXT_RECORD_VALUE = "landed-verification=a1b2c3d4-e5f6-7890-g1h2-i3j4k5l6m7
 export default function SettingsPage() {
   const [domains, setDomains] = useState<Domain[]>(initialDomains)
   const [newDomain, setNewDomain] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSubmittingDomain, setIsSubmittingDomain] = useState(false)
   const [isVerifying, setIsVerifying] = useState<string | null>(null)
   const [copiedRecord, setCopiedRecord] = useState<string | null>(null);
+  
+  const [subdomain, setSubdomain] = useState('');
+  const [initialSubdomain, setInitialSubdomain] = useState('');
+  const [isSavingSubdomain, setIsSavingSubdomain] = useState(false);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  
   const { toast } = useToast()
+
+  useEffect(() => {
+    async function loadProfile() {
+        setLoadingProfile(true);
+        const profile = await getCurrentUserProfile();
+        if (profile?.subdomain) {
+            setSubdomain(profile.subdomain);
+            setInitialSubdomain(profile.subdomain);
+        }
+        setLoadingProfile(false);
+    }
+    loadProfile();
+  }, []);
 
   const handleAddDomain = (e: React.FormEvent) => {
     e.preventDefault()
     if (!newDomain) return
-    setIsSubmitting(true)
+    setIsSubmittingDomain(true)
 
     // Simulate API call
     setTimeout(() => {
@@ -81,7 +104,7 @@ export default function SettingsPage() {
       }
       setDomains([...domains, newDomainEntry])
       setNewDomain("")
-      setIsSubmitting(false)
+      setIsSubmittingDomain(false)
       toast({
         title: "Dominio añadido",
         description: `El dominio ${newDomain} ha sido añadido y está pendiente de verificación.`,
@@ -110,21 +133,74 @@ export default function SettingsPage() {
     });
     setTimeout(() => setCopiedRecord(null), 2000);
   };
+  
+  const handleSaveSubdomain = async () => {
+    setIsSavingSubdomain(true);
+    const result = await claimUserSubdomain(subdomain);
+    if (result.success) {
+      toast({ title: "¡Subdominio guardado!", description: `Tu subdominio ${result.normalized} ha sido reservado.` });
+      setInitialSubdomain(result.normalized || '');
+    } else {
+      toast({ variant: "destructive", title: "Error", description: result.error });
+    }
+    setIsSavingSubdomain(false);
+  };
+
+  const PROD_BASE_DOMAIN = process.env.NEXT_PUBLIC_PROD_BASE_DOMAIN || "landed.pe";
 
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Configuración de Dominios</h2>
+        <h2 className="text-2xl font-bold tracking-tight">Configuración</h2>
         <p className="text-muted-foreground">
-          Gestiona tus dominios personalizados para tus páginas de aterrizaje.
+          Gestiona tu subdominio y dominios personalizados.
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Añadir Dominio</CardTitle>
+          <CardTitle>Tu Subdominio</CardTitle>
           <CardDescription>
-            Añade un dominio personalizado para conectar a tus páginas de aterrizaje.
+            Este es tu identificador único en la plataforma. Todas tus páginas publicadas usarán este subdominio.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+           {loadingProfile ? (
+              <div className="space-y-2">
+                <Skeleton className="h-5 w-1/4" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-4 w-1/2" />
+              </div>
+           ) : (
+             <div className="flex flex-col gap-2">
+               <Label htmlFor="subdomain">Subdominio</Label>
+               <div className="flex items-center gap-2">
+                 <Input
+                   id="subdomain"
+                   placeholder="tu-empresa"
+                   value={subdomain}
+                   onChange={(e) => setSubdomain(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                   disabled={isSavingSubdomain}
+                 />
+                 <span className="text-sm text-muted-foreground whitespace-nowrap">.{PROD_BASE_DOMAIN}</span>
+               </div>
+               <p className="text-xs text-muted-foreground">Solo se permiten letras minúsculas, números y guiones.</p>
+             </div>
+           )}
+        </CardContent>
+        <CardFooter className="border-t px-6 py-4">
+            <Button onClick={handleSaveSubdomain} disabled={isSavingSubdomain || loadingProfile || subdomain === initialSubdomain || subdomain.length < 3}>
+                {isSavingSubdomain && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Guardar Subdominio
+            </Button>
+        </CardFooter>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Añadir Dominio Personalizado</CardTitle>
+          <CardDescription>
+            Conecta tu propio dominio a tus páginas de aterrizaje.
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleAddDomain}>
@@ -137,11 +213,11 @@ export default function SettingsPage() {
                   placeholder="ejemplo.com"
                   value={newDomain}
                   onChange={(e) => setNewDomain(e.target.value)}
-                  disabled={isSubmitting}
+                  disabled={isSubmittingDomain}
                 />
               </div>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Añadiendo..." : "Añadir"}
+              <Button type="submit" disabled={isSubmittingDomain}>
+                {isSubmittingDomain ? "Añadiendo..." : "Añadir"}
               </Button>
             </div>
           </CardContent>
@@ -175,7 +251,7 @@ export default function SettingsPage() {
                     {domain.name}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={domain.status === "verified" ? "default" : "secondary"}>
+                    <Badge variant={domain.status === "verified" ? "success" : "secondary"}>
                       {domain.status === "verified" ? "Verificado" : "Pendiente"}
                     </Badge>
                   </TableCell>
@@ -196,7 +272,7 @@ export default function SettingsPage() {
                       <DropdownMenuContent align="end">
                          <Dialog>
                             <DialogTrigger asChild>
-                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>Verificar</DropdownMenuItem>
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()} disabled={domain.status === 'verified'}>Verificar</DropdownMenuItem>
                             </DialogTrigger>
                             <DialogContent>
                                 <DialogHeader>
@@ -253,3 +329,5 @@ export default function SettingsPage() {
     </div>
   )
 }
+
+    
