@@ -41,16 +41,9 @@ export async function publishLanding(pageId: string): Promise<{ success: boolean
     
     const userRole = await getUserRole(user.uid);
 
-    const userDocRef = db.collection('users').doc(user.uid);
     const pageRef = landingsCollection.doc(pageId);
-
-    const [userDocSnap, pageDocSnap] = await Promise.all([userDocRef.get(), pageRef.get()]);
+    const pageDocSnap = await pageRef.get();
     
-    if (!userDocSnap.exists() || !userDocSnap.data()?.subdomain) {
-      return { success: false, needsSubdomain: true };
-    }
-    const userSubdomain = userDocSnap.data()!.subdomain;
-
     if (!pageDocSnap.exists()) {
       return { success: false, error: `Page with ID ${pageId} not found.` };
     }
@@ -59,6 +52,22 @@ export async function publishLanding(pageId: string): Promise<{ success: boolean
 
     if (landingData.userId !== user.uid) {
       return { success: false, error: "User does not have permission to publish this page." };
+    }
+
+    let userSubdomain = landingData.userSubdomain;
+
+    // If the page doesn't have a subdomain, check if the user has one claimed
+    if (!userSubdomain) {
+        const userDocRef = db.collection('users').doc(user.uid);
+        const userDocSnap = await userDocRef.get();
+        if (userDocSnap.exists() && userDocSnap.data()?.subdomain) {
+            userSubdomain = userDocSnap.data()!.subdomain;
+        }
+    }
+    
+    // If still no subdomain, then the user needs to claim one.
+    if (!userSubdomain) {
+        return { success: false, needsSubdomain: true };
     }
 
     let pageSlug = toPageSlug(landingData.name);
@@ -90,7 +99,7 @@ export async function publishLanding(pageId: string): Promise<{ success: boolean
 
     await pageRef.update({
       isPublished: true,
-      userSubdomain,
+      userSubdomain, // This will be the newly found or existing subdomain
       pageSlug,
       publicUrl,
       devPublicUrl,
