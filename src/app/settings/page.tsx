@@ -251,7 +251,7 @@ export default function SettingsPage() {
                     {domain.name}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={domain.status === "verified" ? "success" : "secondary"}>
+                    <Badge variant={domain.status === "verified" ? "success" : "warning"}>
                       {domain.status === "verified" ? "Verificado" : "Pendiente"}
                     </Badge>
                   </TableCell>
