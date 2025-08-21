@@ -45,16 +45,20 @@ export default function DashboardLayout({
         <SidebarContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/dashboard" tooltip="Dashboard">
-                <LayoutDashboard />
-                Dashboard
-              </SidebarMenuButton>
+              <Link href="/dashboard" passHref>
+                <SidebarMenuButton tooltip="Dashboard">
+                  <LayoutDashboard />
+                  Dashboard
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/settings" tooltip="Settings">
-                <Settings />
-                Configuración
-              </SidebarMenuButton>
+              <Link href="/settings" passHref>
+                <SidebarMenuButton tooltip="Settings">
+                  <Settings />
+                  Configuración
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarContent>
