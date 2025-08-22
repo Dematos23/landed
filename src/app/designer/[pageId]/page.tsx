@@ -1790,7 +1790,7 @@ function DesignerPageContent() {
     }
   };
   
-  const handleSubdomainClaim = async (subdomain: string) => {
+  const handleSubdomainClaim = async (subdomain: string): Promise<boolean> => {
     const result = await claimUserSubdomain(subdomain);
     if (result.success) {
       toast({ title: "¡Subdominio guardado!", description: `Tu subdominio ${result.normalized} ha sido reservado.`});
@@ -2300,15 +2300,25 @@ function PublishSuccessModal({ open, onOpenChange, publicUrl, devPublicUrl }: { 
 function SubdomainModal({ open, onOpenChange, onClaim }: { open: boolean, onOpenChange: (open: boolean) => void, onClaim: (subdomain: string) => Promise<boolean> }) {
   const [subdomain, setSubdomain] = useState('');
   const [isClaiming, setIsClaiming] = useState(false);
+  const PROD_BASE_DOMAIN = process.env.NEXT_PUBLIC_PROD_BASE_DOMAIN || "landed.pe";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsClaiming(true);
     const success = await onClaim(subdomain);
+    // Only set isClaiming to false if the claim failed, otherwise the modal will close.
     if (!success) {
       setIsClaiming(false);
     }
   };
+
+  // Reset state when modal opens
+  useEffect(() => {
+    if (open) {
+      setSubdomain('');
+      setIsClaiming(false);
+    }
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -2323,18 +2333,18 @@ function SubdomainModal({ open, onOpenChange, onClaim }: { open: boolean, onOpen
             <div className="flex items-center gap-2">
               <Input
                 id="subdomain"
-                placeholder="tu-empresa"
+                placeholder="tu-subdominio"
                 value={subdomain}
-                onChange={(e) => setSubdomain(e.target.value)}
+                onChange={(e) => setSubdomain(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
                 disabled={isClaiming}
               />
-              <span className="text-sm text-muted-foreground">.landed.pe</span>
+              <span className="text-sm text-muted-foreground">.{PROD_BASE_DOMAIN}</span>
             </div>
              <DialogFooter>
                 <DialogClose asChild>
                     <Button type="button" variant="ghost" disabled={isClaiming}>Cancelar</Button>
                 </DialogClose>
-                <Button type="submit" disabled={isClaiming || !subdomain}>
+                <Button type="submit" disabled={isClaiming || !subdomain || subdomain.length < 3}>
                   {isClaiming && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Reservar y Publicar
                 </Button>
@@ -2353,3 +2363,5 @@ export default function DesignerPage() {
     </SidebarProvider>
   );
 }
+
+    
