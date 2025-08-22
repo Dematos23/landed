@@ -30,7 +30,8 @@ export function UserNav() {
   const handleSignOut = async () => {
     try {
       await clientSignOut(auth);
-      localStorage.clear(); // Limpiar todo el almacenamiento local
+      localStorage.clear();
+      sessionStorage.clear();
       await serverSignOut();
       router.push('/login');
     } catch (error) {
