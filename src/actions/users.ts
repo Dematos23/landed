@@ -53,22 +53,30 @@ export async function claimUserSubdomain(desiredSubdomain: string): Promise<{ su
   if (!user) {
     return { success: false, error: "Authentication required." };
   }
-  
+
   if (!desiredSubdomain || desiredSubdomain.trim().length < 3) {
-      return { success: false, error: "El subdominio debe tener al menos 3 caracteres." };
+    return { success: false, error: "El subdominio debe tener al menos 3 caracteres." };
   }
 
   const normalized = desiredSubdomain.trim().toLowerCase().replace(/\s+/g, '-');
-  
-  // Basic validation for subdomain format
+
   if (!/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(normalized)) {
-      return { success: false, error: "Formato de subdominio no válido. Solo letras, números y guiones." };
+    return { success: false, error: "Formato de subdominio no válido. Solo letras, números y guiones." };
   }
 
   const userRef = db.collection('users').doc(user.uid);
   const claimRef = db.collection('subdomainClaims').doc(normalized);
 
   try {
+    // First, get the user's current subdomain outside the transaction
+    const userDoc = await userRef.get();
+    const previousSubdomain = userDoc.exists ? userDoc.data()?.subdomain : null;
+
+    // If the user is trying to claim the same subdomain they already have, do nothing.
+    if (previousSubdomain === normalized) {
+        return { success: true, normalized };
+    }
+
     await db.runTransaction(async (transaction) => {
       const claimDoc = await transaction.get(claimRef);
       
@@ -77,12 +85,18 @@ export async function claimUserSubdomain(desiredSubdomain: string): Promise<{ su
         if (claimDoc.data()?.ownerUserId !== user.uid) {
             throw new Error(`El subdominio '${normalized}' ya está en uso.`);
         }
-        // If the user already owns this claim, do nothing.
-      } else {
-        // The subdomain is available, claim it.
-        transaction.set(claimRef, { ownerUserId: user.uid });
-        transaction.update(userRef, { subdomain: normalized });
+        // If the user somehow owns this claim but their user doc is out of sync, we'll just overwrite.
       }
+      
+      // If the user had a previous subdomain, release it.
+      if (previousSubdomain) {
+          const previousClaimRef = db.collection('subdomainClaims').doc(previousSubdomain);
+          transaction.delete(previousClaimRef);
+      }
+      
+      // Claim the new subdomain and update the user's document.
+      transaction.set(claimRef, { ownerUserId: user.uid });
+      transaction.update(userRef, { subdomain: normalized });
     });
 
     return { success: true, normalized };

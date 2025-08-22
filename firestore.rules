@@ -2,17 +2,10 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-  
-    // Protege la colección de landings.
-    // Un usuario solo puede leer, escribir y borrar los documentos que le pertenecen.
     match /landings/{landingId} {
       allow read, write, delete: if request.auth != null && request.auth.uid == resource.data.userId;
       allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
     }
-
-    // Protege la colección de usuarios.
-    // Un usuario puede crear su propio documento y leerlo.
-    // Nadie más puede leer los datos de otros usuarios, y no se pueden actualizar una vez creados (excepto por el propio usuario).
     match /users/{userId} {
       allow read, update: if request.auth != null && request.auth.uid == userId;
       allow create: if request.auth != null && request.auth.uid == userId;
