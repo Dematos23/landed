@@ -6,6 +6,7 @@ import { cookies } from 'next/headers';
 import type { LandingPageData } from '@/lib/types';
 
 const landingsCollection = db.collection('landings');
+const usersCollection = db.collection('users');
 
 async function getAuthenticatedUser() {
   try {
@@ -20,21 +21,6 @@ async function getAuthenticatedUser() {
     return null;
   }
 }
-
-async function getUser(uid: string) {
-    try {
-        const userDocRef = db.collection('users').doc(uid);
-        const userDoc = await userDocRef.get();
-        if (userDoc.exists) {
-            return userDoc.data();
-        }
-        return null;
-    } catch (error) {
-        console.error("Error getting user:", error);
-        return null;
-    }
-}
-
 
 function toPageSlug(name: string): string {
   return name.trim().replace(/\s+/g, '-');
@@ -53,10 +39,13 @@ export async function publishLanding(pageId: string): Promise<{ success: boolean
       return { success: false, error: "Authentication required." };
     }
     
-    const user = await getUser(userClaims.uid);
-    if (!user) {
+    const userDocRef = usersCollection.doc(userClaims.uid);
+    const userDoc = await userDocRef.get();
+    
+    if (!userDoc.exists) {
         return { success: false, error: "User not found." };
     }
+    const userData = userDoc.data();
 
     const pageRef = landingsCollection.doc(pageId);
     const pageDocSnap = await pageRef.get();
@@ -74,8 +63,8 @@ export async function publishLanding(pageId: string): Promise<{ success: boolean
     let userSubdomain = landingData.userSubdomain;
     
     // If the page doesn't have a subdomain, check if the user has one claimed
-    if (!userSubdomain && user.subdomain) {
-      userSubdomain = user.subdomain;
+    if (!userSubdomain && userData?.subdomain) {
+      userSubdomain = userData.subdomain;
     }
     
     // If still no subdomain, then the user needs to claim one.
@@ -127,7 +116,7 @@ export async function publishLanding(pageId: string): Promise<{ success: boolean
         publicUrl,
     };
 
-    if (user.role === 'admin') {
+    if (userData?.role === 'admin') {
         response.devPublicUrl = devPublicUrl;
     }
 
