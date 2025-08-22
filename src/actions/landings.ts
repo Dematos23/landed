@@ -4,7 +4,6 @@
 import { db, auth, FieldValue } from '@/lib/firebase-admin';
 import { cookies } from 'next/headers';
 import type { LandingPageData } from '@/lib/types';
-import { getUserRole } from './users';
 
 const landingsCollection = db.collection('landings');
 
@@ -22,6 +21,21 @@ async function getAuthenticatedUser() {
   }
 }
 
+async function getUser(uid: string) {
+    try {
+        const userDocRef = db.collection('users').doc(uid);
+        const userDoc = await userDocRef.get();
+        if (userDoc.exists) {
+            return userDoc.data();
+        }
+        return null;
+    } catch (error) {
+        console.error("Error getting user:", error);
+        return null;
+    }
+}
+
+
 function toPageSlug(name: string): string {
   return name.trim().replace(/\s+/g, '-');
 }
@@ -34,12 +48,15 @@ function toPageSlug(name: string): string {
  */
 export async function publishLanding(pageId: string): Promise<{ success: boolean; publicUrl?: string; devPublicUrl?: string; needsSubdomain?: boolean; error?: string }> {
   try {
-    const user = await getAuthenticatedUser();
-    if (!user) {
+    const userClaims = await getAuthenticatedUser();
+    if (!userClaims) {
       return { success: false, error: "Authentication required." };
     }
     
-    const userRole = await getUserRole(user.uid);
+    const user = await getUser(userClaims.uid);
+    if (!user) {
+        return { success: false, error: "User not found." };
+    }
 
     const pageRef = landingsCollection.doc(pageId);
     const pageDocSnap = await pageRef.get();
@@ -50,24 +67,20 @@ export async function publishLanding(pageId: string): Promise<{ success: boolean
     
     const landingData = pageDocSnap.data() as LandingPageData;
 
-    if (landingData.userId !== user.uid) {
+    if (landingData.userId !== userClaims.uid) {
       return { success: false, error: "User does not have permission to publish this page." };
     }
 
     let userSubdomain = landingData.userSubdomain;
-
+    
     // If the page doesn't have a subdomain, check if the user has one claimed
-    if (!userSubdomain) {
-        const userDocRef = db.collection('users').doc(user.uid);
-        const userDocSnap = await userDocRef.get();
-        if (userDocSnap.exists() && userDocSnap.data()?.subdomain) {
-            userSubdomain = userDocSnap.data()!.subdomain;
-        }
+    if (!userSubdomain && user.subdomain) {
+      userSubdomain = user.subdomain;
     }
     
     // If still no subdomain, then the user needs to claim one.
     if (!userSubdomain) {
-        return { success: false, needsSubdomain: true };
+        return { success: false, needsSubdomain: true, error: "Subdomain required for publication." };
     }
 
     let pageSlug = toPageSlug(landingData.name);
@@ -77,7 +90,7 @@ export async function publishLanding(pageId: string): Promise<{ success: boolean
     let suffix = 1;
     let isUnique = false;
     while (!isUnique) {
-        const q = db.collection('landings').where("userId", "==", user.uid).where("pageSlug", "==", finalSlug).where("isPublished", "==", true);
+        const q = db.collection('landings').where("userId", "==", userClaims.uid).where("pageSlug", "==", finalSlug).where("isPublished", "==", true);
         const collisionSnapshot = await q.get();
         const collisionDocs = collisionSnapshot.docs.filter(doc => doc.id !== pageId); // Exclude the current page
         
@@ -114,7 +127,7 @@ export async function publishLanding(pageId: string): Promise<{ success: boolean
         publicUrl,
     };
 
-    if (userRole === 'admin') {
+    if (user.role === 'admin') {
         response.devPublicUrl = devPublicUrl;
     }
 
